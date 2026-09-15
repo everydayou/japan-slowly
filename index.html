@@ -157,7 +157,7 @@
        toward scrollable overflow) got clipped at .view's bottom edge as a result. Using
        flex:1 1 auto instead makes the deck always take exactly the remaining space
        after the hero's real height is subtracted, so the two together can never exceed
-       the screen and nothing gets clipped, on any device/inset size. */
+       the screen. */
     flex:1 1 auto;
     min-height:280px;
     /* the stack-card children are absolutely positioned to exactly fill this box's
@@ -166,6 +166,17 @@
        edge of the cards -- kept at a flat 40px per spec, deliberately not stacked with
        .home-hero's own padding (which is 0 on its bottom edge; see above). */
     margin-top:40px;
+    /* the fix above (flex:1 1 auto) stopped the PAGE from ever needing to scroll, but the
+       front card's own box-shadow (0 22px 40px -18px, ~44px of visible bleed below the
+       card) was still getting hard-clipped right at .view's bottom edge -- because the
+       card's own box, via the abs-positioned-child containing-block rule, extends to
+       stack-wrap's exact outer edge regardless of stack-wrap's own padding (padding is
+       INCLUDED in that containing block, so it creates no usable slack below the card).
+       The only way to give the shadow real room to render is to reserve genuine empty
+       space *below* stack-wrap's box, inside .view, via a margin -- which flexbox still
+       correctly subtracts from what flex:1 1 auto claims as "remaining space", so the
+       page still never needs to scroll. 48px comfortably covers the shadow's ~44px bleed. */
+    margin-bottom:48px;
     padding:2px 0 14px;
     /* was pan-y -- but a real finger drag is never perfectly horizontal, so the
        browser's own vertical-pan gesture kept hijacking the drag-to-browse
@@ -178,7 +189,7 @@
   .stack-card{
     position:absolute;
     top:50%; left:50%;
-    width:min(300px, 82%);
+    width:min(320px, 82%); /* was 300px */
     height:100%;
     border-radius:22px;
     cursor:pointer;

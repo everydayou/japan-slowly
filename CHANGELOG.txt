@@ -4,6 +4,21 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 8 — 2026-09-15
+The deck shadow-clip bug from round 7 turned out to only be half-fixed, plus wider cards.
+
+**The real fix for the shadow clip.**
+The user sent a real-iPhone screenshot showing the front card's box-shadow still hard-cut at the bottom, right where round 7's fix was supposed to have addressed it. Round 7's `flex:1 1 auto` change on `.stack-wrap` was real and worth keeping — it does stop the page (`.view`) from ever needing to scroll when the hero's safe-area-dependent height grows — but it turned out to be treating a different symptom of the same underlying situation, not the actual clipping. The actual cause: `.stack-card` is absolutely positioned with `top:50%; height:100%` (plus a `translateY(-50%)`), which resolves those percentages against its *containing block* — and per spec, an absolutely-positioned element's containing block is its nearest positioned ancestor's **padding box**, not its content box. `.stack-wrap` has `padding: 2px 0 14px`, but because that padding is already included in the containing block the card sizes itself against, the card's own box always extends to stack-wrap's exact *outer* edge — the 14px of bottom padding creates no usable empty space below the card at all, contrary to what it looks like it should do. Since `.view` clips overflow (it's `overflow-y:auto; overflow-x:hidden`, which clips both axes per spec), and the card's shadow doesn't count toward scrollable content, the shadow got hard-cut the instant it crossed `.view`'s edge, with zero pixels of slack to work with.
+
+Fixed by reserving genuine empty space *below* `.stack-wrap`'s own box instead of padding inside it: added `margin-bottom:48px`. Flexbox still correctly subtracts a flex item's margin when computing how much space `flex:1 1 auto` claims as "remaining," so `.view` still never needs to scroll — but now there's 48px of real gap between the bottom of the deck and the bottom of `.view` for the shadow (`0 22px 40px -18px rgba(0,0,0,.55)`, which bleeds roughly 44px below the card) to render into cleanly.
+
+Verified with Playwright by measuring the actual gap between the front card's `getBoundingClientRect().bottom` and `.view`'s own `bottom` — confirmed 48px of real slack, at both a normal 390×844 viewport and a short 390×700 one, with `.view.scrollHeight === .view.clientHeight` (no scroll) holding at both sizes too.
+
+**Wider cards.**
+`width:min(300px, 82%)` → `width:min(320px, 82%)`. At most phone widths this mostly just raises the ceiling the 82%-of-viewport cap was already hitting, rather than adding a flat 20px everywhere.
+
+---
+
 ## ROUND 7 — 2026-09-15
 Five issues reported after round 6 — one of them a real regression in a previous "fix."
 
