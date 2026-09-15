@@ -4,6 +4,26 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 7 — 2026-09-15
+Five issues reported after round 6 — one of them a real regression in a previous "fix."
+
+**1. Day-detail back button unreachable under the iPhone status bar.**
+`.dayhead` had no safe-area awareness at all, so on a real device its top edge (and the back button inside it) sat directly under the status bar/clock — same class of bug round 3 found for the drag zone and round 5 fixed for the home hero. Fixed with the same `calc(env(safe-area-inset-top, 0px) + 16px)` pattern.
+
+**2. Deck shadow clipped at the bottom again.**
+Root cause: `.stack-wrap` sized itself with a fixed `flex:0 0 66%` of `.view`'s height, a value that's been unchanged since round 1. Round 5 made the home hero's own height variable (adding `env(safe-area-inset-top)`), so on a device with a large inset (Dynamic Island ≈ 59px) or a shorter viewport, hero-height + deck's fixed 66% could together exceed the screen height, pushing `.view` into scroll mode. Box-shadow doesn't count toward an element's scrollable overflow area, so the last card's shadow simply got cut off at `.view`'s visible bottom edge instead of being reachable by scrolling. Fixed by changing `.stack-wrap` to `flex:1 1 auto`, so it always claims exactly whatever space is left after the hero's real (rendered) height is subtracted — the two can now never together exceed the screen, on any device or viewport size. Verified with a deliberately short 390×700 Playwright viewport, confirming `.view`'s `scrollHeight` never exceeds its `clientHeight`.
+
+**3. Home-hero spacing tightened.**
+Per explicit spec: mark→"Japan Slowly" title reduced to 4px, title→date range reduced to 2px (previously both were a uniform 10px flex `gap`, which can't express two different values — replaced with explicit `margin-top` on `.wordmark` and `.range`), and the gap from hero content down to the top of the card stack reduced from 48px (round 5) to 40px. Verified with Playwright `getBoundingClientRect()` measurements of all three gaps.
+
+**4. Card date line reordered.**
+"SAT 26 SEP · Day 2/10" (day-of-week/date first), was "Day 2/10 · SAT 26 SEP" (count first, since round 4). One-line change in `stackCardFrontHTML()`.
+
+**5. The round-4 "card pops to fullscreen" bug was still happening — because round 4's fix had a bug of its own.**
+Root cause: round 4 added `cardEl.style.transition = 'none'` right before `openDayFlip()` snaps the card to its resting transform and measures it, specifically to make that snap instant/synchronous. That part worked. But the code never set `cardEl.style.transition` back afterward — and a few lines later, `cardEl.classList.add('opening')` adds a class that defines `transition: top .52s ..., left .52s ..., width .52s ...` etc. An inline `style.transition` always wins over a class-based transition rule, *regardless of which was applied more recently* — so that leftover `transition:none` silently cancelled the entire box-morph grow-to-fullscreen animation for the rest of the function. The visual result: the card's top/left/width/height jumped instantly to fullscreen with no animation at all, while only the flip-inner's `rotateY` (a different element, with its own separate transition, unaffected by `cardEl`'s inline style) kept animating smoothly — exactly matching "starts already fullscreen on tap, and then just flips." Fixed with one added line: `cardEl.style.transition = '';` immediately after the snap's forced-reflow flush, clearing the inline override so the `.opening` class's transition applies normally again. Verified by sampling the opening card's `getBoundingClientRect()` every 50ms after a tap: size now grows gradually frame over frame (e.g. 300×677 → 685 → 719 → 774 → ... → 840) instead of jumping straight to the fullscreen size on the first frame — checked for both a plain tap and the swipe-then-immediately-tap sequence from round 4, to confirm both fixes still work together correctly.
+
+---
+
 ## ROUND 6 — 2026-09-15
 Small follow-up to round 5: swapped in transparent-background versions of the hero mark artwork.
 

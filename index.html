@@ -129,7 +129,7 @@
        of the card stack is entirely owned by .stack-wrap's margin-top below, so the two
        don't add together into something bigger than intended. */
     padding:calc(env(safe-area-inset-top, 0px) + 24px) 24px 0;
-    display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
   }
   /* the mark is now the user's own icon artwork (round 5) -- a light-bg and a
      dark-bg variant, swapped with the same prefers-color-scheme / data-theme
@@ -143,19 +143,29 @@
   }
   :root[data-theme="dark"] .home-hero .mark .mark-light{ display:none; }
   :root[data-theme="dark"] .home-hero .mark .mark-dark{ display:block; }
-  .home-hero .wordmark{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:22px; letter-spacing:.01em; }
-  .home-hero .range{ font-size:14px; color:var(--ink-faint); font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; letter-spacing:.03em; }
+  /* switched from a uniform flex `gap` to per-pair margins -- mark-to-title and
+     title-to-date needed two different distances (4px, 2px), which `gap` can't express. */
+  .home-hero .wordmark{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:22px; letter-spacing:.01em; margin-top:4px; }
+  .home-hero .range{ font-size:14px; color:var(--ink-faint); font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; letter-spacing:.03em; margin-top:2px; }
 
   .stack-wrap{
     position:relative;
-    flex:0 0 66%;
+    /* was a fixed `flex:0 0 66%` of .view's height -- with the hero's own height now
+       variable (env(safe-area-inset-top) can add 50px+ on a real iPhone), a fixed
+       percentage stack-wrap could push the total content taller than the screen,
+       forcing .view to scroll -- and the last card's box-shadow (which doesn't count
+       toward scrollable overflow) got clipped at .view's bottom edge as a result. Using
+       flex:1 1 auto instead makes the deck always take exactly the remaining space
+       after the hero's real height is subtracted, so the two together can never exceed
+       the screen and nothing gets clipped, on any device/inset size. */
+    flex:1 1 auto;
     min-height:280px;
     /* the stack-card children are absolutely positioned to exactly fill this box's
        top-to-bottom span (top:50%/height:100% + translateY(-50%) nets out to 0%-100%),
        so this margin-top IS the visible gap between the hero content above and the top
-       edge of the cards -- kept at a flat 48px per spec, deliberately not stacked with
+       edge of the cards -- kept at a flat 40px per spec, deliberately not stacked with
        .home-hero's own padding (which is 0 on its bottom edge; see above). */
-    margin-top:48px;
+    margin-top:40px;
     padding:2px 0 14px;
     /* was pan-y -- but a real finger drag is never perfectly horizontal, so the
        browser's own vertical-pan gesture kept hijacking the drag-to-browse
@@ -205,8 +215,8 @@
   .stack-card .shade{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 42%, rgba(0,0,0,.74) 100%); }
   .stack-card .content{ position:absolute; left:17px; right:17px; bottom:16px; color:#F3EEE1; opacity:0; transition:opacity .3s ease; }
   .stack-card.is-front .content{ opacity:1; }
-  /* day-date now doubles as the card's only top-of-card-style label ("Day 2 / 10 · SAT 26
-     SEP") -- the old top-right "#02 / 10" frame-no badge was removed as redundant with it. */
+  /* day-date now doubles as the card's only top-of-card-style label ("SAT 26 SEP · Day
+     2/10") -- the old top-right "#02 / 10" frame-no badge was removed as redundant with it. */
   .stack-card .day-date{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:12px; letter-spacing:.08em; opacity:.85; text-transform:uppercase; }
   .stack-card .day-title{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:23px; margin-top:4px; }
   .stack-card .day-teaser{ font-size:14px; margin-top:5px; opacity:.92; line-height:1.4; }
@@ -226,7 +236,11 @@
   /* ---- day detail ---- */
   .dayhead{
     display:flex; align-items:center; justify-content:space-between;
-    padding:16px 24px 8px; gap:8px; position:relative; z-index:5;
+    /* same env(safe-area-inset-top) treatment the home hero already got -- without it
+       this row (and the only way back to the home reel, the back button) sat directly
+       under the iPhone status bar/clock, sometimes unreachable under it entirely. */
+    padding:calc(env(safe-area-inset-top, 0px) + 16px) 24px 8px;
+    gap:8px; position:relative; z-index:5;
   }
   .backbtn{
     display:flex; align-items:center; gap:6px;
@@ -695,12 +709,12 @@
     var locked = d.status==='locked';
     /* the status pill is now only shown for locked cards -- journal/active (unlocked)
        cards no longer carry a status label at all. The old top-right "#02 / 10" frame-no
-       badge is gone too: that position-in-trip info now lives in front of the bottom
-       date instead ("Day 2 / 10 · SAT 26 SEP"). */
+       badge is gone too: that position-in-trip info now lives after the bottom
+       date instead ("SAT 26 SEP · Day 2/10"). */
     return '<div class="hero" style="'+heroStyle(d.n)+'"></div>' + grainDiv() + '<div class="shade"></div>' +
       (locked ? '<div class="status-pill">Locked</div>' : '') +
       '<div class="content">' +
-        '<div class="day-date">Day '+d.n+' / 10 &middot; '+d.date+'</div>' +
+        '<div class="day-date">'+d.date+' &middot; Day '+d.n+'/10</div>' +
         (locked ? '<div class="day-title" style="font-style:italic;font-weight:400;font-size:16px;letter-spacing:.04em;opacity:.7;">Title withheld</div>' : '<div class="day-title">'+d.title+'</div>') +
         '<div class="day-teaser">'+d.teaser+'</div>' +
       '</div>';
@@ -798,6 +812,12 @@
     cardEl.style.transition = 'none';
     cardEl.style.transform = stackTransform(stackStyle(0, idx));
     cardEl.getBoundingClientRect(); /* flush the snap before measuring below */
+    cardEl.style.transition = ''; /* clear the inline override -- left in place, it would
+      permanently out-rank the ".opening" class's own transition (added below) since an
+      inline style always beats a class rule, regardless of add order. That's exactly what
+      broke the open animation: the box-morph grow-to-fullscreen stopped transitioning at
+      all (still jumped instantly) while only the flip's own rotateY kept animating, making
+      every open look like "already fullscreen, then it just flips." */
 
     /* the focused card can carry a few degrees of tilt now, so getBoundingClientRect()
        (the axis-aligned box AROUND the rotated card, inflated by the rotation) is the
