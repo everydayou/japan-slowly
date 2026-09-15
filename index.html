@@ -151,10 +151,13 @@
     border:0; padding:0; margin:0; font:inherit; color:inherit; text-align:left;
     background:none;
     /* release-into-place snap after a drag (NOT the day open/close flip, which is a
-       separate, protected animation elsewhere). Was .5s with a front-loaded curve that
-       read as an abrupt snap on release -- slowed slightly and switched to a smooth
-       decelerate-only curve (no bounce/overshoot) so it settles more naturally. */
-    transition:transform .68s cubic-bezier(.16,1,.3,1), opacity .5s ease, box-shadow .3s ease;
+       separate, protected animation elsewhere). Originally .5s with a curve that decelerated
+       almost immediately, so nearly all the motion happened in the first sliver of the
+       duration and the rest was an imperceptible creep -- that read as an abrupt snap
+       regardless of the total time. Switched to a gentle spring/overshoot curve (settles
+       slightly past rest, then eases back) which reads as a natural physical "landing"
+       instead of a robotic stop. */
+    transition:transform .6s cubic-bezier(.34,1.56,.64,1), opacity .5s ease, box-shadow .3s ease;
     box-shadow:0 22px 40px -18px rgba(0,0,0,.55);
     perspective:1600px;
     -webkit-tap-highlight-color:transparent;
@@ -307,9 +310,43 @@
   .tomorrow.ready .tomorrow-text{ color:var(--ink); }
 
   .journalflag{ margin:6px 20px 0; font-size:11px; color:var(--ink-faint); font-style:italic; }
+
+  /* ---- reload-latest button (top-right, all screens) ---- */
+  .refresh-fab{
+    position:fixed;
+    top:calc(env(safe-area-inset-top,0px) + 14px);
+    right:14px;
+    z-index:50;
+    width:34px; height:34px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--bg-elevated);
+    color:var(--ink-soft);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 10px rgba(0,0,0,.14);
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .15s ease, opacity .15s ease;
+  }
+  .refresh-fab[hidden]{ display:none; } /* the class below sets display:flex, which
+    would otherwise out-rank the UA's [hidden] rule and keep it visible */
+  .refresh-fab:active{ transform:scale(.9); }
+  .refresh-fab.spinning{ pointer-events:none; opacity:.7; }
+  .refresh-fab.spinning svg{ animation:refreshspin .7s linear infinite; }
+  @keyframes refreshspin{ to{ transform:rotate(360deg); } }
 </style>
 
 <div class="screen" id="screen"></div>
+
+<!-- Lives outside #screen (which render() fully replaces on every navigation) so it
+     persists across home/day views without being re-wired each time. Installed as a
+     standalone home-screen app there's no browser chrome at all -- no address bar,
+     no pull-to-refresh, no way to get a fresh copy of the page except force-quitting
+     and reopening the app. This gives an explicit, always-visible way to grab the
+     latest published version instead. -->
+<button id="refreshBtn" class="refresh-fab" aria-label="Reload latest version" title="Reload latest version">
+  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
+</button>
 
 <script>
 (function(){
@@ -665,6 +702,11 @@
     html += '</div>';
     el.innerHTML = html;
     wire();
+    /* only show the reload button on the home reel -- a day-detail screen already
+       has its own top-right control (Reset demo) in that same corner, and this
+       button is fixed-position so it would sit directly on top of it there. */
+    var refreshBtn = document.getElementById('refreshBtn');
+    if(refreshBtn) refreshBtn.hidden = (state.screen!=='home');
   }
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1022,6 +1064,20 @@
     var el = document.getElementById('screen');
     if(state.screen==='home'){ wireHome(); } else { wireCommon(el); }
   }
+
+  /* ---------- reload-latest button ---------- */
+  (function wireRefresh(){
+    var btn = document.getElementById('refreshBtn');
+    if(!btn) return;
+    btn.addEventListener('click', function(){
+      btn.classList.add('spinning');
+      /* a plain reload can still be served from the browser/CDN's HTTP cache; a
+         unique query string forces a genuinely fresh network fetch of this file. */
+      setTimeout(function(){
+        location.replace(location.pathname + '?v=' + Date.now());
+      }, 220);
+    });
+  })();
 
   render();
 })();
