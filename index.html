@@ -150,7 +150,11 @@
     cursor:pointer;
     border:0; padding:0; margin:0; font:inherit; color:inherit; text-align:left;
     background:none;
-    transition:transform .5s cubic-bezier(.22,.9,.32,1), opacity .5s ease, box-shadow .3s ease;
+    /* release-into-place snap after a drag (NOT the day open/close flip, which is a
+       separate, protected animation elsewhere). Was .5s with a front-loaded curve that
+       read as an abrupt snap on release -- slowed slightly and switched to a smooth
+       decelerate-only curve (no bounce/overshoot) so it settles more naturally. */
+    transition:transform .68s cubic-bezier(.16,1,.3,1), opacity .5s ease, box-shadow .3s ease;
     box-shadow:0 22px 40px -18px rgba(0,0,0,.55);
     perspective:1600px;
     -webkit-tap-highlight-color:transparent;
