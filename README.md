@@ -9,7 +9,9 @@ This repo exists so a fresh chat (Claude, ChatGPT, whichever) can pick up this p
 
 ## Start here in a new chat
 
-Paste this section (or just point the assistant at this README) to get a new conversation up to speed without re-reading the whole history.
+**Read `PROJECT-CONTEXT.txt` first, every time.** It's a short, always-current snapshot — quick status, the fixed design/interaction decisions you shouldn't casually redo, current scope, and a prioritized list of known gaps — kept up to date every round specifically so a new chat doesn't need this README or the full history to get moving. `CHANGELOG.txt` is the detailed round-by-round archive behind it; read it only when you need the "why" behind something older than the last round or two. This split (snapshot vs. archive) mirrors the workflow already used on the user's other project ("leve") — keep using it going forward: update PROJECT-CONTEXT.txt's status/gaps every round, and append a new dated round to CHANGELOG.txt rather than editing history.
+
+The rest of this README is the slower, human-facing version of the same information, for anyone who wants the fuller picture without diving into PROJECT-CONTEXT.txt's terser format.
 
 > We're building **Japan Slowly**, a lightweight PWA for a 3-person Japan trip (25 Sep–4 Oct 2026). One traveller is the planner; his father and brother should experience the itinerary progressively and be surprised by what comes next. It should feel like a cinematic travel guide — not a checklist, dashboard, or game.
 >

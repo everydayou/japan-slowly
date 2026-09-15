@@ -1,0 +1,64 @@
+# Japan Slowly — Project Context
+
+## Quick Status
+Explorer Mode prototype is built and working: a draggable 10-day card-stack home screen, with Day 1 and Day 2 as fully clickable detail screens (open/close flip animation, progressive chapter reveal, weather-informed prep, PWA install support). It's a single self-contained `index.html`, no backend, no persistence, no real data feeds. Pushed to GitHub as of round 1 (2026-09-15). Guide Mode, Days 3–10, and the content-publishing pipeline are all unbuilt.
+
+## How to Use This Document
+Read this at the start of every new chat, before touching anything. This file is a *current-state snapshot*, not history — full round-by-round detail lives in CHANGELOG.txt. Before touching any animation/interaction code, read the "Design & Interaction Contract" below; several things in there look like bugs but are deliberate, already-tuned decisions. When something here conflicts with an older statement anywhere else (chat history, an old comment), this file wins — it's kept current every round.
+
+## Design & Interaction Contract — fixed rules (read BEFORE touching UI/animation)
+These were each arrived at after multiple rounds of iteration and user feedback. Don't change them without being explicitly asked to revisit them:
+- **Card jitter range is 1–3°**, applied only to non-front deck cards (`CARD_JITTER` array in index.html). A wider 3–5° range was tried and explicitly rejected as "too much."
+- **The front/focused card has NO tilt** (`rot:0` at offset 0). Adding one was tried, then explicitly reverted — it interacted badly with the deck-movement animation. Don't re-add without the user raising it again.
+- **Open/close uses a combined 3D flip + FLIP-technique box-morph** (animating top/left/width/height, not `transform:scale`), specifically so photo/text proportions never distort. This is why the code reparents the card into `#screen` and manually computes pixel rects instead of using simpler CSS.
+- **The rest of the deck gathers into a tidy, square, untilted stack while one card is open/closing**, then spreads back into its natural fan as the card lands. This exists specifically to mask the fact that a rotated card can't gracefully unrotate into a tilted slot on its own — it's a workaround, not a feature in its own right.
+- **Card shadows fade via `box-shadow` transition only, never via opacity** — fading the whole card was tried and rejected ("makes the cards behind disappear").
+- **On close, the animated card element is folded directly into the deck as the permanent front card, not destroyed and rebuilt via a full `render()`.** This was a real bug (a one-frame subpixel "shimmer" from swapping a continuously-animated element for a freshly-laid-out one) — don't reintroduce a full-rebuild-on-close pattern.
+- **The outer "gallery" demo chrome (title/description header, decorative side dots, phone-bezel mockup) has been removed.** The page is meant to be opened directly / installed as a home-screen app, so it should always just BE the app, full-bleed — don't reintroduce a phone-simulation wrapper.
+- **A "jump" that looked like a real animation bug turned out to be a Safari-in-webview rendering quirk specific to the claude.ai chat's in-app preview** — confirmed fine in real Chrome and standalone Safari. If something like this comes up again, reproduce it in an actual browser (not the chat preview) before spending time on it.
+- **No real, named public figures or copyrighted film/show branding in any generated imagery** (a stylized "Lost in Translation" poster with Bill Murray/Scarlett Johansson was declined for Day 2; the user's own uploaded photo was used instead).
+
+## What We're Building
+Full product vision: see README.md (short) or `docs/Japan Slowly - Product Concept v2.docx` (full, includes its own zero-context Appendix A). One-line version: a spoiler-light PWA for a 3-person Japan trip (25 Sep–4 Oct 2026) where two travellers experience each day progressively instead of reading the full itinerary up front, while the planner has a separate operational Guide Mode.
+
+## Current Scope (this prototype)
+- Explorer Mode only. Guide Mode does not exist yet, not even a stub.
+- Only Day 1 and Day 2 have real detail screens; Days 3–10 exist only as locked cards in the deck.
+- All content (itinerary text, chapter data, "About this place" copy, weather numbers) is hardcoded in `index.html`. No API calls, no backend, nothing persists across a page reload.
+- No automated tests. Verification so far has been manual/visual (Playwright screenshots + frame-by-frame video diffing during debugging), not a real test suite.
+
+## Known Gaps
+### HIGH
+- None open.
+
+### MED
+- No persistence of chapter-reveal state (resets on every reload) — fine for a prototype, not fine for the real trip.
+- No real weather API — prep cards show static demo numbers.
+
+### LOW
+- Front-card tilt was explicitly deferred (see contract above) — revisit only if asked.
+- Accessibility is approximate: the close animation reuses a `<div>` (not a `<button>`) for the just-landed card, with `role="button"`/`tabindex` added as a stopgap rather than a real semantic fix.
+
+### DONE (round 1)
+- Locked-card corner-radius clipping bug (Chromium `overflow:hidden`+`border-radius`+`filter`+`preserve-3d` interaction) — fixed with `clip-path`.
+- Shadow-smear "blob" bug when the deck gathers — fixed with a box-shadow-only fade, separate from the transform/opacity transitions.
+- "IN PROGRESS" pill flashing to its real color right at the end of the close animation — the transient closing element was missing the `active` status class that real deck cards get; fixed by matching classes exactly.
+- Deck-spread race condition — the final DOM swap was on a fixed timer that assumed (with only ~40ms margin) the deck's spread-out transition had already finished; under any real jank it could fire early and snap the deck. Fixed by waiting on the actual `transitionend` event instead of a guessed delay.
+- Subpixel "shimmer" across the whole card at the end of closing — caused by destroying the just-landed animated element and rebuilding it from scratch via `render()`. Fixed by folding the same DOM element into the deck permanently instead of replacing it.
+- Day 2 given a real photo (user's own, embedded as base64 JPEG) instead of the generated gradient placeholder.
+- PWA installability: `manifest.json`, `icon-512.png`, and the associated meta/link tags.
+- Outer demo/gallery chrome (stagehead, filmrail, phone bezel) stripped so the page is the app, full-bleed.
+- Project moved into version control: GitHub repo created at github.com/everydayou/japan-slowly, pushed with `index.html`, `manifest.json`, `icon-512.png`, `README.md`, `PROJECT-CONTEXT.txt`, `CHANGELOG.txt`, and the two source `.docx` planning documents under `docs/`.
+
+### DEFERRED
+- Front-card tilt (see contract above).
+- Guide Mode — entirely unbuilt.
+- Days 3–10 — deliberately not started; the plan is to freeze the interaction language on Day 1 + Day 2 first, then scale the same content model.
+- Real weather API integration.
+- The GitHub-based content-publishing pipeline itself (Planner → chat → GitHub → published trip data → travellers' phones) — this repo is the "GitHub" half; the "chat updates it conversationally" half isn't wired up as a repeatable process yet beyond "ask an assistant with repo access."
+- Persistence of reveal state, either locally or synced across the three travellers' devices.
+- All open product questions listed in README.md / the product concept doc (final day titles, teaser tone, unlock timing rules, Guide Mode access protection, in-app vs. external maps, journal/photo behaviour, offline-conflict handling).
+
+## Recent Rounds (most recent shown; full history in CHANGELOG.txt)
+### ROUND 1 — Prototype built, three real animation bugs fixed, PWA-ified, repo created (2026-09-15)
+Built the Explorer Mode home reel + Day 1/Day 2 detail screens from scratch across many iterations (drag physics, flip-open/close animation, deck gather/spread masking, jitter tuning, photo integration). Diagnosed and fixed three genuine bugs via Playwright + frame-by-frame video analysis (corner-radius clipping, pill-flash, deck-spread race, subpixel shimmer-on-close). Ruled out a fourth reported "jump" as a Safari-in-webview preview artifact, not a real bug. Stripped the demo-gallery chrome now that the page can be installed as a real app. Set up this GitHub repo as the project's source of truth, per the product concept's own preferred workflow.
