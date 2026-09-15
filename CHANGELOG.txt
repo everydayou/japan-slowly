@@ -4,6 +4,55 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 6 — 2026-09-15
+Small follow-up to round 5: swapped in transparent-background versions of the hero mark artwork.
+
+- The user pointed out the opaque round-5 mark images (a white square for light mode, a black square for dark mode) sat in a faintly visible square against the page background rather than blending in. They supplied new versions of both — same circle-plus-vertical-text design, same light/dark split (black text for light mode, white text for dark mode) — but with a transparent background instead of a solid fill.
+- Swapped the `MARK_LIGHT`/`MARK_DARK` base64 constants in `index.html` for the new images; no other markup or theme-switching logic needed to change since it was already keyed off the same light/dark pairing.
+- `.home-hero .mark img`'s `border-radius:22%; object-fit:cover` was dropped in favor of plain `object-fit:contain` — the border-radius existed only to round off the opaque square's corners, which no longer exist now that the background is transparent; `contain` (over `cover`) avoids any risk of clipping the artwork's off-center content now that there's no uniform background to crop into.
+- `icon-512.png` (the installed-app icon / `apple-touch-icon`) deliberately was NOT swapped to the new transparent artwork — kept the round-5 opaque light version. Installed home-screen icons don't handle real transparency reliably across platforms (iOS in particular backfills transparent regions with an unpredictable color), so an opaque icon stays the safer choice there even though the in-page hero mark benefits from transparency.
+- Verified with Playwright screenshots in both light and dark mode — the mark now reads as floating directly on the page in both themes, no visible edge.
+
+---
+
+## ROUND 5 — 2026-09-15
+User's own icon artwork replaces the placeholder circle mark, plus a spacing/safe-area pass on the home hero.
+
+**Icon artwork:**
+- Replaced the plain CSS red circle used as the home hero's mark with two PNGs the user supplied: a light-bg variant (white background, red circle, black vertical "スローリー ニホン" text) and a dark-bg variant (black background, same circle, white text), both 512×512. Embedded both as base64 `data:` URIs in `index.html` (`MARK_LIGHT`/`MARK_DARK` constants, next to `heroStyle()`), rendered as two `<img>` elements in `.home-hero .mark`, and toggled with the same `prefers-color-scheme`/`data-theme` CSS pattern already used for every other themed value in the file — so it follows system/manual theme exactly like everything else.
+- Replaced `icon-512.png` on disk with the light variant (used by `manifest.json`'s two icon entries and the `<link rel="apple-touch-icon">` tag). Picked light over dark because it matches `manifest.json`'s `background_color` (`#fafafa`), which is what shows through as the PWA splash background while the icon is still loading — a static manifest icon can't theme-swap the way the in-page mark can, so one variant had to be chosen.
+- Flagged, not fixed: the artwork's vertical text sits close to the right edge of the 512×512 canvas, and `manifest.json` lists a `maskable` purpose entry for this icon — OS home screens crop maskable icons to roughly their inner ~80% "safe zone," which could clip that text on an aggressive (e.g. circular) mask shape. Didn't redesign the user's artwork to pull the text inward without being asked; noted in PROJECT-CONTEXT.txt's Known Gaps for them to check once actually installed on a device.
+
+**Home-screen spacing:**
+- Hero top padding changed from a flat `44px` to `calc(env(safe-area-inset-top, 0px) + 24px)`, so it clears the iPhone notch/Dynamic Island (or any other device inset) instead of guessing a value generous enough to hopefully clear every device — collapses to a plain 24px with no visual change on a device/browser with no inset at all (desktop, older phones).
+- Gap from the hero's content down to the top of the card stack set to a flat 48px: `.home-hero`'s bottom padding dropped to 0 and `.stack-wrap`'s `margin-top` changed from `6px` to `48px`, so the spacing is owned by exactly one rule instead of two paddings silently adding together. Verified with a Playwright DOM measurement (`card.getBoundingClientRect().top - hero.getBoundingClientRect().bottom === 48`), not eyeballed from a screenshot.
+
+---
+
+## ROUND 4 — 2026-09-15
+Design cleanup pass on type scale and spacing, a home-screen/card redesign, and a real animation bug fix.
+
+**Type scale (min. 14px):**
+- Defined a fixed 3-tier scale and applied it across the whole stylesheet: **16px regular** for long-form readable copy (chapter blurbs, "about this place" paragraphs, teasers directly under a heading, tomorrow/locked-day notes), **14px small** for secondary/meta/button text (dates under headings, prep values, weather temp/condition, buttons, confirm-row text), and **12px bold uppercase** for small labels (chapter tags, prep-cell labels, section labels like "CHAPTERS"/"TOMORROW", the card's bottom date line, hourly-forecast time ticks). Previously sizes were scattered from 8.5px up to 15.5px with no consistent logic. Big headings (20–25px day titles) were left untouched — they were already well above the floor.
+- A few paddings were nudged up alongside the larger text so nothing reads as cramped: the status pill, `.ctag`, `.resetbtn`, `herebtn`, and the "about" panel's max-height.
+- Verified via Playwright screenshots that nothing wraps/overflows at the new sizes in the tightest spots: the 6-column hourly-forecast grid and the 3-column prep-info grid.
+
+**Spacing:**
+- Standardized every page-level horizontal margin/padding (`.dayhead`, `.backhero-text`, `.lockednote`, `.prep`, `.chapters`, `.tomorrow`, `.journalflag`, `.lastupdate`, the home hero) to a single 24px, replacing an inconsistent mix of 16/17/20px. Left the stack-card's own internal 17px photo-caption padding alone — that's inset from the *card's* edge, a different concept from the page's device-edge margin.
+
+**Home screen:**
+- Replaced the old left-aligned "wordmark + date range" header with a centered hero: a red circle mark, "Japan Slowly" beneath it, then the trip date range beneath that.
+- Removed the demo-preview description line ("Preview state: evening of Day 2, shown mid-experience for this demo...") entirely, not just hidden.
+
+**Deck cards:**
+- Status pill now only renders for locked cards ("Locked"); unlocked (journal / in-progress) cards no longer show any status label at all. The `.active`-specific pill color override was removed since nothing uses it anymore.
+- Removed the top-right "#02 / 10" frame-number badge. That trip-position info now prefixes the bottom date line instead: "Day 2 / 10 · SAT 26 SEP".
+
+**Bug fixed:**
+1. *Card visibly "pops" to full size right as the open animation starts — but only if you swipe to focus a card and then tap it immediately, not if you close and reopen.* Root cause: `openDayFlip()` captures a "from" rect for the box-morph using the card's rotation-invariant center point paired with its own *unrotated, unscaled* layout size (`offsetWidth`/`offsetHeight`, which `transform` never affects) — a deliberate round-1 fix for a different problem (rotation inflating `getBoundingClientRect()`). That assumes the card is already sitting at its settled resting transform (`scale(1) rotate(0)`) when opened. But `endDrag()` promotes a new front card by updating `state.stackIndex` and calling `applyStack()`, which kicks off the ordinary `.6s` spring transition that grows/un-tilts that card from whatever smaller, jittered transform it had as a background card — and a tap right after the swipe (part of the same gesture) can land well before that transition finishes. In that window the card's actual on-screen size was still mid-transition (smaller/tilted), but the "from" box was built from its full resting size regardless — so setting that size directly (bypassing the transition) made it visibly snap to full size for one frame before the flip-grow animation took over. Fixed by having `openDayFlip()` synchronously force the card to its resting transform (`transition:none` + `stackTransform(stackStyle(0, idx))`, with a forced reflow) *before* any measuring happens, so the measured box always matches what's actually on screen. Verified by scripting the exact repro in Playwright (swipe, then click with zero wait) and sampling the opening element's `getBoundingClientRect()` every 60ms — the first frame now reports the card's correct resting size (300×557) instead of a smaller mid-transition one.
+
+---
+
 ## ROUND 1 — 2026-09-15
 Built the Explorer Mode prototype end to end and set up version control for the project.
 
