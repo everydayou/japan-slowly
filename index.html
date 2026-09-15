@@ -77,12 +77,25 @@
      film-strip dots, a phone bezel) for presenting the prototype as a demo. now that
      the page is meant to be opened directly -- including as a home-screen app shortcut --
      it should just BE the app, full-bleed, with none of that outer chrome. */
-  html, body{ height:100%; }
+  /* Lock the actual document/viewport itself so it can never pan or rubber-band
+     in either direction -- this is a full-bleed app shell, not a scrollable
+     page. .screen fills 100% of this and .view (below) is the ONE element
+     that's allowed its own internal vertical scroll for a day's detail content;
+     overscroll-behavior:contain on .view stops even that from chaining up into
+     a bounce on html/body once it hits the top/bottom of its own scroll range. */
+  html, body{
+    height:100%;
+    width:100%;
+    overflow:hidden;
+    overscroll-behavior:none;
+  }
   body{
     background:var(--bg);
     color:var(--ink);
     font-family:'Outfit',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
     margin:0;
+    position:fixed;
+    inset:0;
   }
   h1,h2,h3{ text-wrap:balance; margin:0; }
   .mono{ font-family:'Outfit',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; }
@@ -99,7 +112,7 @@
     flex-direction:column;
   }
 
-  .view{ position:absolute; inset:0; overflow-y:auto; display:flex; flex-direction:column; }
+  .view{ position:absolute; inset:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; display:flex; flex-direction:column; }
   .view::-webkit-scrollbar{ width:0; }
 
   /* ---- grain overlay ---- */
