@@ -1,7 +1,7 @@
 <title>Japan Slowly</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <!-- lets this be "installed" from the browser share/menu and launch full-screen off the
      home screen, like an app, instead of opening back into a browser tab -->
 <link rel="manifest" href="manifest.json">
@@ -10,56 +10,64 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Japan Slowly">
-<meta name="theme-color" content="#241436">
+<meta name="theme-color" content="#fafafa">
 <style>
+  /* ============================================================================
+     DESIGN TOKENS — ported from the leve design system (src/index.css).
+     Same semantic roles (surface/content/border/accent), same light+dark remap
+     pattern, same radius/shadow scale and Outfit type family — with the accent
+     hue swapped from leve's mint to a torii-red so the app still reads as
+     distinctly "Japan Slowly" rather than a mint iOS app. Variable NAMES below
+     are unchanged from the original file (--bg, --ink, --accent, etc.) so no
+     other rule in this stylesheet needed to be touched. */
   :root{
-    --bg:#E7E1D2;
-    --bg-elevated:#DED6C2;
-    --frame:#CDC4AC;
-    --ink:#211C16;
-    --ink-soft:#5B5342;
-    --ink-faint:#8A8066;
-    --accent:#33456B;
-    --accent-soft:#516089;
-    --reveal:#B85A34;
-    --line:rgba(33,28,22,.16);
+    --bg:#fafafa;              /* was --color-surface-muted (page backdrop) */
+    --bg-elevated:#ffffff;     /* was --color-surface (cards, sheets, bars) */
+    --frame:#f3f3f3;           /* was --color-surface-sunken (insets) */
+    --ink:#171717;             /* was --color-content (primary text) */
+    --ink-soft:#767676;        /* was --color-content-secondary */
+    --ink-faint:#a3a3a3;       /* was --color-content-muted */
+    --accent:#d6432e;          /* torii vermillion, in place of leve's mint */
+    --accent-soft:#e2694f;     /* lighter red — hover state */
+    --reveal:#c08a2e;          /* warm gold, distinct 2nd accent (was rust) */
+    --line:#efeff0;            /* was --color-border-field */
     --grain-opacity:.05;
-    --stage-a:#F1ECDF;
-    --stage-b:#DCD4BE;
+    --stage-a:#ffffff;
+    --stage-b:#f3f3f3;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#1E1A16;
-      --bg-elevated:#28221B;
-      --frame:#382F24;
-      --ink:#ECE5D6;
-      --ink-soft:#B4A990;
-      --ink-faint:#7C7360;
-      --accent:#93ACD8;
-      --accent-soft:#7089B8;
-      --reveal:#DE8552;
-      --line:rgba(236,229,214,.14);
+      --bg:#18181b;
+      --bg-elevated:#1b1c1d;
+      --frame:#161618;
+      --ink:#e3e3e3;
+      --ink-soft:#9c9c9c;
+      --ink-faint:#7c7c81;
+      --accent:#ff7a61;        /* brighter red pops on near-black, like leve's mint did */
+      --accent-soft:#e85d42;   /* darker red — hover state */
+      --reveal:#e3ac55;
+      --line:#212121;
       --grain-opacity:.09;
-      --stage-a:#171310;
-      --stage-b:#0F0D0A;
+      --stage-a:#18181b;
+      --stage-b:#131315;
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"]{
-    --bg:#1E1A16;
-    --bg-elevated:#28221B;
-    --frame:#382F24;
-    --ink:#ECE5D6;
-    --ink-soft:#B4A990;
-    --ink-faint:#7C7360;
-    --accent:#93ACD8;
-    --accent-soft:#7089B8;
-    --reveal:#DE8552;
-    --line:rgba(236,229,214,.14);
+    --bg:#18181b;
+    --bg-elevated:#1b1c1d;
+    --frame:#161618;
+    --ink:#e3e3e3;
+    --ink-soft:#9c9c9c;
+    --ink-faint:#7c7c81;
+    --accent:#ff7a61;
+    --accent-soft:#e85d42;
+    --reveal:#e3ac55;
+    --line:#212121;
     --grain-opacity:.09;
-    --stage-a:#171310;
-    --stage-b:#0F0D0A;
+    --stage-a:#18181b;
+    --stage-b:#131315;
     color-scheme: dark;
   }
 
@@ -72,11 +80,11 @@
   body{
     background:var(--bg);
     color:var(--ink);
-    font-family:'Work Sans',ui-sans-serif,system-ui,sans-serif;
+    font-family:'Outfit',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
     margin:0;
   }
   h1,h2,h3{ text-wrap:balance; margin:0; }
-  .mono{ font-family:'IBM Plex Mono',ui-monospace,monospace; }
+  .mono{ font-family:'Outfit',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; }
 
   /* ---- screen (fills the viewport; svh not dvh so a mobile browser's address bar
      showing/hiding doesn't resize -- and jump -- the whole layout) ---- */
@@ -101,8 +109,8 @@
     padding:44px 20px 4px;
     display:flex; flex-direction:column; gap:2px;
   }
-  .reel-head .wordmark{ font-family:'Fraunces',serif; font-weight:600; font-size:20px; letter-spacing:.01em; }
-  .reel-head .range{ font-size:11.5px; color:var(--ink-faint); font-family:'IBM Plex Mono',monospace; letter-spacing:.03em; }
+  .reel-head .wordmark{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:20px; letter-spacing:.01em; }
+  .reel-head .range{ font-size:11.5px; color:var(--ink-faint); font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; letter-spacing:.03em; }
   .reel-note{ margin:8px 20px 0; font-size:11px; color:var(--ink-faint); }
 
   .stack-wrap{
@@ -147,14 +155,14 @@
   .stack-card .shade{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 42%, rgba(0,0,0,.74) 100%); }
   .stack-card .content{ position:absolute; left:17px; right:17px; bottom:16px; color:#F3EEE1; opacity:0; transition:opacity .3s ease; }
   .stack-card.is-front .content{ opacity:1; }
-  .stack-card .frame-no{ position:absolute; top:13px; right:15px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.06em; color:rgba(243,238,225,.75); opacity:0; transition:opacity .3s; }
+  .stack-card .frame-no{ position:absolute; top:13px; right:15px; font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:9.5px; letter-spacing:.06em; color:rgba(243,238,225,.75); opacity:0; transition:opacity .3s; }
   .stack-card.is-front .frame-no{ opacity:1; }
-  .stack-card .day-date{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; opacity:.85; text-transform:uppercase; }
-  .stack-card .day-title{ font-family:'Fraunces',serif; font-weight:600; font-size:23px; margin-top:4px; }
+  .stack-card .day-date{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:10.5px; letter-spacing:.08em; opacity:.85; text-transform:uppercase; }
+  .stack-card .day-title{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:23px; margin-top:4px; }
   .stack-card .day-teaser{ font-size:12px; margin-top:5px; opacity:.92; line-height:1.4; }
   .stack-card .status-pill{
     position:absolute; top:13px; left:15px;
-    font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.08em;
+    font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:9px; letter-spacing:.08em;
     padding:3px 8px; border-radius:20px; text-transform:uppercase;
     background:rgba(0,0,0,.35); color:#F3EEE1;
     opacity:0; transition:opacity .3s;
@@ -176,14 +184,14 @@
   .backbtn svg{ width:13px; height:13px; }
   .resetbtn{
     background:none; border:1px solid var(--line); color:var(--ink-faint);
-    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.05em;
+    font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:10px; letter-spacing:.05em;
     padding:5px 9px; border-radius:20px; cursor:pointer; text-transform:uppercase;
   }
   .resetbtn:hover{ color:var(--ink-soft); border-color:var(--ink-faint); }
 
   .backhero-text{ padding:14px 20px 16px; border-bottom:1px solid var(--line); }
-  .backhero-text .day-date{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); }
-  .backhero-text .day-title{ font-family:'Fraunces',serif; font-weight:600; font-size:25px; margin-top:5px; color:var(--ink); }
+  .backhero-text .day-date{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); }
+  .backhero-text .day-title{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:25px; margin-top:5px; color:var(--ink); }
   .backhero-text .day-title.hidden-title{ letter-spacing:.14em; opacity:.55; font-weight:500; font-size:17px; }
   .backhero-text .day-teaser{ font-size:13px; margin-top:6px; line-height:1.45; color:var(--ink-soft); }
 
@@ -195,27 +203,27 @@
   .prep-row{ display:grid; grid-template-columns:repeat(3,1fr); }
   .prep-cell{ padding:11px 10px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
   .prep-cell:nth-child(3n){ border-right:0; }
-  .prep-label{ font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; }
+  .prep-label{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:9px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; }
   .prep-value{ font-size:12.5px; margin-top:3px; color:var(--ink); line-height:1.3; }
   .weather-cell{ grid-column:1 / -1; border-right:0; padding:0; cursor:pointer; }
   .weather-top{ display:flex; align-items:center; justify-content:space-between; padding:11px 12px; }
   .weather-left{ display:flex; align-items:center; gap:9px; }
-  .weather-temp{ font-family:'IBM Plex Mono',monospace; font-size:15px; font-variant-numeric:tabular-nums; }
+  .weather-temp{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:15px; font-variant-numeric:tabular-nums; }
   .weather-cond{ font-size:11.5px; color:var(--ink-soft); }
   .weather-caret{ font-size:10px; color:var(--ink-faint); transition:transform .2s; }
   .weather-cell.open .weather-caret{ transform:rotate(180deg); }
   .hourly{ display:grid; grid-template-columns:repeat(6,1fr); gap:2px; padding:0 10px; max-height:0; overflow:hidden; transition:max-height .28s ease, padding .28s ease; border-top:1px solid var(--line); }
   .weather-cell.open .hourly{ max-height:100px; padding:10px 10px 12px; }
   .hr-tick{ text-align:center; display:flex; flex-direction:column; align-items:center; gap:3px; }
-  .hr-tick .t{ font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--ink-faint); }
-  .hr-tick .v{ font-family:'IBM Plex Mono',monospace; font-size:11px; font-variant-numeric:tabular-nums; }
+  .hr-tick .t{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:9px; color:var(--ink-faint); }
+  .hr-tick .v{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:11px; font-variant-numeric:tabular-nums; }
 
-  .lastupdate{ margin:10px 20px 0; font-size:10.5px; color:var(--ink-faint); font-family:'IBM Plex Mono',monospace; display:flex; align-items:center; gap:6px; }
+  .lastupdate{ margin:10px 20px 0; font-size:10.5px; color:var(--ink-faint); font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; display:flex; align-items:center; gap:6px; }
   .lastupdate .dot{ width:5px; height:5px; border-radius:50%; background:#5C8A5C; flex:none; }
 
   /* ---- chapters ---- */
   .chapters{ margin:18px 16px 8px; display:flex; flex-direction:column; }
-  .chapters-label{ font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.1em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:8px; }
+  .chapters-label{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:9.5px; letter-spacing:.1em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:8px; }
   .chapter{ position:relative; border-top:1px solid var(--line); padding:13px 2px; overflow:hidden; }
   .chapter:last-child{ border-bottom:1px solid var(--line); }
   .chrow{ display:flex; gap:11px; align-items:flex-start; }
@@ -224,11 +232,11 @@
   .chapter.ontheway .cmarker{ border-color:var(--reveal); background:repeating-conic-gradient(var(--reveal) 0 180deg, transparent 0 360deg); }
   .cbody{ flex:1; min-width:0; }
   .ctitlerow{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
-  .ctitle{ font-family:'Fraunces',serif; font-weight:500; font-size:15.5px; }
+  .ctitle{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:500; font-size:15.5px; }
   .ctitle.dim{ font-style:italic; color:var(--ink-faint); font-weight:400; }
-  .ctag{ flex:none; font-family:'IBM Plex Mono',monospace; font-size:8.5px; letter-spacing:.05em; color:var(--ink-faint); border:1px solid var(--line); padding:1.5px 5px; border-radius:5px; }
+  .ctag{ flex:none; font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:8.5px; letter-spacing:.05em; color:var(--ink-faint); border:1px solid var(--line); padding:1.5px 5px; border-radius:5px; }
   .cblurb{ font-size:12.5px; color:var(--ink-soft); margin-top:3px; line-height:1.42; }
-  .cmeta{ font-size:11px; color:var(--ink-faint); margin-top:5px; font-family:'IBM Plex Mono',monospace; }
+  .cmeta{ font-size:11px; color:var(--ink-faint); margin-top:5px; font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; }
 
   .herebtn{
     margin-top:9px; display:inline-flex; align-items:center; gap:6px;
@@ -253,7 +261,7 @@
   .about{ max-height:0; overflow:hidden; transition:max-height .3s ease; }
   .about.open{ max-height:320px; }
   .about-inner{ padding-top:10px; display:flex; flex-direction:column; gap:8px; }
-  .about-item .k{ font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.07em; color:var(--reveal); text-transform:uppercase; }
+  .about-item .k{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:9px; letter-spacing:.07em; color:var(--reveal); text-transform:uppercase; }
   .about-item .v{ font-size:12px; color:var(--ink-soft); line-height:1.45; margin-top:2px; }
 
   @keyframes sweep{
@@ -271,7 +279,7 @@
   /* ---- tomorrow stub ---- */
   .tomorrow{ margin:6px 16px 26px; border:1px dashed var(--line); border-radius:14px; padding:13px 14px; }
   .tomorrow.ready{ border-style:solid; background:var(--bg-elevated); }
-  .tomorrow-label{ font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.1em; color:var(--ink-faint); text-transform:uppercase; }
+  .tomorrow-label{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:9.5px; letter-spacing:.1em; color:var(--ink-faint); text-transform:uppercase; }
   .tomorrow-text{ font-size:12.5px; color:var(--ink-soft); margin-top:6px; line-height:1.45; }
   .tomorrow.ready .tomorrow-text{ color:var(--ink); }
 
