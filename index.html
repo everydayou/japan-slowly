@@ -1,4 +1,4 @@
-<title>Japan Slowly</title>
+<title>Japan, unscripted</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -6,11 +6,19 @@
 <!-- lets this be "installed" from the browser share/menu and launch full-screen off the
      home screen, like an app, instead of opening back into a browser tab -->
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-512.png">
+<!-- ?v=9 cache-busts the icon (round 9) -- iOS/browsers cache an installed-app icon
+     very aggressively by URL, and icon-512.png had been silently swapped twice before
+     (rounds 5 and 6) with the filename unchanged, so nothing ever told the OS/browser a
+     new copy existed. Bump this query param any time icon-512.png's contents change
+     again. NOTE this only fixes it going forward for a fresh fetch/install -- an icon
+     already on a phone's home screen was cached at install time and won't refresh on
+     its own; removing and re-adding the app to the home screen is the only way to pick
+     up a new icon on a device that already installed an old one. -->
+<link rel="apple-touch-icon" href="icon-512.png?v=9">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Japan Slowly">
+<meta name="apple-mobile-web-app-title" content="Japan, unscripted">
 <meta name="theme-color" content="#fafafa">
 <style>
   /* ============================================================================
@@ -28,8 +36,8 @@
     --ink:#171717;             /* was --color-content (primary text) */
     --ink-soft:#767676;        /* was --color-content-secondary */
     --ink-faint:#a3a3a3;       /* was --color-content-muted */
-    --accent:#d6432e;          /* torii vermillion, in place of leve's mint */
-    --accent-soft:#e2694f;     /* lighter red — hover state */
+    --accent:#E11401;          /* updated torii red (round 9) -- was #d6432e */
+    --accent-soft:#ff3110;     /* lighter red — hover state (derived to keep the same L/S offset from --accent that the old palette had) */
     --reveal:#c08a2e;          /* warm gold, distinct 2nd accent (was rust) */
     --line:#efeff0;            /* was --color-border-field */
     --grain-opacity:.05;
@@ -45,8 +53,8 @@
       --ink:#e3e3e3;
       --ink-soft:#9c9c9c;
       --ink-faint:#7c7c81;
-      --accent:#ff7a61;        /* brighter red pops on near-black, like leve's mint did */
-      --accent-soft:#e85d42;   /* darker red — hover state */
+      --accent:#ff563f;        /* brighter red pops on near-black -- derived from the round-9 #E11401 base */
+      --accent-soft:#ff2809;   /* darker red — hover state */
       --reveal:#e3ac55;
       --line:#212121;
       --grain-opacity:.09;
@@ -62,8 +70,8 @@
     --ink:#e3e3e3;
     --ink-soft:#9c9c9c;
     --ink-faint:#7c7c81;
-    --accent:#ff7a61;
-    --accent-soft:#e85d42;
+    --accent:#ff563f;
+    --accent-soft:#ff2809;
     --reveal:#e3ac55;
     --line:#212121;
     --grain-opacity:.09;
@@ -147,6 +155,37 @@
      title-to-date needed two different distances (4px, 2px), which `gap` can't express. */
   .home-hero .wordmark{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:22px; letter-spacing:.01em; margin-top:4px; }
   .home-hero .range{ font-size:14px; color:var(--ink-faint); font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; letter-spacing:.03em; margin-top:2px; }
+
+  /* ---- intro splash (round 9) ----
+     Sizing/spacing here is approximated from a screenshot of the user's Figma frame
+     (the file itself needs a login WebFetch can't provide) by measuring the reference
+     image's pixel proportions directly -- not pixel-exact to the source, but close.
+     Flexible spacers (not fixed margins) distribute the vertical rhythm proportionally
+     (~3.5 : 2 above/below the hero block) so this holds up across viewport heights
+     instead of assuming one fixed screen size, the same lesson round 8's shadow-clip
+     fix was about. */
+  .intro-screen{ height:100%; display:flex; flex-direction:column; align-items:center; padding:0 24px; }
+  .intro-spacer-top{ flex:3.5 1 0; min-height:12px; }
+  .intro-spacer-mid{ flex:2 1 0; min-height:24px; }
+  .home-hero.intro-hero{ padding:0; flex:none; }
+  .home-hero.intro-hero .mark{ width:140px; height:140px; }
+  /* max-width forces the wrap to land right after the comma ("Japan," / "unscripted",
+     matching the reference) regardless of exact font-metric/kerning variance across
+     browsers -- at 32px this string is wide enough to wrap somewhere on its own even
+     without the constraint, but leaving that to chance risked an inconsistent break
+     point instead of always the same one. */
+  .home-hero.intro-hero .wordmark{ font-size:32px; line-height:1.08; margin-top:22px; max-width:230px; }
+  .home-hero.intro-hero .range{ font-size:15px; margin-top:12px; }
+  .intro-cta{
+    flex:none;
+    margin-bottom:calc(env(safe-area-inset-bottom, 0px) + 40px);
+    background:var(--accent); color:#fff; border:0; border-radius:999px;
+    font:inherit; font-weight:600; font-size:16px; letter-spacing:.01em;
+    padding:16px 32px; cursor:pointer; -webkit-tap-highlight-color:transparent;
+    box-shadow:0 12px 24px -12px rgba(225,20,1,.45);
+  }
+  .intro-cta:hover{ background:var(--accent-soft); }
+  .intro-cta:active{ transform:scale(.97); }
 
   .stack-wrap{
     position:relative;
@@ -544,7 +583,12 @@
   };
 
   /* ---------- state ---------- */
-  var state = { screen:'home', openDay:null, day2:JSON.parse(JSON.stringify(DAY2)), weatherOpen:{}, stackIndex:1, confirmId:null, animating:false };
+  /* screen starts on 'intro' (round 9) -- the big centered splash with the "Start your
+     journey" CTA -- rather than dropping straight into the card deck. Tapping the CTA
+     morphs into 'home' (see goHome()); tapping the compact hero on 'home' morphs back
+     (see goIntro()). Both are a from-scratch state, not persisted across reloads, same
+     as everything else in this prototype. */
+  var state = { screen:'intro', openDay:null, day2:JSON.parse(JSON.stringify(DAY2)), weatherOpen:{}, stackIndex:1, confirmId:null, animating:false };
   var dragState = { startX:0, lastX:0, lastT:0, vx:0, moved:false, active:false, el:null };
 
   function iconFor(cond){
@@ -692,10 +736,28 @@
     return 'translate(-50%,-50%) translateX('+s.tx+'px) scale('+s.scale+') rotate('+s.rot+'deg)';
   }
 
+  /* shared by both the intro splash and the compact home hero -- same sub-element
+     classes (.mark/.wordmark/.range) in both, sized differently via the .intro-hero
+     modifier class, so goHome()/goIntro() can morph between them (see markMorph()). */
+  function heroMarkupHTML(){
+    return '<div class="mark"><img class="mark-light" src="'+MARK_LIGHT+'" alt="Japan, unscripted" width="56" height="56"><img class="mark-dark" src="'+MARK_DARK+'" alt="Japan, unscripted" width="56" height="56"></div><div class="wordmark">Japan, unscripted</div><div class="range mono">25 SEP &ndash; 4 OCT 2026</div>';
+  }
+
+  /* the big centered splash shown on first load (round 9) -- see goHome()/goIntro() for
+     the morph transition between this and the compact home hero. */
+  function introScreen(){
+    return '<div class="intro-screen">' +
+      '<div class="intro-spacer-top"></div>' +
+      '<div class="home-hero intro-hero">' + heroMarkupHTML() + '</div>' +
+      '<div class="intro-spacer-mid"></div>' +
+      '<button class="intro-cta" data-start>Start your journey</button>' +
+    '</div>';
+  }
+
   function homeScreen(excludeIdx){
     /* centered mark + wordmark + date-range hero, replacing the old left-aligned
        "reel-head" -- the old descriptive note beneath it has been removed entirely. */
-    var html = '<div class="home-hero"><div class="mark"><img class="mark-light" src="'+MARK_LIGHT+'" alt="Japan Slowly" width="56" height="56"><img class="mark-dark" src="'+MARK_DARK+'" alt="Japan Slowly" width="56" height="56"></div><div class="wordmark">Japan Slowly</div><div class="range mono">25 SEP &ndash; 4 OCT 2026</div></div>';
+    var html = '<div class="home-hero">' + heroMarkupHTML() + '</div>';
     html += '<div class="stack-wrap" id="stackwrap">';
     DAYS.forEach(function(d, i){
       if(i===excludeIdx) return; /* that card is off being flipped elsewhere -- it doesn't belong in the deck yet */
@@ -737,6 +799,22 @@
     wrap.querySelectorAll('.stack-card').forEach(function(el){
       var i = parseInt(el.getAttribute('data-idx'),10);
       var s = stackStyle(i - state.stackIndex, i);
+      /* the card swinging INTO focus travels a much bigger transform delta (position,
+         scale, and rotation all change substantially, going from a small tilted
+         background card to full-size and untilted) than the outgoing card does, which
+         made it read as noticeably snappier/faster than the rest of the deck even
+         though every card shares the same .6s transition. Give just this one card a
+         longer, gentler transition for its transform change, then clear the inline
+         override once that transition finishes so it doesn't linger and affect some
+         later, unrelated transform change on the same element (the round-4/7 bug was
+         exactly this kind of leftover-inline-transition mistake). */
+      var becomingFront = (i === state.stackIndex) && !el.classList.contains('is-front');
+      if(becomingFront){
+        el.style.transition = 'transform .85s cubic-bezier(.22,1,.36,1), opacity .5s ease, box-shadow .3s ease';
+        el.addEventListener('transitionend', function onEnd(ev){
+          if(ev.target===el && ev.propertyName==='transform'){ el.style.transition=''; el.removeEventListener('transitionend', onEnd); }
+        });
+      }
       el.style.transform = stackTransform(s);
       el.style.opacity = s.op;
       el.style.zIndex = s.z;
@@ -752,10 +830,105 @@
     applyStack();
   }
 
+  /* ---------- intro <-> home hero morph (round 9) ----------
+     Only the .mark (the icon/circle) is animated with a true FLIP scale+move: it's the
+     same image in both screens, so scaling it is a clean, distortion-free transform,
+     exactly the reasoning the day-card open/close flip already uses for photos elsewhere
+     in this file. The wordmark/date text is NOT scale-morphed the same way, on purpose:
+     the intro screen's title wraps to two lines ("Japan," / "unscripted") at its larger
+     size while the compact home title is one line -- scaling a single-line element up
+     to stand in for a two-line one would show a visible text-reflow mismatch the instant
+     the screen swaps. Cross-fading the text instead sidesteps that entirely and still
+     reads as one coordinated motion alongside the mark's scale+move. */
+  function markMorph(fromRect, toEl){
+    var toRect = toEl.getBoundingClientRect();
+    var scale = fromRect.width / toRect.width;
+    var dx = (fromRect.left+fromRect.width/2) - (toRect.left+toRect.width/2);
+    var dy = (fromRect.top+fromRect.height/2) - (toRect.top+toRect.height/2);
+    toEl.style.transition = 'none';
+    toEl.style.transformOrigin = 'center center';
+    toEl.style.transform = 'translate('+dx+'px,'+dy+'px) scale('+scale+')';
+    toEl.getBoundingClientRect(); /* flush the "from" state before animating */
+    requestAnimationFrame(function(){
+      toEl.style.transition = 'transform .5s cubic-bezier(.4,0,.2,1)';
+      toEl.style.transform = 'none';
+      toEl.addEventListener('transitionend', function onEnd(ev){
+        if(ev.target===toEl && ev.propertyName==='transform'){
+          toEl.style.transition = ''; toEl.style.transformOrigin = '';
+          toEl.removeEventListener('transitionend', onEnd);
+        }
+      });
+    });
+  }
+
+  /* fades an element out (in place) then back in from a slight offset -- used for the
+     wordmark/date text and the CTA/deck, which cross-fade rather than scale-morph. */
+  function crossfadeIn(el, delay){
+    el.style.transition = 'none';
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(6px)';
+    el.getBoundingClientRect();
+    requestAnimationFrame(function(){
+      el.style.transition = 'opacity .35s ease '+delay+'s, transform .35s cubic-bezier(.4,0,.2,1) '+delay+'s';
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+    });
+  }
+
+  function goHome(){
+    if(state.animating || state.screen!=='intro') return;
+    if(reduceMotion){ state.screen='home'; render(); return; }
+    state.animating = true;
+    var markEl = document.querySelector('.intro-hero .mark');
+    var fromRect = markEl ? markEl.getBoundingClientRect() : null;
+    var fadeOut = [document.querySelector('.intro-cta'), document.querySelector('.intro-hero .wordmark'), document.querySelector('.intro-hero .range')];
+    fadeOut.forEach(function(el){ if(el){ el.style.transition='opacity .18s ease'; el.style.opacity='0'; } });
+    setTimeout(function(){
+      state.screen = 'home';
+      render();
+      var newMark = document.querySelector('.home-hero .mark');
+      var newWordmark = document.querySelector('.home-hero .wordmark');
+      var newRange = document.querySelector('.home-hero .range');
+      var wrap = document.getElementById('stackwrap');
+      if(newMark && fromRect) markMorph(fromRect, newMark);
+      if(newWordmark) crossfadeIn(newWordmark, 0.15);
+      if(newRange) crossfadeIn(newRange, 0.2);
+      if(wrap) crossfadeIn(wrap, 0.15);
+      setTimeout(function(){ state.animating=false; }, 650);
+    }, 160);
+  }
+
+  function goIntro(){
+    if(state.animating || state.screen!=='home') return;
+    if(reduceMotion){ state.screen='intro'; render(); return; }
+    state.animating = true;
+    var markEl = document.querySelector('.home-hero .mark');
+    var fromRect = markEl ? markEl.getBoundingClientRect() : null;
+    var wrap = document.getElementById('stackwrap');
+    var oldWordmark = document.querySelector('.home-hero .wordmark');
+    var oldRange = document.querySelector('.home-hero .range');
+    [wrap, oldWordmark, oldRange].forEach(function(el){ if(el){ el.style.transition='opacity .18s ease'; el.style.opacity='0'; } });
+    setTimeout(function(){
+      state.screen = 'intro';
+      render();
+      var newMark = document.querySelector('.intro-hero .mark');
+      var newWordmark = document.querySelector('.intro-hero .wordmark');
+      var newRange = document.querySelector('.intro-hero .range');
+      var cta = document.querySelector('.intro-cta');
+      if(newMark && fromRect) markMorph(fromRect, newMark);
+      if(newWordmark) crossfadeIn(newWordmark, 0.15);
+      if(newRange) crossfadeIn(newRange, 0.2);
+      if(cta) crossfadeIn(cta, 0.25);
+      setTimeout(function(){ state.animating=false; }, 650);
+    }, 160);
+  }
+
   function render(){
     var el = document.getElementById('screen');
     var html = '<div class="view">';
-    if(state.screen==='home'){
+    if(state.screen==='intro'){
+      html += introScreen();
+    } else if(state.screen==='home'){
       html += homeScreen();
     } else {
       var day = DAYS.filter(function(d){return d.n===state.openDay;})[0];
@@ -766,11 +939,15 @@
     html += '</div>';
     el.innerHTML = html;
     wire();
-    /* only show the reload button on the home reel -- a day-detail screen already
-       has its own top-right control (Reset demo) in that same corner, and this
-       button is fixed-position so it would sit directly on top of it there. */
+    /* show the reload button on the intro screen and the home reel, but not on a
+       day-detail screen -- that screen already has its own top-right control
+       (Reset demo) in that same corner, and this button is fixed-position so it
+       would sit directly on top of it there. (round 9: the app's default/initial
+       screen changed from 'home' to 'intro', so this button has to be reachable
+       from there too, or a user landing on the intro screen has no way at all to
+       force-fetch a fresh copy of the app.) */
     var refreshBtn = document.getElementById('refreshBtn');
-    if(refreshBtn) refreshBtn.hidden = (state.screen!=='home');
+    if(refreshBtn) refreshBtn.hidden = (state.screen!=='home' && state.screen!=='intro');
   }
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1099,6 +1276,15 @@
   /* ---------- drag-to-browse + tap-to-flip-open on the home stack ---------- */
   function wireHome(){
     var el = document.getElementById('screen');
+    /* tapping the compact hero (mark/title/date, up top) returns to the intro splash --
+       round 9. Scoped safely here since wireHome() only ever runs while state.screen
+       is 'home' (see wire() below), so this never fires for the intro screen's own
+       (much bigger) hero, which has no tap behavior of its own -- only its CTA does. */
+    var hero = el.querySelector('.home-hero');
+    if(hero){
+      hero.style.cursor = 'pointer';
+      hero.addEventListener('click', function(){ goIntro(); });
+    }
     el.querySelectorAll('.stack-card').forEach(function(b){
       b.addEventListener('pointerdown', function(e){
         if(state.animating || !b.classList.contains('is-front')) return;
@@ -1147,9 +1333,15 @@
     });
   }
 
+  function wireIntro(){
+    var el = document.getElementById('screen');
+    var cta = el.querySelector('[data-start]');
+    if(cta) cta.addEventListener('click', function(){ goHome(); });
+  }
+
   function wire(){
     var el = document.getElementById('screen');
-    if(state.screen==='home'){ wireHome(); } else { wireCommon(el); }
+    if(state.screen==='intro'){ wireIntro(); } else if(state.screen==='home'){ wireHome(); } else { wireCommon(el); }
   }
 
   /* ---------- reload-latest button ---------- */
