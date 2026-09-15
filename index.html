@@ -120,7 +120,12 @@
     min-height:280px;
     margin-top:6px;
     padding:2px 0 14px;
-    touch-action:pan-y;
+    /* was pan-y -- but a real finger drag is never perfectly horizontal, so the
+       browser's own vertical-pan gesture kept hijacking the drag-to-browse
+       gesture as a native scroll/bounce (fine on mouse/trackpad, broken on
+       touch). This zone's only job is the custom horizontal drag below, so it
+       should fully opt out of native panning instead of partially allowing it. */
+    touch-action:none;
     perspective:1600px;
   }
   .stack-card{
@@ -963,6 +968,7 @@
       });
       b.addEventListener('pointermove', function(e){
         if(!dragState.active || dragState.el!==b) return;
+        if(e.cancelable) e.preventDefault(); /* belt-and-suspenders alongside touch-action:none above */
         var dx = e.clientX - dragState.startX;
         if(Math.abs(dx) > 6) dragState.moved = true;
         var now = performance.now();
