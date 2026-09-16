@@ -492,6 +492,17 @@
   .sheet-body{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; display:flex; flex-direction:column; gap:10px; padding:14px 24px 24px; }
   .about-item .k{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:12px; letter-spacing:.07em; color:var(--reveal); text-transform:uppercase; }
   .about-item .v{ font-size:16px; color:var(--ink-soft); line-height:1.45; margin-top:2px; }
+  /* grouped About panels (content-upgrade round) -- a chapter's `about` can now be either
+     the original flat [label,value] row list (rendered exactly as before), or a list of
+     named sub-places (Shibuya's About panel opening into "Shibuya Crossing", "Hachiko",
+     etc). Each group after the first gets a top border + extra margin to read as a
+     visually separate section within the same scrollable sheet; the group's own items
+     reuse .about-item/.k/.v unchanged, so this is purely a wrapping/heading addition. */
+  .about-group + .about-group{ margin-top:10px; padding-top:18px; border-top:1px solid var(--line); }
+  .about-group-head{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:2px; }
+  .about-group-title{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:16px; color:var(--ink); }
+  .about-group-tag{ flex:none; font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:11px; letter-spacing:.05em; color:var(--ink-faint); text-transform:uppercase; }
+  .about-group-rows{ display:flex; flex-direction:column; gap:10px; margin-top:8px; }
   @media (prefers-reduced-motion: reduce){ .sheet-backdrop, .sheet-panel{ transition:none; } }
 
   @keyframes sweep{
@@ -682,20 +693,121 @@
     chapters:[
       {id:'harajuku', name:'Harajuku', tag:'DATE', state:'revealed',
         blurb:'Takeshita Street into the surrounding lanes, drifting toward Omotesando. The wigs are already bought — no shopping task attached.',
-        about:[['Why it matters','Birthplace of postwar Japan’s street-fashion subcultures.'],
-               ['Look for','Saturated shopfronts on Takeshita Street, cosplay and kawaii displays, the queue outside AFURI for yuzu ramen.'],
-               ['A little history','Harajuku’s youth culture traces back to street dancers gathering near the station through the 1970s and 80s.']]},
+        about:[
+          {group:'Harajuku', rows:[
+            ['Why it matters','Harajuku is one of Tokyo’s clearest examples of youth culture becoming part of the city’s international identity. It works perfectly as the colourful opening to the “Lost in Translation” day.'],
+            ['A little context','The area was once much quieter and historically lay on routes outside the old city centre. In the postwar decades it became associated with new youth scenes, independent fashion and eventually the “kawaii” aesthetics exported worldwide.'],
+            ['Look for','The contrast is more interesting than any single landmark: intensely commercial Takeshita Street, fashion-focused side streets, tiny independent shops and then the more polished Omotesando edge.'],
+            ['How to experience it','Let Harajuku read as multiple layers rather than one aesthetic — tourist spectacle, fashion retail and smaller backstreet culture — while moving naturally south.'],
+            ['Etiquette / sensitivity','Ask before photographing people at close range, especially anyone whose outfit attracted attention. Street fashion is not automatic consent for portrait photography.'],
+            ['One memorable detail','Harajuku’s cultural significance comes from repeated reinvention: styles that began as subcultures in side streets have repeatedly become global fashion references.'],
+            ['Practical note','Saturdays are busy here — the route stays loose rather than turning the wigs into a shopping task.']]},
+          {group:'Takeshita Street', rows:[
+            ['Why it matters','Takeshita Street is the most concentrated, theatrical version of Harajuku: youth fashion, sweets, cosmetics, character goods and crowds packed into a short pedestrian street.'],
+            ['A little context','Its modern identity is tied to Harajuku’s rise as a youth-fashion district. The street became particularly associated with inexpensive trend-driven retail, making it a gateway into styles that were often more experimental than Tokyo’s department-store fashion.'],
+            ['Look for','Layered shop signs, compact storefronts, crepe stands, themed sweets and the compressed perspective of the street itself. The crowd is part of the visual experience.'],
+            ['How to experience it','Walk it once rather than trying to “complete” it. If it feels too crowded, the interesting move is to peel off into the side streets and compare the atmosphere.'],
+            ['Etiquette / sensitivity','Keep moving with pedestrian flow and avoid stopping suddenly for photos. Food is better consumed beside the shop rather than while weaving through the crowd.'],
+            ['One memorable detail','Its role is almost the opposite of a grand boulevard: a narrow side street became globally famous because youth culture, not monuments, made it important.'],
+            ['Practical note','Expect peak Saturday density — no timed visit is needed.']]},
+          {group:'Cat Street', rows:[
+            ['Why it matters','Cat Street is useful less as a “sight” than as the connective tissue between Harajuku and Shibuya: calmer than Takeshita, with boutiques, cafés and a more relaxed pedestrian rhythm.'],
+            ['A little context','The street became closely associated with the broader Ura-Harajuku fashion scene and helped spread the area’s reputation for streetwear and independent retail. Its importance is cultural rather than monumental.'],
+            ['Look for','Low-rise storefronts, fashion labels, side alleys, small cafés and the change in pace compared with the huge Omotesando axis nearby.'],
+            ['How to experience it','Use it as an optional drift route, not a list of shops — the quieter fashion bridge toward Shibuya.'],
+            ['Etiquette / sensitivity','Normal urban etiquette applies; some shop fronts and residential side lanes are private space even when visually appealing.'],
+            ['One memorable detail','One of Harajuku’s defining patterns is that the smaller backstreets often produced trends before the major flagship stores adopted them.'],
+            ['Practical note','The itinerary doesn’t require a specific entrance or exit — there’s freedom to wander.']]},
+          {group:'Ura-Harajuku', rows:[
+            ['Why it matters','Ura-Harajuku — literally the “back” side of Harajuku — provides the quieter, more exploratory counterpoint to the tourist-heavy main streets.'],
+            ['A little context','The term became associated with the backstreets where independent Japanese streetwear brands and youth-oriented shops developed strong followings. Its influence helped shape the global perception of Japanese street fashion from the 1990s onward.'],
+            ['Look for','Narrower lanes, smaller storefronts, mixed residential/commercial buildings and brands that feel less like giant flagships.'],
+            ['How to experience it','This is exactly where the route should avoid turn-by-turn micromanagement — a clue such as “leave the obvious street behind” fits the discovery concept better than naming every lane.'],
+            ['Etiquette / sensitivity','Some lanes are residential. Keep photography and volume respectful.'],
+            ['One memorable detail','The “backstreet” label itself is the memorable idea: much of Harajuku’s global cultural influence grew away from its biggest roads.'],
+            ['Practical note','Treat boundaries loosely — Ura-Harajuku is a cultural area label, not a single attraction pin.']]},
+          {group:'AFURI Harajuku', rows:[
+            ['Why it matters','AFURI gives the day an easy food anchor without interrupting the flow. Its yuzu ramen is light, aromatic and distinctive enough to feel specific to the trip rather than just “eat ramen.”'],
+            ['A little context','AFURI says its name comes from Mt. Afuri in Kanagawa. The brand became known for clear chicken-based ramen with citrusy yuzu, especially yuzu shio and yuzu shoyu styles.'],
+            ['Look for','The visual interest is restrained: open kitchen energy, simple bowls and the yuzu aroma/clarity rather than a heavy tonkotsu style.'],
+            ['How to experience it','Keep it simple: why yuzu changes the bowl, why this is a lighter style — then let lunch be lunch.'],
+            ['Etiquette / sensitivity','Ramen shops often move quickly. Decide before reaching the counter if possible, keep bags compact and do not linger long after finishing when there is a queue.'],
+            ['One memorable detail','The mountain reference in the name makes the brand feel more Japanese than its modern minimalist interiors initially suggest.']]}
+        ]},
       {id:'omotesando', name:'Omotesando', tag:'SEQ', state:'revealed',
         blurb:'Flagship stores and leafy side streets, working south through Ura-Harajuku toward Shibuya.',
-        about:[['Why it matters','Tokyo’s architectural runway — flagship buildings by some of the world’s best-known architects.'],
-               ['Look for','Tokyu Plaza’s kaleidoscope mirrored entrance; Cat Street’s quiet transition into Shibuya.'],
-               ['A little history','"Omotesando" literally means the front approach — the avenue was built as the ceremonial path to Meiji Shrine.']]},
+        about:[
+          {group:'Omotesando', rows:[
+            ['Why it matters','Omotesando is the polished architectural counterweight to Harajuku. The day works because the atmosphere changes without a hard break: playful youth fashion becomes flagship design and contemporary architecture.'],
+            ['A little context','The area developed around the broad approach toward Meiji Shrine and later became one of Tokyo’s best-known luxury and design corridors. Today it is as notable for architecture as for retail.'],
+            ['Look for','Zelkova trees, wide pavements, luxury façades, carefully designed flagship buildings and glimpses into quieter side streets.'],
+            ['How to experience it','Do not make “shopping” the goal. Walk the avenue as an outdoor architecture gallery and let individual buildings catch attention naturally.'],
+            ['Etiquette / sensitivity','Flagship stores are operating businesses; photography policies vary indoors.'],
+            ['One memorable detail','Few Tokyo streets demonstrate the city’s design economy as clearly: internationally known architects have used retail buildings here as full-scale urban statements.'],
+            ['Practical note','This segment stays a southward drift toward Shibuya, as the itinerary specifies.']]},
+          {group:'Omotesando Avenue', rows:[
+            ['Why it matters','The avenue is the spine that makes Omotesando legible. It offers a rare broad, tree-lined perspective in central Tokyo and turns the walk itself into part of the destination.'],
+            ['A little context','The road’s identity is tied to its role as the main approach toward Meiji Shrine; the name “Omotesando” literally refers to a front approach. Its modern luxury character came much later.'],
+            ['Look for','The zelkova canopy, seasonal light, sloping perspective, carefully composed storefronts and how side streets immediately become smaller and quieter.'],
+            ['How to experience it','Walk one side, cross when something interesting pulls you over, and avoid treating the avenue like a straight transit corridor — the contrast between boulevard and backstreet is the experience.'],
+            ['Etiquette / sensitivity','At busy crossings, move with the signal and avoid stopping at curb ramps for photos.'],
+            ['One memorable detail','The street feels luxurious today, but its name still encodes an older function: it was an approach route rather than a shopping brand.']]},
+          {group:'Tokyu Plaza Omotesando “Omokado”', rows:[
+            ['Why it matters','The kaleidoscopic mirrored escalator entrance is an ideal low-effort visual reveal: instantly recognisable, highly photogenic and directly on the day’s walking line.'],
+            ['A little context','The building opened in 2012 as Tokyu Plaza Omotesando Harajuku. In 2024, when the neighbouring “Harakado” complex opened, the older facility was renamed Tokyu Plaza Omotesando “Omokado.”'],
+            ['Look for','The faceted mirrors around the escalator multiply people, sky and street into a shifting geometric tunnel. Upstairs, the rooftop greenery provides a calmer counterpoint.'],
+            ['How to experience it','This is a “look up” moment rather than a separate attraction — take the photo if it appeals, then continue south.'],
+            ['Etiquette / sensitivity','Keep escalator flow clear while photographing; do not stop at the landing.'],
+            ['One memorable detail','The 2024 paired names “Omokado” and “Harakado” are a playful way to distinguish the two Tokyu Plaza buildings facing the same Harajuku/Omotesando crossroads.']]}
+        ]},
       {id:'shibuya', name:'Shibuya', tag:'LOC', state:'ontheway',
         onway:'Head toward Shibuya Crossing — about 15 minutes on foot from Omotesando.',
         blurb:'Crossing, Center-gai, Hachiko and neon — let them appear as you move. Wigs go on before karaoke.',
-        about:[['Why it matters','The symbolic centre of modern Tokyo, and home to the world’s busiest pedestrian crossing.'],
-               ['Look for','The Hachiko statue, the wall of screens over the crossing, Nonbei Yokocho’s tiny post-war alley bars.'],
-               ['A little history','Hachiko kept returning to Shibuya Station to wait for his owner for nine years after his death — the statue is now the city’s most-used meeting point.']]},
+        about:[
+          {group:'Shibuya Crossing', tag:'Priority A', rows:[
+            ['Why it matters','It is less important as a “sight” than as a compressed image of Tokyo: huge pedestrian volume, dense rail infrastructure, screens, fashion and nightlife all meeting at one junction. The crossing became a global shorthand for the city’s energy precisely because it looks chaotic while functioning with remarkable order.'],
+            ['A little history','Shibuya grew around one of Tokyo’s major rail hubs and evolved into a trend-setting district for youth culture, fashion, music and art. The crossing outside the station now sits at the threshold between the station, Center-gai, Dogenzaka and the commercial towers that define contemporary Shibuya.'],
+            ['Look for','Watch the light cycle rather than rushing through once: traffic stops in every direction and pedestrians flood diagonally as well as straight across. Look upward at the giant façades and screens, then back toward the station to understand why this junction works almost like an outdoor stage.'],
+            ['How to experience it','Cross once at street level, then — if the route naturally allows — see it again from above. The contrast between being inside the crowd and seeing the geometry from above is the point.'],
+            ['Etiquette / sensitivity','Do not stop abruptly in the middle of the crossing for staged photos; keep moving with the flow and stay aware of other pedestrians.'],
+            ['One memorable story','The most memorable thing is not the maximum headcount but the “organized chaos”: official Tokyo tourism describes the intersection as five crossings releasing at once, with people converging from several directions and somehow avoiding one another.']]},
+          {group:'Hachiko', tag:'Priority A', rows:[
+            ['Why it matters','The bronze dog beside Shibuya Station is a small monument with an outsized place in Japanese popular memory. Knowing the story transforms it from a crowded selfie point into a symbol of loyalty and of Shibuya itself.'],
+            ['A little history','Hachiko was an Akita who met his owner at Shibuya Station. After his owner died suddenly in the 1920s, Hachiko continued returning to wait for him for roughly nine more years. The story spread nationally and Hachiko became an enduring symbol of faithfulness.'],
+            ['Look for','The statue is physically modest compared with the crossing around it. Notice how it functions socially: it remains one of Tokyo’s best-known rendezvous points, with people constantly waiting nearby.'],
+            ['How to experience it','Treat it as a two-minute story rather than a major stop. Read the story while standing there, look at the crowd using it as a meeting point, then continue into the crossing.'],
+            ['Etiquette / sensitivity','The area is extremely busy. Keep the group together without blocking the meeting area for long photographs.'],
+            ['One memorable story','The emotional power comes from repetition: after his owner never came home, Hachiko returned to the station day after day for years. That repeated act is why the story survived far beyond the dog’s lifetime.']]},
+          {group:'Nonbei Yokocho', tag:'Priority A', rows:[
+            ['Why it matters','Nonbei Yokocho shows a completely different scale of Tokyo from the crossing only metres away: tiny bars, narrow alleys, close conversation and Showa-era atmosphere pressed against the railway.'],
+            ['A little history','Tokyo’s yokocho culture developed strongly in the post-war years as compact clusters for inexpensive food and drink. Nonbei Yokocho dates to the early 1950s and retains the intimate proportions associated with that period. Official Tokyo tourism lists 39 small bars and eateries there.'],
+            ['Look for','Red lanterns, the width of the passageways, bars with only a handful of seats and the contrast between the alley and Shibuya’s giant commercial architecture.'],
+            ['How to experience it','Go for one drink or small bite, not to “complete” the alley. The experience is the closeness: sitting beside locals in a room that may only hold four or five people.'],
+            ['Etiquette / sensitivity','Space is limited. Some bars are not set up for large groups or English service. Order something if you enter, avoid using the alley only as a photo set, and do not linger when people are waiting for seats.'],
+            ['One memorable story','Its survival beside one of the world’s most futuristic-looking intersections is the story: within a few steps, Shibuya can jump from giant screens and thousands of pedestrians to a bar where almost everyone inside can hear the same conversation.']]},
+          {group:'Center-gai', rows:[
+            ['Why it matters','Center-gai is one of the clearest street-level expressions of Shibuya’s youth culture: narrow, busy, retail-heavy and very different from the polished towers around the station.'],
+            ['A little context','The pedestrian street became closely associated with youth fashion, music and nightlife as Shibuya developed into a major teen/young-adult cultural centre.'],
+            ['Look for','Dense signage, fast-changing retail, arcades, casual food and the way crowds funnel from the crossing into much narrower streets.'],
+            ['How to experience it','Walk through once as texture. It does not need its own stop or “achievement”; it is part of the cinematic movement from the crossing into Shibuya’s interior.'],
+            ['Etiquette / sensitivity','Keep moving with pedestrian traffic; step into a side space before checking navigation.'],
+            ['One memorable detail','The shift from the enormous open crossing to Center-gai’s compressed lane happens in under a minute — a good example of Tokyo’s rapid spatial changes.']]},
+          {group:'Dogenzaka', rows:[
+            ['Why it matters','Dogenzaka is the night-facing side of Shibuya and the practical bridge between karaoke, tiny bars and several club options. It gives the evening a darker, steeper and more intimate visual language.'],
+            ['A little context','The slope west of Shibuya Station has long been associated with entertainment and nightlife. Today the area mixes restaurants, clubs, bars, hotels and newer redevelopment around the older street pattern.'],
+            ['Look for','The literal incline, vertical signage, basement entrances and the transition away from the giant station screens.'],
+            ['How to experience it','Use Dogenzaka as an atmospheric corridor. Explorer copy should say enough to heighten awareness — “the city goes underground here” — without naming the next club too early.'],
+            ['Etiquette / sensitivity','Nightlife districts are still normal public streets. Be discreet around hotels and avoid photographing strangers at close range.'],
+            ['One memorable detail','Many of Shibuya’s best-known music spaces are not visible from far away; basement doors and narrow staircases are part of the city’s club culture.']]},
+          {group:'SHIBUYA SKY', rows:[
+            ['Why it matters','This is the optional “zoom out” moment: after street-level overload, the city becomes a legible grid from 229 metres above Shibuya.'],
+            ['A little context','SHIBUYA SKY opened as part of Shibuya Scramble Square and represents the district’s recent high-rise redevelopment. Its defining feature is the open-air rooftop rather than an enclosed classic observatory.'],
+            ['Look for','The crossing from above, layered rail lines, the Shinjuku skyline and — in clear conditions — much wider views across Tokyo. The exposed rooftop makes weather part of the experience.'],
+            ['How to experience it','Keep it genuinely optional. If the day is flowing well at street level, do not interrupt it just to “tick” an observation deck. If used, sunset/early night is the obvious cinematic slot, but those times sell out first.'],
+            ['Etiquette / sensitivity','Large bags and loose items are restricted on the rooftop for safety; follow storage instructions and staff guidance.'],
+            ['One memorable detail','The most famous Shibuya image is usually from ground level inside the crossing. SHIBUYA SKY deliberately reverses that perspective and makes the crossing look almost small.'],
+            ['Practical note','Timed entry, and sunset slots sell out first — only worth it if the day allows.']]}
+        ]},
       {id:'pasela', name:'Pasela Shibuya', tag:'TIME', state:'hidden', targetTime:'20:00',
         onway:'A few minutes from Shibuya Crossing.',
         blurb:'Private-room karaoke, booked for 20:00 — the three of you, in character.',
@@ -704,7 +816,14 @@
                ['A little history','The private-room format took off across Japan in the 1980s and spread worldwide from there.']]},
       {id:'nightlife', name:'Shibuya nightlife', tag:'MAN', state:'hidden',
         onway:'Your guide will open this once tonight’s lineup is confirmed.',
-        blurb:'MITSUKI is the default — a small underground room leaning house and electro, close to karaoke.'}
+        blurb:'MITSUKI is the default — a small underground room leaning house and electro, close to karaoke.',
+        about:[
+          ['Why it matters','MITSUKI best matches the desired scale: small, underground and intimate rather than a giant nightclub. It can feel like discovering a basement scene instead of attending a tourist nightlife attraction.'],
+          ['A little context','The venue positions itself as an underground music space on upper Dogenzaka. Its identity is built more around programming and atmosphere than around spectacle.'],
+          ['Look for','A discreet entrance, descent into a basement room, close proximity between DJ and crowd and a compact sound-led environment.'],
+          ['How to experience it','This should be a late reveal. Do not show the club name in the morning — Explorer Mode can simply reveal “one floor below Shibuya” when the choice is made.'],
+          ['Etiquette / sensitivity','Carry physical photo ID. Avoid sandals or extremely sporty clothing. Follow the specific event’s entry/photography policy.'],
+          ['One memorable detail','Small Tokyo clubs often hide behind minimal street presence; the feeling of finding the door is part of the experience.']]}
     ],
     tomorrow:'Kamakura meeting time is still the driver — wake-up and leave time will be set once your friend confirms. Destination withheld.',
     tomorrowGateChapter:'pasela'
@@ -788,8 +907,27 @@
     return '<button class="abouttoggle" data-about="'+ch.id+'">About this place</button>';
   }
 
+  function aboutRowHTML(row){
+    return '<div class="about-item"><div class="k">'+row[0]+'</div><div class="v">'+row[1]+'</div></div>';
+  }
+
+  /* accepts either shape of ch.about: the original flat list of [label,value] rows
+     (rendered exactly as before), or a list of named groups ({group, tag, rows}) for
+     chapters whose About panel opens into several sub-places -- detected by checking
+     whether the first entry itself looks like a [label,value] row (a 2-element array)
+     versus a group object. Mixing the two shapes within one chapter's `about` is not
+     supported; pick one per chapter. */
   function aboutItemsHTML(rows){
-    return rows.map(function(row){ return '<div class="about-item"><div class="k">'+row[0]+'</div><div class="v">'+row[1]+'</div></div>'; }).join('');
+    if(!rows || !rows.length) return '';
+    var isGrouped = !Array.isArray(rows[0]);
+    if(!isGrouped) return rows.map(aboutRowHTML).join('');
+    return rows.map(function(g){
+      return '<div class="about-group">' +
+        '<div class="about-group-head"><div class="about-group-title">'+g.group+'</div>' +
+          (g.tag ? '<div class="about-group-tag">'+g.tag+'</div>' : '') + '</div>' +
+        '<div class="about-group-rows">' + g.rows.map(aboutRowHTML).join('') + '</div>' +
+      '</div>';
+    }).join('');
   }
 
   /* finds the chapter data for whichever day is currently open, so the sheet can look
