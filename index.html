@@ -852,17 +852,23 @@
   ];
 
   /* ---- Stays tab data (open point) ----
-     No confirmed accommodation content yet (names/addresses/area write-ups) -- the
-     user explicitly asked for this to stay a structural placeholder rather than
-     fabricated content. Each entry only carries what IS settled: which leg of the
-     trip it covers and which day it should unlock on. Locking reuses DAYS' own
-     status field (found via unlockDay) rather than a separate lock flag, so a stay
-     unlocks the same way a day does -- by time/day, never by physical proximity,
-     since the user wants this reachable before actually arriving there. `mood` picks
-     a placeholder gradient from heroStyle()/MOODS (same mechanism day cards use when
-     they have no real photo yet) until real photos are supplied. */
+     Mostly no confirmed accommodation content yet (names/addresses/area write-ups) --
+     the user explicitly asked for this to stay a structural placeholder rather than
+     fabricated content. Stay 1 is the one exception: its hotel (Isshuku Noma) and its
+     surrounding area are already documented, just in a different place -- Day 1's own
+     `kita-shinjuku` chapter (see DAY1.chapters above), written before the Stays tab
+     existed. Rather than copy/paste that text into a second, driftable location, `hotel`
+     here just names the hotel and `areaChapterId` points at that existing chapter id;
+     stayAboutHTML() below pulls its real `about` rows live from DAY1 at render time.
+     Stays 2-4 have no such source anywhere yet (Days 3-10 have no real chapter data at
+     all), so they stay genuinely undocumented placeholders -- don't invent content for
+     them. Locking reuses DAYS' own status field (found via unlockDay) rather than a
+     separate lock flag, so a stay unlocks the same way a day does -- by time/day, never
+     by physical proximity, since the user wants this reachable before actually arriving
+     there. `mood` picks a placeholder gradient from heroStyle()/MOODS (same mechanism
+     day cards use when they have no real photo yet) until real photos are supplied. */
   var STAYS = [
-    {id:'s1', label:'Stay 1', range:'Days 1–2', unlockDay:1, mood:1},
+    {id:'s1', label:'Stay 1', areaName:'Kita-Shinjuku', range:'Days 1–2', unlockDay:1, mood:1, hotel:'Isshuku Noma', areaChapterId:'kita-shinjuku'},
     {id:'s2', label:'Stay 2', range:'Days 3–5', unlockDay:3, mood:4},
     {id:'s3', label:'Stay 3', range:'Days 6–8', unlockDay:6, mood:6},
     {id:'s4', label:'Stay 4', range:'Days 9–10', unlockDay:9, mood:9}
@@ -1203,6 +1209,17 @@
      the same [label,value] row shape aboutItemsHTML() already knows how to render,
      so swapping in real content later is just filling these two rows in. */
   function stayAboutHTML(st){
+    /* Stay 1 has real, already-written content -- Day 1's own `kita-shinjuku` chapter
+       documents Isshuku Noma's neighbourhood (that's where "drop the bags... and notice
+       the neighbourhood" happens). Pulled live from DAY1 rather than duplicated here, so
+       the two can never drift apart -- if that chapter's copy ever changes, this updates
+       with it automatically. */
+    var areaCh = st.areaChapterId ? DAY1.chapters.filter(function(c){return c.id===st.areaChapterId;})[0] : null;
+    if(st.hotel && areaCh && areaCh.about){
+      return aboutItemsHTML([
+        ['Hotel', st.hotel + ' — exact address still to be added.']
+      ].concat(areaCh.about), st.id);
+    }
     return aboutItemsHTML([
       ['Hotel', 'Name and address — to be added once booked.'],
       ['The area', 'A short guide to what’s around it — to be added.']
@@ -1220,7 +1237,7 @@
     if(state.sheetAbout.indexOf('stay:')===0){
       var st = STAYS.filter(function(s){return s.id===state.sheetAbout.slice(5);})[0];
       if(!st || stayLocked(st)) return '';
-      return sheetShell(st.label, stayAboutHTML(st));
+      return sheetShell(st.areaName || st.label, stayAboutHTML(st));
     }
     var dayData = currentDayData();
     var ch = dayData ? dayData.chapters.filter(function(c){return c.id===state.sheetAbout;})[0] : null;
@@ -1566,7 +1583,7 @@
         '<div class="hero" style="'+heroStyle(st.mood)+'"></div>' + grainDiv() + '<div class="shade"></div>' +
         (locked ? '<div class="status-pill">Locked</div>' : '') +
         '<div class="content">' +
-          '<div class="stay-label">'+(locked ? 'Stay withheld' : st.label)+'</div>' +
+          '<div class="stay-label">'+(locked ? 'Stay withheld' : (st.areaName || st.label))+'</div>' +
           '<div class="stay-range">'+st.range+'</div>' +
         '</div>' +
       '</button>';
