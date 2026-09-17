@@ -851,27 +851,81 @@
       teaser:'One last look before the doors close.', status:'locked'}
   ];
 
-  /* ---- Stays tab data (open point) ----
-     Mostly no confirmed accommodation content yet (names/addresses/area write-ups) --
-     the user explicitly asked for this to stay a structural placeholder rather than
-     fabricated content. Stay 1 is the one exception: its hotel (Isshuku Noma) and its
-     surrounding area are already documented, just in a different place -- Day 1's own
-     `kita-shinjuku` chapter (see DAY1.chapters above), written before the Stays tab
-     existed. Rather than copy/paste that text into a second, driftable location, `hotel`
-     here just names the hotel and `areaChapterId` points at that existing chapter id;
-     stayAboutHTML() below pulls its real `about` rows live from DAY1 at render time.
-     Stays 2-4 have no such source anywhere yet (Days 3-10 have no real chapter data at
-     all), so they stay genuinely undocumented placeholders -- don't invent content for
-     them. Locking reuses DAYS' own status field (found via unlockDay) rather than a
-     separate lock flag, so a stay unlocks the same way a day does -- by time/day, never
-     by physical proximity, since the user wants this reachable before actually arriving
-     there. `mood` picks a placeholder gradient from heroStyle()/MOODS (same mechanism
-     day cards use when they have no real photo yet) until real photos are supplied. */
+  /* ---- Stays tab data ----
+     All 4 real accommodations, sourced from "Japan Day-by-Day Itinerary (Current).docx"
+     (docs/) -- names, addresses (where the doc has one) and area/ryokan notes are the
+     doc's own content, not invented. Two shapes coexist here: Stay 1 pulls its area copy
+     live from Day 1's own `kita-shinjuku` chapter (see stayAboutHTML() below) since that
+     content already existed in-app before the Stays tab did; Stays 2-4 have no equivalent
+     in-app chapter (Days 3-10 have no real chapter data yet), so their `about` rows are
+     written directly here, adapted from the same source doc into this file's usual
+     [label,value] row shape rather than pasted verbatim. Day ranges are the doc's actual
+     check-in/checkout days (worked out from each day's own natural-flow line), replacing
+     the earlier round's evenly-spread guess: Isshuku Noma covers nights 1-3 (checkout
+     day 4 morning), Komanoyu is a single-night ryokan stay (day 4 only), Kabin Gion
+     covers nights 5-7 (checkout during day 8), and ARIA Takanawa covers nights 8-10
+     through departure. Exact street addresses that the doc itself doesn't give (Komanoyu,
+     ARIA Takanawa) are left explicitly marked rather than guessed. Locking reuses DAYS'
+     own status field (found via unlockDay) rather than a separate lock flag, so a stay
+     unlocks the same way a day does -- by time/day, never by physical proximity, since
+     the user wants this reachable before actually arriving there. `mood` picks a
+     placeholder gradient from heroStyle()/MOODS (same mechanism day cards use when they
+     have no real photo yet) until real photos are supplied. */
   var STAYS = [
-    {id:'s1', label:'Stay 1', areaName:'Kita-Shinjuku', range:'Days 1–2', unlockDay:1, mood:1, hotel:'Isshuku Noma', areaChapterId:'kita-shinjuku'},
-    {id:'s2', label:'Stay 2', range:'Days 3–5', unlockDay:3, mood:4},
-    {id:'s3', label:'Stay 3', range:'Days 6–8', unlockDay:6, mood:6},
-    {id:'s4', label:'Stay 4', range:'Days 9–10', unlockDay:9, mood:9}
+    {id:'s1', label:'Stay 1', areaName:'Kita-Shinjuku', range:'Days 1–3', unlockDay:1, mood:1, hotel:'Isshuku Noma',
+      address:'4 Chome-14-7 Kita-Shinjuku, Room 101, Shinjuku City, Tokyo', areaChapterId:'kita-shinjuku'},
+    {id:'s2', label:'Stay 2', areaName:'Kiso-Fukushima', range:'Day 4', unlockDay:4, mood:4, hotel:'Komanoyu',
+      about:[
+        {group:'Komanoyu', tag:'THE RYOKAN', rows:[
+          ['Why it matters', 'This is not merely the hotel at the end of the day. The ryokan format — tatami, futon, communal bathing, local food and hospitality — turns accommodation itself into part of the cultural experience.'],
+          ['A little history', 'Komanoyu was established in 1897 and sits in the Kiso mountains. The property describes itself as one of the few hot-spring inns in Kiso-Fukushima with its own source, with an indoor bath made from Kiso hinoki cypress and iron-rich water. Its cuisine emphasizes Kiso and Shinshu mountain-and-river ingredients.'],
+          ['Look for', 'Notice the transition rituals: shoes off, tatami rooms, yukata, dinner pacing, bedding appearing later, bath etiquette and the quieter relationship between building and landscape. In the bath, notice the scent and feel of hinoki if using the cypress indoor bath.'],
+          ['How to experience it', 'Let the evening stay slow. Bathe before or after dinner depending on the ryokan rhythm, wear the yukata if comfortable, and treat dinner as an experience rather than refuelling.'],
+          ['Etiquette / sensitivity', 'For onsen: wash thoroughly before entering; bathe nude unless the facility states otherwise; keep towels and hair out of the water; keep phones out of the bathing area; speak quietly.'],
+          ['One memorable detail', 'Komanoyu combines a late-19th-century inn lineage with a private hot-spring source in the same mountain corridor you’ve just crossed.'],
+          ['Getting there', 'Collected by the ryokan’s own shuttle from JR Kiso-Fukushima Station — confirm the exact pickup time directly with them before travelling.']
+        ]},
+        {group:'Kiso-Fukushima', tag:'THE TOWN', rows:[
+          ['Why it matters', 'For the itinerary it’s mostly a transfer point, but a little context prevents it from feeling arbitrary: Kiso-Fukushima was historically one of the important control points on the Nakasendo and the administrative centre of the Kiso area.'],
+          ['A little history', 'During the Edo period, the town was a post town and the site of one of the route’s major checkpoints, where movement of people and goods was controlled. It later developed as a regional centre along the Kiso River.'],
+          ['Look for', 'From the station/vehicle, notice the narrow valley geography, river, wooded slopes and older building pockets compressed between them.'],
+          ['One memorable detail', 'The historic checkpoint gives a concrete mental image of how controlled long-distance travel could be in the Edo period — useful context before sleeping in the same valley.']
+        ]}
+      ]},
+    {id:'s3', label:'Stay 3', areaName:'Gion, Kyoto', range:'Days 5–7', unlockDay:5, mood:6, hotel:'Kabin Gion',
+      address:'18-12 Yamatocho, Higashiyama Ward, Kyoto',
+      about:[
+        {group:'Gion', tag:'HISTORIC KAGAI', rows:[
+          ['Why it matters', 'Gion is valuable not because you might “spot a geisha,” but because it remains one of Kyoto’s kagai — districts where geiko and maiko live, train and work within a highly developed performing-arts and hospitality culture.'],
+          ['A little history', 'The district grew around Yasaka Shrine and developed into an entertainment area of teahouses and performance culture. The connection between Gion, Yasaka Shrine and seasonal traditions remains visible today, especially through the Gion Matsuri and the area’s active geiko culture.'],
+          ['Look for', 'Ochaya-style architecture, subdued machiya fronts, lattices, noren curtains, lanterns, narrow entrances and the transition between busy Shijo-dori and quieter lanes. The visual restraint is part of the identity.'],
+          ['How to experience it', 'Walk slowly after the daytime crowds thin. Treat the district as an atmosphere to inhabit, not a hunt for performers.'],
+          ['Etiquette / sensitivity', 'Do not photograph maiko or geiko without permission; do not trespass into private alleys or properties; keep to the side of roads; obey no-photography signs — Gion is a place where people live and work, not a theme park.'],
+          ['One memorable detail', 'The word “geiko” is Kyoto’s regional term for geisha. A maiko is an apprentice; the culture includes dance, music, seasonal dress, conversation and hospitality — not simply appearance.']
+        ]},
+        {group:'Hanamikoji', tag:'GION STREET', rows:[
+          ['Why it matters', 'Hanamikoji is one of the clearest places to read Gion’s architectural language and understand the district as a working kagai rather than a themed attraction.'],
+          ['A little history', 'The southern Gion area contains historic machiya and teahouse architecture and is protected for its landscape. Geiko and maiko still move through the district between training, engagements and performances.'],
+          ['Look for', 'The restrained wooden fronts, lattices, lanterns and entrances that reveal very little of the interiors. The architecture often creates privacy rather than display.'],
+          ['How to experience it', 'Walk it once without trying to photograph every façade — the experience is strongest when you notice how quiet the buildings can feel even on a busy street.'],
+          ['Etiquette / sensitivity', 'Photography restrictions and private-property boundaries matter here. Do not pursue or obstruct geiko/maiko. Stay out of private side lanes where access is prohibited.'],
+          ['One memorable detail', 'The understated façades are intentional: much of Gion’s cultural life happens behind doors rather than being staged in the street.']
+        ]},
+        {group:'Yasaka Shrine', tag:'GION ANCHOR', rows:[
+          ['Why it matters', 'Yasaka Shrine is the spiritual anchor at the eastern end of Shijo and helps explain why Gion developed where it did. It is also the home shrine of the Gion Matsuri, one of Kyoto’s defining festivals.'],
+          ['A little history', 'The shrine’s history reaches back at least to the 9th century in official Kyoto accounts, with traditions placing its origins even earlier. Worship here became strongly associated with protection from epidemic disease — the Gion festival traces its origin to rituals held during a plague in 869.'],
+          ['Look for', 'The relationship between the west gate, Shijo Street and Gion; inside, worshippers ringing bells, offering coins and clapping. The main hall uses a distinctive Gion-zukuri form in which worship and sanctuary spaces are covered by one large roof.'],
+          ['How to experience it', 'Visit after dark if the evening allows — the shrine isn’t simply a daytime monument, and the lantern-lit atmosphere makes a good transition back into Gion.'],
+          ['Etiquette / sensitivity', 'It’s an active shrine. Give space to people praying; do not stand directly in front of worshippers for photos; follow normal Shinto courtesy.'],
+          ['One memorable detail', 'In 869, sixty-six halberds were erected to represent Japan’s provinces as part of prayers to end a plague — an origin that gives today’s huge summer Gion Matsuri an unexpectedly serious foundation.']
+        ]}
+      ]},
+    {id:'s4', label:'Stay 4', areaName:'Takanawa', range:'Days 8–10', unlockDay:8, mood:9, hotel:'ARIA Takanawa',
+      about:[
+        ['Why it matters', 'The base for the trip’s final stretch — reached from Shinagawa Station after the Shinkansen back from Kyoto, and the anchor for the deliberately open final days.'],
+        ['Getting there', 'A short continuation from Shinagawa Station once the Nozomi from Kyoto arrives.'],
+        ['Look for', 'Close enough to keep luggage and timing easy on the last morning before heading to the airport.']
+      ]}
   ];
   function stayLocked(st){
     var d = DAYS.filter(function(x){ return x.n===st.unlockDay; })[0];
@@ -891,16 +945,42 @@
                ['A little history','Terminal 3’s Edo Koji strip recreates an Edo-period shopping street, a taste of old Japan before you’ve even left the airport.']]},
       {id:'kita-shinjuku', name:'Kita-Shinjuku', tag:'SEQ', state:'revealed',
         blurb:'Drop the bags at Isshuku Noma and notice the neighbourhood rather than trying to sightsee.',
-        about:[['Why it matters','A quieter, residential pocket a few minutes from Tokyo’s busiest transit hub.'],
-               ['Look for','Narrow backstreets, small shopfronts, laundry on balconies — ordinary Tokyo rather than tourist Tokyo.']]},
+        about:[['Why it matters','This is the trip’s first lived-in Tokyo context rather than a sightseeing target. It gives the group a useful contrast: one of the world’s most intense urban centres is only a short walk away, yet the accommodation sits in a much quieter residential fabric.'],
+               ['A little context','The itinerary uses Kita-Shinjuku mainly as a base. For the app, the useful context is not a long history lesson but orientation: this is the northern residential side of the greater Shinjuku area, with smaller streets, local housing and everyday shops rather than landmark tourism.'],
+               ['Look for','Notice the scale change from Shinjuku: narrower streets, low-rise homes and apartments, bicycles, convenience stores and local restaurants. The contrast itself is the point.'],
+               ['How to experience it','Do not create a checklist here. Treat the first walk from the accommodation as “ordinary Tokyo” — the place where the group learns how bins, vending machines, konbini, crossings and residential quiet actually feel.'],
+               ['Etiquette / sensitivity','Keep voices low late at night, especially when returning after karaoke or clubbing. Residential lanes are not nightlife spaces even when the centre of Shinjuku is nearby.'],
+               ['One memorable detail','A good first Tokyo reveal is the speed of the urban transition: within a short walk, the city can move from near-silence to rail infrastructure, giant department stores and neon.']]},
       {id:'shinjuku-shop', name:'Shinjuku', tag:'SEQ', state:'revealed',
-        blurb:'Practical shopping for anything missing from the flight — UNIQLO, MUJI, toiletries, snacks.'},
+        blurb:'Practical shopping for anything missing from the flight — UNIQLO, MUJI, toiletries, snacks.',
+        about:[['Why it matters','Shinjuku is both practical infrastructure and a defining Tokyo experience: transport, department stores, skyscrapers, shopping and nightlife all collide around one enormous station complex.'],
+               ['A little context','Modern Shinjuku grew into one of Tokyo’s major commercial and transport centres after rail development shifted activity westward from the older city core. Today the station area has distinct faces: the office-tower district to the west, major retail to the east and nightlife around Kabukicho.'],
+               ['Look for','Instead of “seeing Shinjuku,” notice the transitions: elevated rail lines, department stores integrated into the station, dense signage, the west-side towers and the more chaotic east-side streets.'],
+               ['How to experience it','Use it as a living orientation challenge rather than an attraction. On arrival day, let shopping and navigation be the experience.'],
+               ['Etiquette / sensitivity','Station flows are fast. Stop at the side before checking the phone or regrouping; do not block gates or stair landings.'],
+               ['One memorable detail','Shinjuku Station is famous for its sheer complexity. The useful story is not a record-number statistic but the feeling that “the station is a district” — exits can place you in completely different urban environments.']]},
       {id:'return-haneda', name:'Return to Haneda', tag:'TIME', state:'revealed',
         blurb:'EK312 lands at 22:20 — the reunion point for all three travellers.', meta:'Aim to arrive 21:30–21:45'},
       {id:'late-food', name:'Late food', tag:'SEQ', state:'revealed',
-        blurb:'Swing through Shin-Okubo on the way back from Haneda — Tokyo’s Koreatown runs late, so there’s always something open for a post-midnight meal.',
-        about:[['Why it matters','Most of central Tokyo shuts its kitchens by 11pm; Shin-Okubo, a few minutes from Isshuku Noma, is one of the few pockets that genuinely stays open past midnight.'],
-               ['Look for','Korean BBQ, tteokbokki stalls, convenience-store gaps filled by 24-hour spots — no single destination, just walk until something looks good.']]}
+        blurb:'Okubo and Shin-Okubo, on the way back from Haneda — this stretch of Tokyo runs late, so there’s always something open for a post-midnight meal.',
+        about:[
+          {group:'Okubo', tag:'LATE-FOOD FALLBACK', rows:[
+            ['Why it matters','Okubo broadens the group’s first impression of Tokyo beyond “Japanese-only” imagery. The area is markedly multicultural and sits close enough to the accommodation to be a realistic late-food fallback.'],
+            ['A little context','The Okubo / Shin-Okubo area developed into one of Tokyo’s best-known multicultural neighbourhoods, with especially strong Korean communities and businesses as well as shops and restaurants serving other Asian and Muslim communities.'],
+            ['Look for','Watch for the shift in food signage, grocery stores, restaurants and languages. Compared with Shinjuku’s department-store scale, Okubo feels more street-level and community-driven.'],
+            ['How to experience it','If the group passes through late on arrival night, keep it practical and spontaneous — one of Tokyo’s most multicultural pockets, and a useful place for food after normal restaurant hours.'],
+            ['Etiquette / sensitivity','Late-night residential streets still require normal quiet. Do not treat local community businesses as a theme-park “ethnic district.”'],
+            ['One memorable detail','One of Tokyo’s charms is that a one-stop train ride can change the city’s cultural texture completely; Okubo is a strong early example.']
+          ]},
+          {group:'Shin-Okubo', tag:'KOREATOWN', rows:[
+            ['Why it matters','Shin-Okubo is the more immediately recognisable “Koreatown” face of the wider Okubo area, with dense Korean food, beauty, music and retail around the station.'],
+            ['A little context','The neighbourhood’s Korean commercial identity expanded strongly from the late 20th century and became especially visible through food, K-pop and beauty culture. Official Tokyo tourism material describes the wider area as Japan’s largest Koreatown while also highlighting its broader multicultural character.'],
+            ['Look for','Korean restaurant queues, cosmetics, supermarkets, music merchandise and crowded pedestrian streets around the station. The visual density differs from nearby residential Kita-Shinjuku.'],
+            ['How to experience it','Use it only if it naturally serves the evening — it’s not a planned sightseeing block, just context around the base and an example of contemporary Tokyo’s cultural diversity.'],
+            ['Etiquette / sensitivity','Busy pavements can become very congested. Queue neatly, keep bags tight and avoid stopping in the middle of pedestrian flow.'],
+            ['One memorable detail','The area is a useful counterpoint to the trip’s later preserved-town imagery: contemporary Japan also absorbs and remixes regional pop culture at high speed.']
+          ]}
+        ]}
     ],
     tomorrow:'No fixed early start tomorrow — the day can begin slowly after the late pickup.',
     tomorrowReady:true
@@ -1203,22 +1283,34 @@
     '</div>';
   }
 
-  /* placeholder body for a Stay's detail sheet -- there's no real accommodation
-     content yet (hotel name/address, area write-up), so this deliberately renders
-     as clearly-marked TBD scaffolding rather than inventing anything. Structured as
-     the same [label,value] row shape aboutItemsHTML() already knows how to render,
-     so swapping in real content later is just filling these two rows in. */
+  /* body for a Stay's detail sheet. All 4 stays now have a real, documented hotel name
+     (see the STAYS comment above for the source) -- content comes from one of two
+     places: Stay 1's area copy is pulled live from Day 1's own `kita-shinjuku` chapter
+     (`areaChapterId`, written before the Stays tab existed, so it's read live rather
+     than duplicated -- if that chapter's copy ever changes, this updates with it
+     automatically); Stays 2-4 have no equivalent in-app chapter to read from (Days 3-10
+     have no real chapter data yet), so their `about` rows live directly on the STAYS
+     entry itself. Either way, only a genuinely undocumented field (currently just
+     Komanoyu's and ARIA Takanawa's exact street addresses -- the source doc never gives
+     one) falls back to an explicit "still to be added" instead of a guess. The old
+     all-placeholder branch only fires now if a stay has no `hotel` at all, which
+     shouldn't happen with the current data but is kept as a safety net rather than
+     assumed impossible. */
   function stayAboutHTML(st){
-    /* Stay 1 has real, already-written content -- Day 1's own `kita-shinjuku` chapter
-       documents Isshuku Noma's neighbourhood (that's where "drop the bags... and notice
-       the neighbourhood" happens). Pulled live from DAY1 rather than duplicated here, so
-       the two can never drift apart -- if that chapter's copy ever changes, this updates
-       with it automatically. */
     var areaCh = st.areaChapterId ? DAY1.chapters.filter(function(c){return c.id===st.areaChapterId;})[0] : null;
-    if(st.hotel && areaCh && areaCh.about){
-      return aboutItemsHTML([
-        ['Hotel', st.hotel + ' — exact address still to be added.']
-      ].concat(areaCh.about), st.id);
+    var areaRows = (areaCh && areaCh.about) ? areaCh.about : (st.about || null);
+    if(st.hotel && areaRows){
+      var hotelValue = st.hotel + (st.address ? ', ' + st.address + '.' : ' — exact address still to be added.');
+      /* The Hotel row is always a plain [label,value] row, but `areaRows` can be either
+         that same flat shape (Stay 1, a single chapter's about) or a list of named
+         groups (Stays 2/3, several named sub-places sharing one sheet). Concatenating
+         the two directly into one aboutItemsHTML() call would corrupt its shape
+         detection -- it only inspects the FIRST entry to decide flat-vs-grouped, so a
+         leading flat Hotel row would make it treat real group objects as flat rows too
+         and break. Rendered separately instead: the Hotel row directly via
+         aboutRowHTML(), then areaRows through its own aboutItemsHTML() call exactly as
+         a chapter's own about panel would. */
+      return aboutRowHTML(['Hotel', hotelValue]) + aboutItemsHTML(areaRows, st.id);
     }
     return aboutItemsHTML([
       ['Hotel', 'Name and address — to be added once booked.'],
@@ -2110,13 +2202,23 @@
 
       /* finishClose() deliberately folds `wrapper` into the deck instead of calling
          render() (see the comment above) -- but render() is also the ONLY place that
-         toggles #refreshBtn's [hidden] state for the current screen, so bypassing it
-         here left the reload button permanently hidden after the very first day-detail
-         visit: openDayFlip's render() call hid it on the way in, and nothing ever un-hid
-         it on the way back out, since this path never runs that logic again. Mirror
-         render()'s own rule directly rather than calling render() itself. */
+         toggles #refreshBtn's/#tabbar's [hidden] state for the current screen, so
+         bypassing it here left the reload button permanently hidden after the very
+         first day-detail visit (round 17's real bug fix): openDayFlip's render() call
+         hid it on the way in, and nothing ever un-hid it on the way back out, since
+         this path never runs that logic again. The round-19 tabbar has the exact same
+         problem and needs the exact same fix -- mirror render()'s own rules directly
+         rather than calling render() itself. */
       var refreshBtn = document.getElementById('refreshBtn');
       if(refreshBtn) refreshBtn.hidden = false; /* state.screen is always 'home' by the time we get here */
+      var tabbarEl = document.getElementById('tabbar');
+      if(tabbarEl){
+        tabbarEl.hidden = false;
+        var tabExploreEl = document.getElementById('tabExplore');
+        var tabStaysEl = document.getElementById('tabStays');
+        if(tabExploreEl) tabExploreEl.classList.add('on');
+        if(tabStaysEl) tabStaysEl.classList.remove('on');
+      }
 
       wire();
     };
