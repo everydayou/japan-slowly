@@ -4,6 +4,13 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 18 — 2026-09-17
+Small, single-ask round: renamed the app a fourth time, from round 17's "japan, slowly…" to plain lowercase **"japan slowly"** — comma and ellipsis both dropped. Same four spots updated together as every prior rename: `<title>`, the `apple-mobile-web-app-title` meta tag, `heroMarkupHTML()`'s wordmark markup (shared by the intro splash and the compact home hero), and `manifest.json`'s `name`/`short_name`. `icon-512.png`'s embedded wordmark artwork, README.md, and the old-name mentions inside code comments were left alone, consistent with every rename before this one. Verified the edited script still parses and `manifest.json` is still valid JSON.
+
+Also discussed but not yet built this round: the user asked whether the still-unconfirmed "Late food" chapter reword (parked since round 16) might belong inside the future "Stays" tab instead of Day 1's chapter list, and separately asked about starting on the Stays tab itself (previously an explicitly-parked idea — see round 16). Neither was implemented yet; both need scoping/content decisions first (see this round's conversation, or ask the user directly next session if this file is being read without that context).
+
+---
+
 ## ROUND 17 — 2026-09-17
 Six asks: a native-feeling drag-to-dismiss on the About-this-place sheet, an iOS-style top bar on that sheet (centered title, X on the left instead of the right), a collapsed/accordion list for chapters whose About panel opens into more than one place, a real bug fix for the reload button disappearing after any day-detail visit, a lowercase app rename to "japan, slowly…", a real bug fix for cropped content at the bottom of the day-detail view on iOS, and swapping the day-detail "← The Reel" back button/label for a floating X close button. This session's git credentials are still not authorized to push to this repo (unchanged from round 10 onward) — everything below is committed locally only; the user pushes from their own machine, or authorizes this session's access, same as every prior round.
 
