@@ -1016,7 +1016,20 @@
     var appHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--app-height')) || window.innerHeight;
     var safeBottom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom')) || 0;
     var pillHeight = tabbar.offsetHeight;
-    var gap = 16; // matches .tabbar's CSS bottom offset (round 23) -- only the anchor point changes here, not the spacing itself; keep these two in sync
+    /* round 24 follow-up: real on-device diagnostic data (the new #debugPanel) showed
+       this JS positioning was correct all along -- the "double the size" gap the user
+       saw in standalone mode was the mandatory ~34px home-indicator safe-area clearance
+       becoming visible once there's no more Safari chrome sitting on top of it (a
+       browser tab reports --safe-bottom:0px, since Safari's own UI already owns that
+       strip; standalone reports the device's real value, e.g. 34px on an iPhone with a
+       home indicator). That 34px can't shrink -- it's Apple's own safe-area contract,
+       not something this app controls -- but the DESIGN gap stacked on top of it can:
+       iOS now uses its own smaller 8px (was 16, matching the shared CSS value) so the
+       pill sits closer to the safe-area boundary instead of floating well above it.
+       Deliberately NOT kept in sync with .tabbar's CSS `bottom` value any more --
+       non-iOS platforms (and iOS's own pre-JS-paint fallback instant) still use the
+       shared 16px via that CSS rule; only this iOS-JS override uses 8px. */
+    var gap = 8;
     tabbar.style.bottom = 'auto';
     tabbar.style.top = Math.round(appHeight - pillHeight - gap - safeBottom) + 'px';
   }
