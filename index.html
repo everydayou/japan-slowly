@@ -1,4 +1,12 @@
-<title>Japan, unscripted</title>
+<meta charset="UTF-8">
+<!-- there was no charset declared anywhere (no meta tag, and GitHub Pages' own
+     Content-Type header is the only other thing that could have supplied one) -- this
+     file already had non-ASCII characters in it (the curly apostrophe in "you've
+     arrived?") before this round, and now has more (the wordmark's "…" ellipsis, this
+     round's app rename), so it shouldn't keep depending on the browser correctly
+     guessing UTF-8 with zero explicit signal. Must be within the document's first
+     1024 bytes to reliably take effect, hence right at the very top. -->
+<title>japan, slowly…</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,7 +35,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Japan, unscripted">
+<meta name="apple-mobile-web-app-title" content="japan, slowly…">
 <meta name="theme-color" content="#fafafa">
 <style>
   /* ============================================================================
@@ -131,6 +139,17 @@
 
   .view{ position:absolute; inset:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; display:flex; flex-direction:column; }
   .view::-webkit-scrollbar{ width:0; }
+  /* the day-detail view's content (chapters, the tomorrow card) had nothing reserving
+     room for the iPhone home-indicator safe area at the very bottom of the scroll range
+     -- .dayhead/.close-fab/.sheet-panel all already account for env(safe-area-inset-*)
+     on their own edges (see their rules), but .view itself never did on its bottom edge,
+     so scrolling all the way down still left the last ~24px of content (.tomorrow's own
+     margin-bottom) sitting right at the safe-area boundary, reading as visibly cropped
+     on a real device (fine in desktop/Playwright, which has no safe-area inset to miss).
+     Scoped to the day screen only -- the home/intro screens' .view never scrolls and
+     .stack-wrap's own bottom spacing is a separate, already-tuned value (round 8's
+     shadow-bleed margin) that this shouldn't also stack with. */
+  .view.view-day{ padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 24px); }
 
   /* ---- grain overlay ---- */
   .grain{ position:absolute; inset:0; pointer-events:none; opacity:var(--grain-opacity); mix-blend-mode:overlay; background-repeat:repeat; }
@@ -294,19 +313,45 @@
 
   /* ---- day detail ---- */
   .dayhead{
-    display:flex; align-items:center; justify-content:space-between;
-    /* same env(safe-area-inset-top) treatment the home hero already got -- without it
-       this row (and the only way back to the home reel, the back button) sat directly
-       under the iPhone status bar/clock, sometimes unreachable under it entirely. */
+    display:flex; align-items:center; justify-content:flex-end;
+    /* was space-between (back button on the left, reset on the right) -- the back
+       button is gone now (see .close-fab below), so this row only ever holds the
+       optional day-2 reset button and just needs to keep it pinned to the right.
+       Still kept as a real row (not dropped from days without a reset button) purely
+       for its own env(safe-area-inset-top) padding, which is what actually clears the
+       iPhone status bar/clock for the title/teaser text that follows it. */
     padding:calc(env(safe-area-inset-top, 0px) + 16px) 24px 8px;
     gap:8px; position:relative; z-index:5;
   }
-  .backbtn{
-    display:flex; align-items:center; gap:6px;
-    background:none; border:0; color:var(--ink-soft); font:inherit; cursor:pointer;
-    font-size:14px; padding:6px 4px;
+  /* ---- floating close button (day-detail screen) ----
+     Replaces the old inline "< The Reel" back button/label. That button scrolled away
+     with the rest of .dayhead's content, so it wasn't reachable once you'd scrolled
+     down a chapter list. This is `position:fixed` (not part of the scrolling .view
+     content's normal flow) so it always stays put in the top-left corner, the same
+     way .refresh-fab already does in the top-right on the home/intro screens -- same
+     size/shape/shadow recipe, mirrored to the opposite corner, an X instead of a
+     refresh glyph. Rendered as part of the day-detail screen's own HTML (not a
+     persistent sibling of #screen like .refresh-fab) since it only ever needs to
+     exist while state.screen==='day' -- render() naturally removes it on any other
+     screen, no manual [hidden] toggling required. */
+  .close-fab{
+    position:fixed;
+    top:calc(env(safe-area-inset-top,0px) + 14px);
+    left:14px;
+    z-index:50;
+    width:34px; height:34px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--bg-elevated);
+    color:var(--ink-soft);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 10px rgba(0,0,0,.14);
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .15s ease;
   }
-  .backbtn svg{ width:13px; height:13px; }
+  .close-fab:active{ transform:scale(.9); }
+  .close-fab svg{ width:14px; height:14px; }
   .resetbtn{
     background:none; border:1px solid var(--line); color:var(--ink-faint);
     font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:12px; letter-spacing:.05em;
@@ -484,26 +529,63 @@
     padding-bottom:env(safe-area-inset-bottom, 0px);
   }
   .sheet-panel.open{ transform:translateY(0); }
-  .sheet-handle{ width:36px; height:4px; border-radius:2px; background:var(--line); margin:10px auto 0; flex:none; }
-  .sheet-header{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 24px 0; flex:none; }
-  .sheet-title{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:16px; font-weight:500; }
-  .sheet-close{ background:none; border:0; color:var(--ink-faint); padding:6px; margin:-6px; cursor:pointer; display:flex; }
-  .sheet-close:hover{ color:var(--ink-soft); }
+  /* dragging (see wireSheetDrag()) sets transform/transition inline directly on this
+     element while a gesture is active/settling, always out-ranking the class rules
+     above -- same "inline beats class" fact the round-4/7 animation bug was about,
+     used deliberately here instead of fought. */
+  .sheet-handle{
+    width:36px; height:4px; border-radius:2px; background:var(--line); margin:10px auto 0; flex:none;
+    touch-action:none; /* this row's only job is the drag-to-dismiss gesture, never scrolling */
+  }
+  /* iOS-modal-style header: a fixed-width close button on the left, the title truly
+     centered (not just flex-centered around whatever the close button's own width
+     happens to be) via a 3-column grid whose outer tracks are both pinned to the
+     close button's own footprint (32px) -- so the title's center lines up with the
+     panel's center regardless of title length, matching the platform convention this
+     was asked to feel like. touch-action:none for the same reason as .sheet-handle:
+     this row doesn't scroll, it only starts a drag. */
+  .sheet-header{ display:grid; grid-template-columns:32px 1fr 32px; align-items:center; gap:8px; padding:10px 16px 0; flex:none; touch-action:none; }
+  .sheet-title{ grid-column:2; text-align:center; font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:16px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .sheet-close{
+    grid-column:1; width:32px; height:32px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--frame); border:0; color:var(--ink-soft); cursor:pointer;
+  }
+  .sheet-close:hover{ color:var(--ink); }
   .sheet-body{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; display:flex; flex-direction:column; gap:10px; padding:14px 24px 24px; }
   .about-item .k{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:12px; letter-spacing:.07em; color:var(--reveal); text-transform:uppercase; }
   .about-item .v{ font-size:16px; color:var(--ink-soft); line-height:1.45; margin-top:2px; }
   /* grouped About panels (content-upgrade round) -- a chapter's `about` can now be either
      the original flat [label,value] row list (rendered exactly as before), or a list of
      named sub-places (Shibuya's About panel opening into "Shibuya Crossing", "Hachiko",
-     etc). Each group after the first gets a top border + extra margin to read as a
-     visually separate section within the same scrollable sheet; the group's own items
-     reuse .about-item/.k/.v unchanged, so this is purely a wrapping/heading addition. */
+     etc). A chapter with exactly ONE group (e.g. nightlife/MITSUKI) renders it plain and
+     always-expanded, same as before -- the collapse UI below only kicks in once there's
+     actually more than one place to choose between. */
   .about-group + .about-group{ margin-top:10px; padding-top:18px; border-top:1px solid var(--line); }
   .about-group-head{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:2px; }
   .about-group-title{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:16px; color:var(--ink); }
   .about-group-tag{ flex:none; font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:11px; letter-spacing:.05em; color:var(--ink-faint); text-transform:uppercase; }
   .about-group-rows{ display:flex; flex-direction:column; gap:10px; margin-top:8px; }
-  @media (prefers-reduced-motion: reduce){ .sheet-backdrop, .sheet-panel{ transition:none; } }
+  /* ---- collapsible variant: more than one place in this chapter's About panel ----
+     Rendered as a flat list of tappable rows (not the plain-group layout above), each
+     starting collapsed; opening one closes whichever other row was open (see the
+     data-group-toggle handler in wireCommon()). Reuses .about-group-rows/.about-item
+     unchanged for the revealed content -- only the row chrome and the collapse
+     mechanics are new. */
+  .about-group.collapsible{ border-top:1px solid var(--line); margin-top:0; padding-top:0; }
+  .about-group.collapsible:first-child{ border-top:0; }
+  .about-group-toggle{
+    display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%;
+    background:none; border:0; padding:12px 0; margin:0; font:inherit; text-align:left; cursor:pointer; color:inherit;
+  }
+  .about-group-toggle .about-group-title{ font-weight:500; }
+  .about-group-headright{ display:flex; align-items:center; gap:8px; flex:none; }
+  .about-group-caret{ display:flex; color:var(--ink-faint); transition:transform .2s ease; }
+  .about-group-caret svg{ width:10px; height:10px; }
+  .about-group.collapsible.open .about-group-caret{ transform:rotate(90deg); }
+  .about-group-collapse{ max-height:0; overflow:hidden; transition:max-height .3s cubic-bezier(.22,1,.36,1); }
+  .about-group-collapse .about-group-rows{ padding-bottom:14px; }
+  @media (prefers-reduced-motion: reduce){ .sheet-backdrop, .sheet-panel, .about-group-collapse, .about-group-caret{ transition:none; } }
 
   @keyframes sweep{
     0%{ transform:translateX(-100%); }
@@ -868,7 +950,9 @@
   }
   var chevronDown = '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>';
   var chevronRight = '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M9 6l6 6-6 6"/></svg>';
-  var backArrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 5l-7 7 7 7"/></svg>';
+  /* backArrow (the old "< The Reel" back-button glyph) removed -- the day-detail
+     screen now uses a floating .close-fab (X, see its CSS/markup) instead, wired to
+     the same data-back handler in wireCommon(). */
   var chevronRightNav = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5l7 7-7 7"/></svg>';
   var closeIcon = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
@@ -916,16 +1000,39 @@
      chapters whose About panel opens into several sub-places -- detected by checking
      whether the first entry itself looks like a [label,value] row (a 2-element array)
      versus a group object. Mixing the two shapes within one chapter's `about` is not
-     supported; pick one per chapter. */
-  function aboutItemsHTML(rows){
+     supported; pick one per chapter.
+
+     A single group (e.g. nightlife's MITSUKI-only panel) still renders plain and
+     always-expanded -- there's nothing to choose between. More than one group renders
+     as a collapsed, tappable list instead (see wireCommon()'s data-group-toggle
+     handler for the "only one open at a time" + scroll-into-view behavior); each row
+     needs a stable id to toggle by, built from the chapter id + its index in the list
+     so it's unique within the sheet without needing the place name to be unique. */
+  function aboutItemsHTML(rows, chId){
     if(!rows || !rows.length) return '';
     var isGrouped = !Array.isArray(rows[0]);
     if(!isGrouped) return rows.map(aboutRowHTML).join('');
-    return rows.map(function(g){
+    if(rows.length===1){
+      var g0 = rows[0];
       return '<div class="about-group">' +
-        '<div class="about-group-head"><div class="about-group-title">'+g.group+'</div>' +
-          (g.tag ? '<div class="about-group-tag">'+g.tag+'</div>' : '') + '</div>' +
-        '<div class="about-group-rows">' + g.rows.map(aboutRowHTML).join('') + '</div>' +
+        '<div class="about-group-head"><div class="about-group-title">'+g0.group+'</div>' +
+          (g0.tag ? '<div class="about-group-tag">'+g0.tag+'</div>' : '') + '</div>' +
+        '<div class="about-group-rows">' + g0.rows.map(aboutRowHTML).join('') + '</div>' +
+      '</div>';
+    }
+    return rows.map(function(g, idx){
+      var gid = chId+'::'+idx;
+      return '<div class="about-group collapsible" data-group-id="'+gid+'">' +
+        '<button class="about-group-toggle" data-group-toggle="'+gid+'" aria-expanded="false">' +
+          '<div class="about-group-title">'+g.group+'</div>' +
+          '<div class="about-group-headright">' +
+            (g.tag ? '<div class="about-group-tag">'+g.tag+'</div>' : '') +
+            '<div class="about-group-caret">'+chevronRight+'</div>' +
+          '</div>' +
+        '</button>' +
+        '<div class="about-group-collapse">' +
+          '<div class="about-group-rows">' + g.rows.map(aboutRowHTML).join('') + '</div>' +
+        '</div>' +
       '</div>';
     }).join('');
   }
@@ -952,9 +1059,13 @@
     '<div class="sheet-backdrop" data-sheet-close></div>' +
     '<div class="sheet-panel" role="dialog" aria-modal="true" aria-label="'+ch.name+'">' +
       '<div class="sheet-handle"></div>' +
-      '<div class="sheet-header"><div class="sheet-title">'+ch.name+'</div>' +
-        '<button class="sheet-close" data-sheet-close aria-label="Close">'+closeIcon+'</button></div>' +
-      '<div class="sheet-body">' + aboutItemsHTML(ch.about) + '</div>' +
+      /* iOS-style bar: close (X) on the left, title centered -- see .sheet-header's
+         3-column grid for how the centering actually works regardless of title length. */
+      '<div class="sheet-header">' +
+        '<button class="sheet-close" data-sheet-close aria-label="Close">'+closeIcon+'</button>' +
+        '<div class="sheet-title">'+ch.name+'</div>' +
+      '</div>' +
+      '<div class="sheet-body">' + aboutItemsHTML(ch.about, ch.id) + '</div>' +
     '</div>';
   }
 
@@ -992,6 +1103,132 @@
         render();
       }
     });
+  }
+
+  /* ---------- drag-to-dismiss on the About sheet ----------
+     Lets the sheet be pulled down and let go, like a native iOS/Android sheet, instead
+     of only closing via the X button or a backdrop tap. Wired fresh after every render
+     that mounts the sheet (see render()'s call site), same as openSheetTransition().
+
+     Drag can start from the handle or header (always -- neither one scrolls), or from
+     the body's own content, but ONLY when the body is already scrolled to its very top
+     -- otherwise a downward drag starting mid-scroll would fight normal scrolling back
+     up to the top instead of ever reaching the sheet itself, which doesn't feel native.
+     `pending` below defers that decision until the first real pointermove, since at
+     pointerdown time knowing the body is scrolled to 0 doesn't yet tell us which way
+     the user is about to drag.
+
+     While a drag is live, both the panel's transform and the backdrop's background are
+     driven directly (transition set to 'none' so they track the finger 1:1, exactly the
+     technique wireHome()'s card drag already uses) -- on release, transition is handed
+     back so the snap-back or the dismiss slide-out both animate, and once that finishes
+     every inline override this function set is cleared back to '', letting the normal
+     .open/.sheet-panel class rules fully govern the sheet again (the same "clean up
+     after yourself" rule the round-4/7 transition:none regression exists to warn about
+     applies here just as much). */
+  function wireSheetDrag(){
+    var panel = document.querySelector('.sheet-panel');
+    var backdrop = document.querySelector('.sheet-backdrop');
+    if(!panel || !backdrop) return;
+    var body = panel.querySelector('.sheet-body');
+    var dragEls = [panel.querySelector('.sheet-handle'), panel.querySelector('.sheet-header'), body];
+
+    var drag = null; /* {startY, lastY, lastT, vy, dy, fromBody, pending, committed} while active */
+
+    function panelHeight(){ return panel.getBoundingClientRect().height || 1; }
+
+    function settle(toOpen){
+      panel.style.transition = 'transform .32s cubic-bezier(.22,1,.36,1)';
+      backdrop.style.transition = 'background .28s ease';
+      var onEnd = function(ev){
+        if(ev.target!==panel || ev.propertyName!=='transform') return;
+        panel.removeEventListener('transitionend', onEnd);
+        if(!toOpen){
+          state.sheetAbout = null;
+          render();
+        } else {
+          /* snapped back to open -- clear every inline override so the .open class
+             rules take over again cleanly, same as before the drag ever started. */
+          panel.style.transition = ''; panel.style.transform = '';
+          backdrop.style.transition = ''; backdrop.style.background = '';
+        }
+      };
+      panel.addEventListener('transitionend', onEnd);
+      requestAnimationFrame(function(){
+        panel.style.transform = toOpen ? 'translateY(0)' : 'translateY(100%)';
+        backdrop.style.background = toOpen ? 'rgba(0,0,0,.44)' : 'rgba(0,0,0,0)';
+      });
+    }
+
+    function onDown(e){
+      if(e.button!==undefined && e.button!==0) return;
+      var fromBody = (e.currentTarget===body);
+      drag = {
+        startY:e.clientY, lastY:e.clientY, lastT:performance.now(), vy:0, dy:0,
+        fromBody:fromBody, pending:fromBody, active:!fromBody, pointerId:e.pointerId, el:e.currentTarget
+      };
+      if(!fromBody){
+        panel.style.transition = 'none';
+        backdrop.style.transition = 'none';
+        /* captured immediately (unlike the body case below, which only captures once a
+           downward drag is confirmed) -- the handle/header never has competing native
+           scroll behavior to preserve, so there's no reason to wait. Without this, a
+           fast drag that carries the pointer outside the shrinking panel's hit area
+           would silently stop delivering pointermove here. */
+        try{ e.currentTarget.setPointerCapture(e.pointerId); }catch(err){}
+      }
+    }
+    function beginBodyDrag(){
+      if(body.scrollTop>0){ drag = null; return false; }
+      drag.pending = false; drag.active = true;
+      panel.style.transition = 'none';
+      backdrop.style.transition = 'none';
+      try{ drag.el.setPointerCapture(drag.pointerId); }catch(err){}
+      return true;
+    }
+    function onMove(e){
+      if(!drag || drag.pointerId!==e.pointerId) return;
+      var rawDy = e.clientY - drag.startY;
+      if(drag.pending){
+        if(rawDy <= 0) return; /* only a downward pull from the top of the body starts this */
+        if(!beginBodyDrag()) return;
+      }
+      if(!drag.active) return;
+      if(e.cancelable) e.preventDefault();
+      var dy = rawDy < 0 ? rawDy/4 : rawDy; /* slight resistance if it overshoots upward past open */
+      var now = performance.now();
+      var dt = now - drag.lastT;
+      if(dt>0) drag.vy = (e.clientY - drag.lastY)/dt;
+      drag.lastY = e.clientY; drag.lastT = now;
+      drag.dy = dy;
+      var clamped = Math.max(0, dy);
+      panel.style.transform = 'translateY('+clamped+'px)';
+      var progress = Math.min(1, clamped / panelHeight());
+      backdrop.style.background = 'rgba(0,0,0,'+(0.44*(1-progress)).toFixed(3)+')';
+    }
+    function onUp(e){
+      if(!drag || drag.pointerId!==e.pointerId) return;
+      var wasActive = drag.active;
+      var dy = Math.max(0, drag.dy);
+      var vy = drag.vy;
+      drag = null;
+      if(!wasActive) return; /* never left "pending" -- e.g. a tap, or an upward scroll gesture */
+      var commit = dy > panelHeight()*0.28 || vy > 0.6;
+      settle(!commit);
+    }
+
+    dragEls.forEach(function(el){
+      if(!el) return;
+      el.addEventListener('pointerdown', onDown);
+    });
+    /* move/up listen on the panel itself (not each drag-source element) since
+       setPointerCapture during a body-drag targets the body element, but a
+       handle/header drag never captures -- listening on the panel covers both, and a
+       plain pointermove/pointerup on document would also work but this keeps it
+       scoped to the sheet's own DOM. */
+    panel.addEventListener('pointermove', onMove);
+    panel.addEventListener('pointerup', onUp);
+    panel.addEventListener('pointercancel', onUp);
   }
 
   function confirmRow(id){
@@ -1035,9 +1272,9 @@
   function dayDetailScreen(day, dayData, dayKey){
     var isJournal = day.status==='journal';
 
-    var html = '<div class="dayhead">' +
-      '<button class="backbtn" data-back>'+backArrow+' The Reel</button>' +
-      (dayKey==='day2' ? '<button class="resetbtn" data-reset>Reset demo</button>' : '<span></span>') +
+    var html = '<button class="close-fab" data-back aria-label="Close">'+closeIcon+'</button>';
+    html += '<div class="dayhead">' +
+      (dayKey==='day2' ? '<button class="resetbtn" data-reset>Reset demo</button>' : '') +
       '</div>';
 
     var dayLocked = day.status==='locked';
@@ -1101,7 +1338,7 @@
      classes (.mark/.wordmark/.range) in both, sized differently via the .intro-hero
      modifier class, so goHome()/goIntro() can morph between them (see markMorph()). */
   function heroMarkupHTML(){
-    return '<div class="mark"><img class="mark-light" src="'+MARK_LIGHT+'" alt="Japan, unscripted" width="56" height="56"><img class="mark-dark" src="'+MARK_DARK+'" alt="Japan, unscripted" width="56" height="56"></div><div class="wordmark">Japan, unscripted</div><div class="range mono">25 SEP &ndash; 4 OCT 2026</div>';
+    return '<div class="mark"><img class="mark-light" src="'+MARK_LIGHT+'" alt="japan, slowly…" width="56" height="56"><img class="mark-dark" src="'+MARK_DARK+'" alt="japan, slowly…" width="56" height="56"></div><div class="wordmark">japan, slowly&hellip;</div><div class="range mono">25 SEP &ndash; 4 OCT 2026</div>';
   }
 
   /* the big centered splash shown on first load (round 9) -- see goHome()/goIntro() for
@@ -1298,7 +1535,7 @@
     var prevView = el.querySelector('.view');
     var keepScroll = (prevView && prevView.dataset.screenKey === screenKey) ? prevView.scrollTop : null;
 
-    var html = '<div class="view" data-screen-key="'+screenKey+'">';
+    var html = '<div class="view'+(state.screen==='day' ? ' view-day' : '')+'" data-screen-key="'+screenKey+'">';
     if(state.screen==='intro'){
       html += introScreen();
     } else if(state.screen==='home'){
@@ -1319,7 +1556,7 @@
       var newView = el.querySelector('.view');
       if(newView) newView.scrollTop = keepScroll;
     }
-    if(state.sheetAbout){ openSheetTransition(); }
+    if(state.sheetAbout){ openSheetTransition(); wireSheetDrag(); }
     /* show the reload button on the intro screen and the home reel, but not on a
        day-detail screen -- that screen already has its own top-right control
        (Reset demo) in that same corner, and this button is fixed-position so it
@@ -1621,6 +1858,16 @@
       bgEl.style.pointerEvents = '';
       bgEl.style.zIndex = '';
 
+      /* finishClose() deliberately folds `wrapper` into the deck instead of calling
+         render() (see the comment above) -- but render() is also the ONLY place that
+         toggles #refreshBtn's [hidden] state for the current screen, so bypassing it
+         here left the reload button permanently hidden after the very first day-detail
+         visit: openDayFlip's render() call hid it on the way in, and nothing ever un-hid
+         it on the way back out, since this path never runs that logic again. Mirror
+         render()'s own rule directly rather than calling render() itself. */
+      var refreshBtn = document.getElementById('refreshBtn');
+      if(refreshBtn) refreshBtn.hidden = false; /* state.screen is always 'home' by the time we get here */
+
       wire();
     };
   }
@@ -1650,6 +1897,54 @@
     });
     root.querySelectorAll('[data-sheet-close]').forEach(function(b){
       b.addEventListener('click', function(){ closeSheet(); });
+    });
+    /* a chapter's About sheet with more than one place (see aboutItemsHTML()) renders
+       them as a collapsed list -- tapping one expands it and collapses whichever other
+       one was open, one at a time. Toggled by directly mutating the existing DOM nodes
+       (classList + measured max-height), the same technique the weather-cell accordion
+       above already uses, rather than going through state+render() -- that keeps the
+       CSS transition intact (a full render() would swap in a fresh, already-in-its-
+       final-state node with nothing to visibly animate from) and means this needs no
+       app-state field of its own; the open/closed state simply lives in the DOM for as
+       long as the sheet itself does, and a fresh sheet always starts fully collapsed
+       (see aboutItemsHTML()) since render() rebuilds the sheet's nodes from scratch. */
+    root.querySelectorAll('[data-group-toggle]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var item = btn.closest('.about-group.collapsible');
+        var collapse = item && item.querySelector('.about-group-collapse');
+        var sheetBody = item && item.closest('.sheet-body');
+        if(!item || !collapse || !sheetBody) return;
+        var opening = !item.classList.contains('open');
+
+        sheetBody.querySelectorAll('.about-group.collapsible.open').forEach(function(other){
+          if(other===item) return;
+          other.classList.remove('open');
+          var otherBtn = other.querySelector('[data-group-toggle]');
+          if(otherBtn) otherBtn.setAttribute('aria-expanded','false');
+          var otherCollapse = other.querySelector('.about-group-collapse');
+          if(otherCollapse) otherCollapse.style.maxHeight = '0px';
+        });
+
+        item.classList.toggle('open', opening);
+        btn.setAttribute('aria-expanded', String(opening));
+        collapse.style.maxHeight = opening ? (collapse.scrollHeight+'px') : '0px';
+
+        if(opening){
+          /* scroll so the newly opened row's own header (the start of its now-visible
+             content) is visible within the sheet's scroll box -- item's own position
+             doesn't shift as its content grows below it, so this can be computed right
+             away rather than waiting for the expand transition to finish. Measured via
+             getBoundingClientRect (not offsetTop) so it's correct regardless of which
+             element ends up being the nearest positioned ancestor. */
+          var doScroll = function(){
+            var sbRect = sheetBody.getBoundingClientRect();
+            var itemRect = item.getBoundingClientRect();
+            var target = sheetBody.scrollTop + (itemRect.top - sbRect.top) - 8;
+            sheetBody.scrollTo({ top:Math.max(0,target), behavior: reduceMotion ? 'auto' : 'smooth' });
+          };
+          if(reduceMotion) doScroll(); else requestAnimationFrame(doScroll);
+        }
+      });
     });
     var wc = root.querySelector('[data-weather]');
     if(wc) wc.addEventListener('click', function(){ wc.classList.toggle('open'); });
