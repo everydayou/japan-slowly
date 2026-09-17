@@ -365,16 +365,16 @@
        Still kept as a real row (not dropped from days without a reset button) purely
        for its own env(safe-area-inset-top) padding, which is what actually clears the
        iPhone status bar/clock for the title/teaser text that follows it. */
-    padding:calc(env(safe-area-inset-top, 0px) + 16px) 24px 8px;
-    /* min-height added -- on a day/stay with no reset button, this row had no content
-       at all, so its total height (just its own padding) fell short of clearing the
-       fixed .close-fab sitting on top of it (top:safe+14, 34px tall, so its bottom
-       edge sits at safe+48). The title text that follows (.backhero-text) started
-       right after this row and ended up sliding underneath the X -- most visible on
-       the Stays detail view's "DAYS 1–3" line, but the same gap existed on any day
-       with no reset button too. 34px (the close button's own diameter) is enough to
-       push the following content safely below it with a small margin to spare. */
-    min-height:34px;
+    padding:calc(env(safe-area-inset-top, 0px) + 16px) 24px 12px;
+    /* round 27: was min-height:34px (the close button's own diameter, padding-bottom
+       8px) -- still read as too tight/overlapping on a real device (the button's own
+       box-shadow bleeds a few px past its 34px box, and safe-area-inset-top can round
+       differently than in a simulator), on both the day-detail and Stays-detail
+       screens. Bumped to a clearer 44px min-height plus 12px bottom padding, pushing
+       the title text (.backhero-text) further below the fixed .close-fab (top:safe+14,
+       34px tall, bottom edge at safe+48) with real margin to spare rather than a
+       precise but fragile 10px gap. */
+    min-height:44px;
     gap:8px; position:relative; z-index:5;
   }
   /* ---- floating close button (day-detail screen) ----
@@ -477,7 +477,7 @@
      the same .about-item/.about-group rows the bottom-sheet About panel already used
      for stay content (stayAboutHTML()), just laid out as plain flowing page content
      instead of inside a scrollable sheet-body. */
-  .stay-detail-body{ margin:28px 24px 8px; display:flex; flex-direction:column; gap:10px; }
+  .stay-detail-body{ margin:28px 24px 8px; display:flex; flex-direction:column; gap:18px; }
   .chapters{ margin:40px 24px 8px; display:flex; flex-direction:column; }
   .chapters-label{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:12px; letter-spacing:.1em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:10px; }
   .chaprow{ display:flex; align-items:stretch; margin-bottom:16px; }
@@ -639,7 +639,11 @@
     background:var(--frame); border:0; color:var(--ink-soft); cursor:pointer;
   }
   .sheet-close:hover{ color:var(--ink); }
-  .sheet-body{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; display:flex; flex-direction:column; gap:10px; padding:14px 24px 24px; }
+  /* round 27: gap was 10px -- user asked for more breathing room between each
+     "Why it matters" / "A little context" / "Look for" ... section in this list.
+     Bumped by 8px across the board (here, .about-group-rows and .stay-detail-body
+     below, which are the three places this same row list can appear). */
+  .sheet-body{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; display:flex; flex-direction:column; gap:18px; padding:14px 24px 24px; }
   .about-item .k{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:12px; letter-spacing:.07em; color:var(--reveal); text-transform:uppercase; }
   .about-item .v{ font-size:16px; color:var(--ink-soft); line-height:1.45; margin-top:2px; }
   /* grouped About panels (content-upgrade round) -- a chapter's `about` can now be either
@@ -652,7 +656,7 @@
   .about-group-head{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:2px; }
   .about-group-title{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:16px; color:var(--ink); }
   .about-group-tag{ flex:none; font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:11px; letter-spacing:.05em; color:var(--ink-faint); text-transform:uppercase; }
-  .about-group-rows{ display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+  .about-group-rows{ display:flex; flex-direction:column; gap:18px; margin-top:8px; }
   /* ---- collapsible variant: more than one place in this chapter's About panel ----
      Rendered as a flat list of tappable rows (not the plain-group layout above), each
      starting collapsed; opening one closes whichever other row was open (see the
