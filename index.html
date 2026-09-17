@@ -60,6 +60,10 @@
     --grain-opacity:.05;
     --stage-a:#ffffff;
     --stage-b:#f3f3f3;
+    /* exposes env(safe-area-inset-bottom) as a plain custom property so JS can read its
+       resolved px value via getComputedStyle -- env() itself isn't otherwise queryable
+       from script. Used by positionTabbarForIOS() below (round 22). */
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark){
@@ -825,9 +829,6 @@
     document.documentElement.style.setProperty('--app-height', h + 'px');
   }
   setAppHeight();
-  window.addEventListener('resize', setAppHeight);
-  window.addEventListener('orientationchange', setAppHeight);
-  if(window.visualViewport) window.visualViewport.addEventListener('resize', setAppHeight);
 
   /* ---------- home-deck bottom clearance above #tabbar (round 21) ----------
      The user asked for the home screen's card deck to resize with the screen and leave
@@ -855,8 +856,69 @@
       document.documentElement.style.removeProperty('--stack-clearance'); // falls back to the CSS default (48px)
     }
   }
-  window.addEventListener('resize', updateStackClearance);
-  window.addEventListener('orientationchange', updateStackClearance);
+
+  /* ---------- iOS-only: reposition #tabbar off native fixed/bottom anchoring (round 22) ----------
+     Rounds 20-21 tried three different ways of getting .screen's own HEIGHT right
+     (100dvh, a JS --app-height from innerHeight, then from visualViewport.height) --
+     none of them moved #tabbar even slightly, because #tabbar was never wrong for that
+     reason. It's `position:fixed; bottom:calc(env(safe-area-inset-bottom,0px)+18px)`,
+     which the browser resolves against its OWN idea of "the viewport" independently of
+     whatever .screen's CSS height happens to be -- and on iOS Safari specifically, a
+     `position:fixed` element's containing block has a long-documented history of being
+     anchored to the LARGE/layout viewport rather than the actual visual one when the
+     browser's chrome is in floating/overlay mode (the same underlying "which viewport"
+     confusion as the dvh bug, just hitting fixed-position offsets instead of a height
+     unit -- a completely separate CSS mechanism, which is exactly why fixing .screen's
+     height never touched this). The user confirmed on a real device that the pill was
+     still sitting noticeably above the true bottom edge after round 21's fix, with the
+     same-sized dead strip still visible beneath it.
+     Rather than guess at a fourth CSS-only viewport unit, this reasons from the one
+     measurement already proven (structurally, in this environment) to track the real
+     visible height: `--app-height` (round 20-21). #tabbar is repositioned via an
+     explicit `top` (in px, computed from --app-height), replacing its native `bottom`
+     anchor entirely -- `top` on a position:fixed element is just as reliably relative to
+     the fixed-positioning containing block's origin as `bottom` is to its far edge, so
+     if that same containing-block confusion affects `top` identically, this doesn't fix
+     anything; if (as with most reports of this class of bug) it's specifically bottom-
+     edge anchoring that misbehaves, computing the same pixel position from the top
+     instead sidesteps it.
+     iOS-only, per the user's explicit ask -- Android/desktop Chrome already look
+     correct, so this shouldn't touch their behavior at all (isIOS also matches iPadOS
+     13+, which reports its platform as "MacIntel" but exposes touch points, unlike a
+     real Mac). Recalculates on the same render()/resize/orientationchange cadence as
+     setAppHeight()/updateStackClearance() -- always run AFTER setAppHeight() (needs a
+     current --app-height) and BEFORE updateStackClearance() (which measures #tabbar's
+     resulting live position, so it needs to already be in its final place). */
+  var isIOS = /iP(hone|od|ad)/.test(navigator.platform) ||
+    (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); // iPadOS 13+ reports as a Mac but has touch points; a real Mac doesn't
+  function positionTabbarForIOS(){
+    if(!isIOS) return;
+    var tabbar = document.getElementById('tabbar');
+    if(!tabbar || tabbar.hidden) return;
+    var appHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--app-height')) || window.innerHeight;
+    var safeBottom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom')) || 0;
+    var pillHeight = tabbar.offsetHeight;
+    var gap = 18; // matches the original CSS bottom offset's own gap -- only the anchor point changes here, not the spacing itself
+    tabbar.style.bottom = 'auto';
+    tabbar.style.top = Math.round(appHeight - pillHeight - gap - safeBottom) + 'px';
+  }
+
+  /* ---------- single consolidated viewport-change handler ----------
+     setAppHeight() / positionTabbarForIOS() / updateStackClearance() each build on the
+     one before it (a current --app-height, then #tabbar's real resulting position, then
+     a clearance measured from that) -- three separate resize/orientationchange listeners
+     registered independently would run in registration order, which is fragile (adding
+     or reordering one of the three functions above could silently break the chain).
+     Calling all three from one handler, in this fixed order, every time, removes that
+     footgun entirely. */
+  function onViewportChange(){
+    setAppHeight();
+    positionTabbarForIOS();
+    updateStackClearance();
+  }
+  window.addEventListener('resize', onViewportChange);
+  window.addEventListener('orientationchange', onViewportChange);
+  if(window.visualViewport) window.visualViewport.addEventListener('resize', onViewportChange);
 
   /* ---------- noise texture ---------- */
   function noiseDataURL(size){
@@ -2064,6 +2126,7 @@
       if(tabExplore) tabExplore.classList.toggle('on', state.screen==='home');
       if(tabStays) tabStays.classList.toggle('on', state.screen==='stays');
     }
+    positionTabbarForIOS(); // must run before updateStackClearance() -- see onViewportChange()'s comment
     updateStackClearance();
     saveProgress();
   }
@@ -2379,9 +2442,11 @@
       }
       /* same bypass-of-render() reasoning as the refreshBtn/tabbar fix directly above --
          render() is also the only place that normally calls saveProgress()/
-         updateStackClearance(), so this path (closing a day back to home) needs its own
-         explicit calls or a reload right after closing a day would silently resume with
-         stale screen/openDay progress and an un-recalculated card clearance. */
+         positionTabbarForIOS()/updateStackClearance(), so this path (closing a day back
+         to home) needs its own explicit calls or a reload right after closing a day
+         would silently resume with stale screen/openDay progress and an un-recalculated
+         tabbar position/card clearance. */
+      positionTabbarForIOS(); // must run before updateStackClearance() -- see onViewportChange()'s comment
       updateStackClearance();
       saveProgress();
 
