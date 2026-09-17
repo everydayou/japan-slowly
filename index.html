@@ -762,16 +762,22 @@
      on a device (both a Safari tab and standalone), the 16px design gap on top of
      standalone's mandatory 34px safe-area read as noticeably more floaty than the
      Safari-tab pill sitting close under its own chrome -- the user asked for the pill
-     to just sit down at the bottom, not hover. Reduced to 6px, every platform (not an
-     iOS-only override this time -- the whole point of this round was to stop needing
-     one). The mandatory safe-area clearance itself (34px standalone / 0px in a
-     Safari tab, Apple's own contract) still applies on top of this and can't shrink
-     further; this 6px is the only part that's this app's own call. */
+     to just sit down at the bottom, not hover. Tried 6px first; still read as not low
+     enough on a real device. This is now the actual floor: `env(safe-area-inset-bottom)`
+     with zero added margin of this app's own -- the pill sits directly flush against
+     the mandatory safe-area boundary (34px on standalone, since that's Apple's own
+     home-indicator gesture-zone contract and can't shrink; 0px in a Safari tab, where
+     Safari's own chrome already owns that strip). There's no lower this can go without
+     the pill starting to sit inside the actual system gesture zone, which isn't a
+     tuning choice, it's Apple's own reserved area -- if this still doesn't look flush
+     enough on a device, that's no longer a "reduce the gap further" problem, it's a
+     "something else is adding space" problem, worth another #debugPanel check rather
+     than another px decrement. */
   .tabbar{
     position:absolute;
     pointer-events:auto;
     left:50%;
-    bottom:calc(env(safe-area-inset-bottom, 0px) + 6px);
+    bottom:env(safe-area-inset-bottom, 0px);
     transform:translateX(-50%);
     z-index:50;
     display:flex; align-items:center; gap:2px;
