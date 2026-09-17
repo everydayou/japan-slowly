@@ -891,19 +891,15 @@
     border:0; padding:0; text-align:left; cursor:pointer;
     -webkit-tap-highlight-color:transparent;
     box-shadow:0 10px 22px -14px rgba(0,0,0,.35);
-    /* round 24: perspective + the .opening/.flipped rules below let this card use the
-       exact same box-morph-and-3D-flip open animation as the day deck's .stack-card --
-       see openStayFlip()/closeStayFlip(), which are directly modeled on
-       openDayFlip()/closeDayFlip(). transition here (not just on .opening) covers the
-       plain hover/settle case; .opening overrides it with the box-morph's own timing
-       exactly like .stack-card.opening does. */
+    /* round 26: simplified from a 3D flip to a plain box expand/collapse -- see
+       openStayFlip()/closeStayFlip(). .opening's transition covers the box-morph
+       (top/left/width/height/border-radius); the plain `transition` here just
+       covers the resting hover/settle box-shadow case. */
     transition:box-shadow .3s ease;
-    perspective:1600px;
   }
   .stay-card:active{ transform:scale(.98); }
   .stay-card.locked{ cursor:default; }
   .stay-card.opening{ transition:top .52s cubic-bezier(.4,0,.2,1), left .52s cubic-bezier(.4,0,.2,1), width .52s cubic-bezier(.4,0,.2,1), height .52s cubic-bezier(.4,0,.2,1), border-radius .52s cubic-bezier(.4,0,.2,1), box-shadow .18s ease; }
-  .stay-card.flipped .flip-inner{ transform:rotateY(180deg); }
   .stay-card[data-area="top"]{ grid-area:top; }
   .stay-card[data-area="left1"]{ grid-area:left1; }
   .stay-card[data-area="left2"]{ grid-area:left2; }
@@ -2075,11 +2071,11 @@
       var locked = stayLocked(st);
       /* round 24: locked cards drop the "Stay withheld" title entirely, per the user's
          explicit ask -- only the date range stays visible. */
+      /* round 26: no more .flip-inner/.flip-face wrapper here -- the open/close
+         animation is a plain expand/collapse now (see openStayFlip()/closeStayFlip()),
+         so the card just renders its front content directly. */
       html += '<button class="stay-card'+(locked?' locked':'')+'" data-area="'+areas[i]+'" data-stay="'+st.id+'">' +
-        '<div class="flip-inner">' +
-          '<div class="flip-face flip-front">' + stayCardFrontHTML(st) + '</div>' +
-          '<div class="flip-face flip-back"></div>' +
-        '</div>' +
+        stayCardFrontHTML(st) +
       '</button>';
     });
     html += '</div></div>';
@@ -2656,15 +2652,16 @@
     };
   }
 
-  /* ---------- Stays: open/close the same box-morph-and-flip animation as the day deck
-     ---------- round 24: the Stays detail view used to be a bottom-sheet modal
-     (sheetHTML(), state.sheetAbout='stay:...') -- the user asked for it to fully open
-     the same way a day card does instead. Modeled directly on openDayFlip()/
-     closeDayFlip() above, with one real difference: a .stay-card lives in a CSS Grid
-     (.stays-grid), not an absolutely-stacked/overlapping deck, so there's no "gather
-     the other cards inward" step that makes sense here -- the opening/closing card
-     simply grows over/shrinks back from whatever the grid's other cards happen to be
-     doing, fully covering them (z-index:500) for the whole animation either way. */
+  /* ---------- Stays: open/close as a plain expand/collapse ----------
+     round 26: this used to mirror the day deck's 3D-flip-and-box-morph animation
+     (see the CHANGELOG for the old approach), but the user asked to simplify it --
+     no flip, just the card's own box growing to fill the screen and shrinking back
+     to its grid slot. That also removes a bug where the closing card would flash
+     white: the old version rotated a live (unstyled-background) copy of the detail
+     view through 3D space as its "back face" while the box was still mid-shrink,
+     and .flip-back's background (var(--bg), a light cream tone) could show through
+     during that rotation. With no flip and no back face at all, there's nothing
+     that can show that background any more. */
   function openStayFlip(stayId){
     if(state.animating) return;
     var st = STAYS.filter(function(s){return s.id===stayId;})[0];
@@ -2678,8 +2675,6 @@
     if(!cardEl){ state.screen='stayDetail'; state.openStay=st.id; state.sheetAbout=null; render(); return; }
 
     state.animating = true;
-    var backEl = cardEl.querySelector('.flip-back');
-    backEl.innerHTML = stayDetailScreen(st);
 
     var rect = cardEl.getBoundingClientRect();
     var parentRect = screenEl.getBoundingClientRect();
@@ -2691,9 +2686,9 @@
     state.closeStayArea = cardEl.getAttribute('data-area');
 
     /* reparent into #screen so top/left/width/height below are measured against the
-       right containing block -- same reasoning as openDayFlip(). .stay-card is
-       position:relative by default (it sits in a CSS grid, not an absolute stack), so
-       unlike a .stack-card this needs an explicit position:absolute override too. */
+       right containing block. .stay-card is position:relative by default (it sits in
+       a CSS grid, not an absolute stack), so this needs an explicit position:absolute
+       override too. */
     screenEl.appendChild(cardEl);
     cardEl.style.position = 'absolute';
     cardEl.style.margin = '0';
@@ -2712,43 +2707,52 @@
       cardEl.style.height = parentRect.height+'px';
       cardEl.style.borderRadius = '0px';
       cardEl.style.boxShadow = 'none';
-      cardEl.classList.add('flipped');
     });
 
+    /* the card's own photo/label just sit there growing to fill the screen -- once
+       that's done, a normal render() swaps straight to the real detail screen. */
     setTimeout(function(){
       state.screen='stayDetail'; state.openStay=st.id; state.animating=false; state.sheetAbout=null;
       render();
-    }, 580);
+    }, 520);
   }
 
   function closeStayFlip(){
     if(reduceMotion){ state.screen='stays'; state.openStay=null; state.sheetAbout=null; render(); return; }
     var screenEl = document.getElementById('screen');
-    var viewEl = screenEl.querySelector('.view');
     var target = state.closeStayTargetRect;
     var st = STAYS.filter(function(s){return s.id===state.closeStayId;})[0];
-    if(!viewEl || !target || !st || state.animating){ state.screen='stays'; state.openStay=null; state.sheetAbout=null; render(); return; }
+    if(!target || !st || state.animating){ state.screen='stays'; state.openStay=null; state.sheetAbout=null; render(); return; }
     state.animating = true;
 
     var parentRect = screenEl.getBoundingClientRect();
     var locked = stayLocked(st);
 
-    /* the rest of the grid, rebuilt behind everything -- no gather/spread motion needed
-       here (unlike the day deck), it's just sitting in its normal resting layout the
-       whole time, fully hidden under the animating card until the very end */
+    /* the live detail view is no longer carried through the animation (see the round
+       26 comment above openStayFlip()) -- remove it outright, otherwise it's left
+       sitting in the DOM underneath the grid that's about to replace it. */
+    var viewEl = screenEl.querySelector('.view');
+    if(viewEl) viewEl.remove();
+
+    /* the rest of the grid, rebuilt behind everything -- it's just sitting in its
+       normal resting layout the whole time, fully hidden under the shrinking card
+       until the very end */
     var bgEl = document.createElement('div');
     bgEl.className = 'view';
     bgEl.style.pointerEvents = 'none';
     bgEl.style.zIndex = 400;
-    bgEl.innerHTML = staysScreen(st.id); /* the flipping card itself is excluded until it lands */
+    bgEl.innerHTML = staysScreen(st.id); /* the closing card itself is excluded until it lands */
     screenEl.appendChild(bgEl);
 
-    /* transient flip element: the live view becomes the back face, a fresh front face
-       carries the card's own photo -- exactly mirroring closeDayFlip() */
+    /* the detail view is simply dropped here -- no live content is carried through
+       the animation any more. A fresh card element (fullscreen, showing the card's
+       own photo/label) starts in the detail view's place and shrinks straight down
+       to its grid slot. */
     var wrapper = document.createElement('div');
-    wrapper.className = 'stay-card flipped is-front closing' + (locked ? ' locked' : '');
+    wrapper.className = 'stay-card closing' + (locked ? ' locked' : '');
     wrapper.setAttribute('data-area', state.closeStayArea);
     wrapper.setAttribute('data-stay', st.id);
+    wrapper.innerHTML = stayCardFrontHTML(st);
     wrapper.style.position = 'absolute';
     wrapper.style.margin = '0';
     wrapper.style.zIndex = 500;
@@ -2758,22 +2762,9 @@
     wrapper.style.height = parentRect.height+'px';
     wrapper.style.borderRadius = '0px';
     wrapper.style.boxShadow = 'none';
-
-    var flipInner = document.createElement('div');
-    flipInner.className = 'flip-inner';
-    var flipFront = document.createElement('div');
-    flipFront.className = 'flip-face flip-front';
-    flipFront.innerHTML = stayCardFrontHTML(st);
-    var flipBack = document.createElement('div');
-    flipBack.className = 'flip-face flip-back';
-    flipBack.appendChild(viewEl); /* reparents the live, still-wired view -- no content is lost */
-
-    flipInner.appendChild(flipFront);
-    flipInner.appendChild(flipBack);
-    wrapper.appendChild(flipInner);
     screenEl.appendChild(wrapper);
 
-    wrapper.getBoundingClientRect(); /* force reflow so the "from" (fullscreen, flipped) state is registered */
+    wrapper.getBoundingClientRect(); /* force reflow so the "from" (fullscreen) state is registered */
     wrapper.classList.add('opening'); /* reuse its box-morph transition timing */
 
     requestAnimationFrame(function(){
@@ -2782,7 +2773,6 @@
       wrapper.style.width = target.width+'px';
       wrapper.style.height = target.height+'px';
       wrapper.style.borderRadius = '20px';
-      wrapper.classList.remove('flipped'); /* flip-inner transitions rotateY(180deg) -> 0 */
     });
 
     /* the card's own shadow waits until it's essentially finished settling (the
@@ -2791,16 +2781,13 @@
     setTimeout(function(){
       wrapper.style.transition = 'box-shadow .12s ease';
       wrapper.style.boxShadow = '0 10px 22px -14px rgba(0,0,0,.35)';
-    }, 560);
+    }, 520);
 
     setTimeout(function(){
       state.screen='stays'; state.openStay=null; state.animating=false; state.sheetAbout=null;
 
       /* fold `wrapper` directly into the grid as its real card -- avoids a full render()
          swap for the same GPU-compositing/shimmer reason explained in closeDayFlip() */
-      var flipBackEl = wrapper.querySelector('.flip-back');
-      if(flipBackEl) flipBackEl.innerHTML = '';
-
       wrapper.className = 'stay-card' + (locked ? ' locked' : '');
       wrapper.style.position = '';
       wrapper.style.top = '';
@@ -2838,7 +2825,7 @@
       saveProgress();
 
       wire();
-    }, 650);
+    }, 590);
   }
 
   /* ---------- shared handlers for the day-detail content (chapters, about, weather, back, reset) ---------- */
