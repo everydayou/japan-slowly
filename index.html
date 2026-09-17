@@ -7,7 +7,18 @@
      guessing UTF-8 with zero explicit signal. Must be within the document's first
      1024 bytes to reliably take effect, hence right at the very top. -->
 <title>japan slowly</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- maximum-scale=1, user-scalable=no (round 25): the app is meant to be installed and
+     used like a native app (see the "no gallery chrome" contract rule), so pinch/
+     double-tap zoom on the UI itself doesn't serve a purpose here and was catching
+     accidental gestures during the drag-heavy interactions (deck drag, sheet
+     drag-to-dismiss). Caveat worth knowing about, not working around: iOS Safari has,
+     since iOS 10, deliberately still allowed pinch-zoom regardless of this flag as an
+     accessibility override for low-vision users (WCAG 1.4.4) -- this reliably blocks
+     it in the standalone/home-screen app (no Safari UI involved at all) and blocks
+     double-tap-zoom everywhere, but a user could still pinch-zoom while it's open as
+     an ordinary Safari tab. That's an intentional accessibility escape hatch on
+     Apple's part, not a bug in this meta tag. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -62,7 +73,8 @@
     --stage-b:#f3f3f3;
     /* exposes env(safe-area-inset-bottom) as a plain custom property so JS can read its
        resolved px value via getComputedStyle -- env() itself isn't otherwise queryable
-       from script. Used by positionTabbarForIOS() below (round 22). */
+       from script. Read by the diagnostics panel (round 24); no longer needed by any
+       layout logic as of round 25 (see .ui-layer's comment), kept for that. */
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     color-scheme: light;
   }
@@ -556,7 +568,18 @@
      (state.sheetAbout), which render()'s scroll-preserving fix keeps from resetting
      the page scroll position underneath -- see the render() comment for why that
      matters. */
-  .sheet-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,0); transition:background .28s ease; z-index:80; touch-action:none; }
+  /* round 25: position:absolute instead of fixed, for both this and .sheet-panel below.
+     Both are already rendered as direct children of #screen (see sheetHTML()'s own
+     comment -- "a sibling of .view"), and #screen already has position:relative plus
+     the same reliable height:var(--app-height,100dvh) sizing .ui-layer above reuses
+     for #tabbar -- so #screen was ALREADY the correct containing block sitting right
+     there; these two just weren't using it, and were resolving `inset:0`/`bottom:0`
+     against the browser's own large-viewport concept instead, same underlying bug as
+     #tabbar's (see .ui-layer's comment), which is what the user meant by "it actually
+     feels like the same margin problem for the top nav bar" -- it was. This replaces
+     positionSheetForIOS()'s JS-computed top/height (now deleted) with the plain
+     `inset:0` / `bottom:0;height:50%` this already had; no new element needed. */
+  .sheet-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,0); transition:background .28s ease; z-index:80; touch-action:none; }
   /* darker than a typical .4-.45 scrim (round 17 follow-up, was rgba(0,0,0,.44)) so the
      content behind the sheet reads as clearly backgrounded/non-interactive instead of
      still competing for attention -- kept in sync with the two matching values inside
@@ -564,7 +587,7 @@
      closed by hand, not just the two CSS-transition endpoints). */
   .sheet-backdrop.open{ background:rgba(0,0,0,.65); }
   .sheet-panel{
-    position:fixed; left:0; right:0; bottom:0; height:50%; z-index:81;
+    position:absolute; left:0; right:0; bottom:0; height:50%; z-index:81;
     background:var(--bg-elevated); border-radius:20px 20px 0 0;
     box-shadow:0 -12px 32px rgba(0,0,0,.18);
     display:flex; flex-direction:column; overflow:hidden;
@@ -696,18 +719,52 @@
   .refresh-fab.spinning svg{ animation:refreshspin .7s linear infinite; }
   @keyframes refreshspin{ to{ transform:rotate(360deg); } }
 
+  /* ---- persistent UI layer (round 25) ----
+     Exists purely to give #tabbar (and nothing else yet -- scoped to just the element
+     that was actually reported broken) a containing block that tracks the real
+     viewport the same reliable way .screen does: an explicit height:var(--app-height,
+     100dvh) rather than `inset:0`/`bottom:0`, which is what a plain `position:fixed`
+     element resolves against the browser's own "large viewport" concept with --
+     the thing that on iOS Safari can (a) stay reported as though a floating bottom
+     toolbar were docked and taking up space even once it's visually not (the
+     standalone-vs-browser-tab "gap" report), or (b) not shrink to leave room for that
+     toolbar consistently, letting it sit on top of content instead of the content
+     safely stopping short of it. Sibling of #screen (not a child -- see the HTML
+     comment above this element for why), so this needs its own independent height
+     source; reuses --app-height rather than inventing a second one. `top:0; left:0`
+     are explicit (not relied on via `inset`) so nothing here depends on the same
+     large-viewport default this exists to avoid. pointer-events:none so this
+     transparent, full-screen layer never intercepts taps meant for #screen
+     underneath -- #tabbar turns pointer-events back on for itself below. */
+  .ui-layer{
+    position:fixed;
+    top:0; left:0;
+    width:100%;
+    height:100dvh;
+    height:var(--app-height, 100dvh);
+    pointer-events:none;
+    z-index:40; /* above .screen's own content, below .sheet-backdrop/.sheet-panel (80/81) */
+  }
+
   /* ---- bottom segmented control bar (Explorer / Stays) ----
      A floating pill, bottom-center, that hugs its content instead of spanning full
      width -- the user was explicit this should read as a small segmented control,
-     not a full-width tab bar. Icon-only (no labels), same fixed/persistent-sibling-
-     of-#screen pattern as .refresh-fab so it survives render() without re-wiring,
-     shown only on the two screens it actually switches between (home/stays) -- see
-     render()'s tabbar[hidden] toggle at the bottom of that function. */
+     not a full-width tab bar. Icon-only (no labels), lives inside #ui-layer (a
+     persistent sibling of #screen, same as .refresh-fab) so it survives render()
+     without re-wiring, shown only on the two screens it actually switches between
+     (home/stays) -- see render()'s tabbar[hidden] toggle at the bottom of that
+     function. round 25: position:absolute instead of fixed -- see .ui-layer's own
+     comment for why; this is what lets a plain CSS `bottom` value work correctly on
+     iOS without the JS-computed `top` positionTabbarForIOS() used to need (now
+     deleted). Also restores the round-23 value (16px from the bottom) for every
+     platform -- the round-24 iOS-only 8px override existed only to compensate for
+     the large-viewport bug this fix removes at the root; easy to bring back per
+     platform if 16px turns out to look different from what round 24 intended once
+     this is actually seen on a device. */
   .tabbar{
-    position:fixed;
+    position:absolute;
+    pointer-events:auto;
     left:50%;
-    /* was +18px (round 21: gap:18 in positionTabbarForIOS() below is kept in sync with
-       this) -- round 23: user asked for exactly 16px from the bottom. */
     bottom:calc(env(safe-area-inset-bottom, 0px) + 16px);
     transform:translateX(-50%);
     z-index:50;
@@ -889,17 +946,31 @@
   <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
 </button>
 
-<!-- Bottom segmented control (Explorer / Stays) -- persistent sibling of #screen for
-     the same reason #refreshBtn is: it must survive render()'s full innerHTML rebuild
-     of #screen without being re-wired on every navigation. -->
-<div id="tabbar" class="tabbar" hidden>
-  <span class="tabbar-indicator" id="tabbarIndicator"></span>
-  <button class="tabbar-btn" id="tabExplore" aria-label="Explorer" title="Explorer">
-    <span class="tabbar-icon tabbar-icon-cards"></span>
-  </button>
-  <button class="tabbar-btn" id="tabStays" aria-label="Stays" title="Stays">
-    <span class="tabbar-icon tabbar-icon-stays"></span>
-  </button>
+<!-- round 25: #tabbar's real containing block -- full reasoning lives on .ui-layer's
+     CSS rule below. Rounds 22-24 tried to fix #tabbar's position by leaving it
+     `position:fixed` directly on the page and computing its `top` in JS every time
+     the viewport changed (positionTabbarForIOS(), now deleted) -- structurally
+     reasonable, but it was working around a `position:fixed` element's containing
+     block being the browser's own ambiguous "large viewport" on iOS Safari, which is
+     also the reason .screen itself moved off plain CSS sizing and onto a JS-measured
+     --app-height custom property (round 20). Rather than hand-roll that same fix a
+     second time for #tabbar, this wraps it in a persistent element that's sized with
+     that exact same already-proven --app-height mechanism, so #tabbar can go back to
+     being plain, static CSS (`position:absolute; bottom:...`) and never needs its own
+     JS at all. Still a sibling of #screen, same reason as #refreshBtn: it must
+     survive render()'s full innerHTML rebuild of #screen without being re-wired on
+     every navigation. -->
+<div id="uiLayer" class="ui-layer">
+  <!-- Bottom segmented control (Explorer / Stays). -->
+  <div id="tabbar" class="tabbar" hidden>
+    <span class="tabbar-indicator" id="tabbarIndicator"></span>
+    <button class="tabbar-btn" id="tabExplore" aria-label="Explorer" title="Explorer">
+      <span class="tabbar-icon tabbar-icon-cards"></span>
+    </button>
+    <button class="tabbar-btn" id="tabStays" aria-label="Stays" title="Stays">
+      <span class="tabbar-icon tabbar-icon-stays"></span>
+    </button>
+  </div>
 </div>
 
 <!-- round 24: a tiny, always-present diagnostic toggle for the still-unresolved
@@ -975,102 +1046,28 @@
     }
   }
 
-  /* ---------- iOS-only: reposition #tabbar off native fixed/bottom anchoring (round 22) ----------
-     Rounds 20-21 tried three different ways of getting .screen's own HEIGHT right
-     (100dvh, a JS --app-height from innerHeight, then from visualViewport.height) --
-     none of them moved #tabbar even slightly, because #tabbar was never wrong for that
-     reason. It's `position:fixed; bottom:calc(env(safe-area-inset-bottom,0px)+18px)`,
-     which the browser resolves against its OWN idea of "the viewport" independently of
-     whatever .screen's CSS height happens to be -- and on iOS Safari specifically, a
-     `position:fixed` element's containing block has a long-documented history of being
-     anchored to the LARGE/layout viewport rather than the actual visual one when the
-     browser's chrome is in floating/overlay mode (the same underlying "which viewport"
-     confusion as the dvh bug, just hitting fixed-position offsets instead of a height
-     unit -- a completely separate CSS mechanism, which is exactly why fixing .screen's
-     height never touched this). The user confirmed on a real device that the pill was
-     still sitting noticeably above the true bottom edge after round 21's fix, with the
-     same-sized dead strip still visible beneath it.
-     Rather than guess at a fourth CSS-only viewport unit, this reasons from the one
-     measurement already proven (structurally, in this environment) to track the real
-     visible height: `--app-height` (round 20-21). #tabbar is repositioned via an
-     explicit `top` (in px, computed from --app-height), replacing its native `bottom`
-     anchor entirely -- `top` on a position:fixed element is just as reliably relative to
-     the fixed-positioning containing block's origin as `bottom` is to its far edge, so
-     if that same containing-block confusion affects `top` identically, this doesn't fix
-     anything; if (as with most reports of this class of bug) it's specifically bottom-
-     edge anchoring that misbehaves, computing the same pixel position from the top
-     instead sidesteps it.
-     iOS-only, per the user's explicit ask -- Android/desktop Chrome already look
-     correct, so this shouldn't touch their behavior at all (isIOS also matches iPadOS
-     13+, which reports its platform as "MacIntel" but exposes touch points, unlike a
-     real Mac). Recalculates on the same render()/resize/orientationchange cadence as
-     setAppHeight()/updateStackClearance() -- always run AFTER setAppHeight() (needs a
-     current --app-height) and BEFORE updateStackClearance() (which measures #tabbar's
-     resulting live position, so it needs to already be in its final place). */
+  /* ---------- iOS platform check ----------
+     Kept for the diagnostics panel (it reports this alongside navigator.platform/
+     userAgent) even though, as of round 25, nothing here branches on it for layout
+     any more -- see .ui-layer's CSS comment for why rounds 22-24's iOS-only JS
+     repositioning (positionTabbarForIOS()/positionSheetForIOS(), both deleted this
+     round) turned out to be working around a fixable containing-block issue rather
+     than a platform difference that genuinely needed its own code path. isIOS also
+     matches iPadOS 13+, which reports its platform as "MacIntel" but exposes touch
+     points, unlike a real Mac. */
   var isIOS = /iP(hone|od|ad)/.test(navigator.platform) ||
-    (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); // iPadOS 13+ reports as a Mac but has touch points; a real Mac doesn't
-  function positionTabbarForIOS(){
-    if(!isIOS) return;
-    var tabbar = document.getElementById('tabbar');
-    if(!tabbar || tabbar.hidden) return;
-    var appHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--app-height')) || window.innerHeight;
-    var safeBottom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom')) || 0;
-    var pillHeight = tabbar.offsetHeight;
-    /* round 24 follow-up: real on-device diagnostic data (the new #debugPanel) showed
-       this JS positioning was correct all along -- the "double the size" gap the user
-       saw in standalone mode was the mandatory ~34px home-indicator safe-area clearance
-       becoming visible once there's no more Safari chrome sitting on top of it (a
-       browser tab reports --safe-bottom:0px, since Safari's own UI already owns that
-       strip; standalone reports the device's real value, e.g. 34px on an iPhone with a
-       home indicator). That 34px can't shrink -- it's Apple's own safe-area contract,
-       not something this app controls -- but the DESIGN gap stacked on top of it can:
-       iOS now uses its own smaller 8px (was 16, matching the shared CSS value) so the
-       pill sits closer to the safe-area boundary instead of floating well above it.
-       Deliberately NOT kept in sync with .tabbar's CSS `bottom` value any more --
-       non-iOS platforms (and iOS's own pre-JS-paint fallback instant) still use the
-       shared 16px via that CSS rule; only this iOS-JS override uses 8px. */
-    var gap = 8;
-    tabbar.style.bottom = 'auto';
-    tabbar.style.top = Math.round(appHeight - pillHeight - gap - safeBottom) + 'px';
-  }
-
-  /* ---------- round 24: the same fixed-position/containing-block fix, for the bottom
-     sheet ---------- the user's own words: "the bottom of the modal is also cropping
-     the content... it actually feels like the same margin problem for the top nav bar."
-     They're right -- .sheet-panel is `position:fixed; bottom:0; height:50%`, the exact
-     same shape of rule that mispositioned #tabbar (a percentage height off the
-     fixed-positioning containing block, anchored from `bottom`), so it's reasonable to
-     expect it misbehaves for the same underlying reason in standalone iOS. Same fix,
-     same technique: an explicit `top`/`height` in px computed from --app-height,
-     replacing the CSS `bottom:0; height:50%` pair entirely, iOS-only. Only runs while a
-     sheet is actually open (openSheetTransition()/onViewportChange() both call this;
-     there's nothing to reposition otherwise). */
-  function positionSheetForIOS(){
-    if(!isIOS) return;
-    var panel = document.querySelector('.sheet-panel');
-    if(!panel) return;
-    var appHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--app-height')) || window.innerHeight;
-    var h = Math.round(appHeight * 0.5);
-    panel.style.bottom = 'auto';
-    panel.style.height = h + 'px';
-    panel.style.top = (appHeight - h) + 'px';
-  }
+    (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
 
   /* ---------- single consolidated viewport-change handler ----------
-     setAppHeight() / positionTabbarForIOS() / updateStackClearance() each build on the
-     one before it (a current --app-height, then #tabbar's real resulting position, then
-     a clearance measured from that) -- three separate resize/orientationchange listeners
-     registered independently would run in registration order, which is fragile (adding
-     or reordering one of the three functions above could silently break the chain).
-     Calling all three from one handler, in this fixed order, every time, removes that
-     footgun entirely. positionSheetForIOS() is appended the same way -- it only ever
-     finds work to do while a sheet is mounted, so its cost is a single null-check the
-     rest of the time. */
+     Just setAppHeight() + updateStackClearance() as of round 25 -- #tabbar and
+     .sheet-panel/.sheet-backdrop no longer need their own JS repositioning (they're
+     plain CSS now, see .ui-layer's and .sheet-backdrop's comments), so there's
+     nothing left for them to do here. updateStackClearance() still needs to run
+     after setAppHeight() (it measures #tabbar's live rendered position, which CSS
+     derives from --app-height, so --app-height has to be current first). */
   function onViewportChange(){
     setAppHeight();
-    positionTabbarForIOS();
     updateStackClearance();
-    positionSheetForIOS();
   }
   window.addEventListener('resize', onViewportChange);
   window.addEventListener('orientationchange', onViewportChange);
@@ -1734,7 +1731,6 @@
     var backdrop = document.querySelector('.sheet-backdrop');
     var panel = document.querySelector('.sheet-panel');
     if(!backdrop || !panel) return;
-    positionSheetForIOS();
     if(reduceMotion){ backdrop.classList.add('open'); panel.classList.add('open'); return; }
     panel.getBoundingClientRect(); /* force reflow so the transition has a "from" state to animate from */
     requestAnimationFrame(function(){
@@ -2317,7 +2313,6 @@
       var tabbarIndicator = document.getElementById('tabbarIndicator');
       if(tabbarIndicator) tabbarIndicator.classList.toggle('right', state.screen==='stays');
     }
-    positionTabbarForIOS(); // must run before updateStackClearance() -- see onViewportChange()'s comment
     updateStackClearance();
     saveProgress();
   }
@@ -2635,11 +2630,9 @@
       }
       /* same bypass-of-render() reasoning as the refreshBtn/tabbar fix directly above --
          render() is also the only place that normally calls saveProgress()/
-         positionTabbarForIOS()/updateStackClearance(), so this path (closing a day back
-         to home) needs its own explicit calls or a reload right after closing a day
-         would silently resume with stale screen/openDay progress and an un-recalculated
-         tabbar position/card clearance. */
-      positionTabbarForIOS(); // must run before updateStackClearance() -- see onViewportChange()'s comment
+         updateStackClearance(), so this path (closing a day back to home) needs its
+         own explicit calls or a reload right after closing a day would silently resume
+         with stale screen/openDay progress and an un-recalculated card clearance. */
       updateStackClearance();
       saveProgress();
 
@@ -2811,8 +2804,8 @@
       bgEl.style.pointerEvents = '';
       bgEl.style.zIndex = '';
 
-      /* mirrors closeDayFlip()'s own refreshBtn/tabbar/positionTabbarForIOS/
-         updateStackClearance/saveProgress bypass-of-render() fix -- same reasoning */
+      /* mirrors closeDayFlip()'s own refreshBtn/tabbar/updateStackClearance/
+         saveProgress bypass-of-render() fix -- same reasoning */
       var refreshBtn = document.getElementById('refreshBtn');
       if(refreshBtn) refreshBtn.hidden = false;
       var tabbarEl = document.getElementById('tabbar');
@@ -2825,7 +2818,6 @@
         var tabbarIndicatorEl = document.getElementById('tabbarIndicator');
         if(tabbarIndicatorEl) tabbarIndicatorEl.classList.add('right');
       }
-      positionTabbarForIOS(); // must run before updateStackClearance() -- see onViewportChange()'s comment
       updateStackClearance();
       saveProgress();
 
@@ -3058,12 +3050,16 @@
   })();
 
   /* ---------- round 24: diagnostic overlay (see debugToggle's HTML comment) ----------
-     Reads every number the viewport-fix chain (setAppHeight/positionTabbarForIOS/
-     positionSheetForIOS) depends on, plus how this launch was opened (standalone vs.
-     browser tab -- the exact distinction the user's latest report hinges on), and
-     prints them as plain text. Refreshes live on the same onViewportChange() cadence
-     as everything else while the panel is open, so pulling the browser chrome
-     open/closed while watching it updates the numbers in real time. */
+     Reads every number the viewport-fix chain (setAppHeight, now just feeding CSS
+     directly as of round 25 -- see .ui-layer's comment for why positionTabbarForIOS/
+     positionSheetForIOS are gone) depends on, plus how this launch was opened
+     (standalone vs. browser tab -- the exact distinction the user's original report
+     hinged on), and prints them as plain text. Refreshes live on the same
+     onViewportChange() cadence as everything else while the panel is open, so pulling
+     the browser chrome open/closed while watching it updates the numbers in real time.
+     Still the right tool for confirming round 25 on a real device: --app-height and
+     ui-layer height should always match, and tabbar/sheet-panel rect should show the
+     expected clearance above the true safe-area edge in both launch modes. */
   (function wireDebugPanel(){
     var toggle = document.getElementById('debugToggle');
     var panel = document.getElementById('debugPanel');
@@ -3080,8 +3076,12 @@
       var cs = getComputedStyle(document.documentElement);
       var tabbar = document.getElementById('tabbar');
       var tabbarRect = (tabbar && !tabbar.hidden) ? tabbar.getBoundingClientRect() : null;
+      var uiLayer = document.getElementById('uiLayer');
+      var uiLayerRect = uiLayer ? uiLayer.getBoundingClientRect() : null;
       var sheetPanel = document.querySelector('.sheet-panel');
       var sheetRect = sheetPanel ? sheetPanel.getBoundingClientRect() : null;
+      var screenEl = document.querySelector('.screen');
+      var screenRect = screenEl ? screenEl.getBoundingClientRect() : null;
       var lines = [
         'standalone: ' + isStandalone(),
         'isIOS (this app\'s own check): ' + isIOS,
@@ -3094,8 +3094,9 @@
         'screen.height: ' + (window.screen ? window.screen.height : 'n/a'),
         '--app-height: ' + cs.getPropertyValue('--app-height'),
         '--safe-bottom: ' + cs.getPropertyValue('--safe-bottom'),
+        '.screen rect: ' + (screenRect ? ('top='+Math.round(screenRect.top)+' bottom='+Math.round(screenRect.bottom)+' height='+Math.round(screenRect.height)) : 'absent'),
+        '.ui-layer rect: ' + (uiLayerRect ? ('top='+Math.round(uiLayerRect.top)+' bottom='+Math.round(uiLayerRect.bottom)+' height='+Math.round(uiLayerRect.height)) : 'absent'),
         'tabbar rect: ' + (tabbarRect ? ('top='+Math.round(tabbarRect.top)+' bottom='+Math.round(tabbarRect.bottom)+' height='+Math.round(tabbarRect.height)) : 'hidden/absent'),
-        'tabbar inline top/bottom: ' + (tabbar ? ('top='+tabbar.style.top+' bottom='+tabbar.style.bottom) : 'n/a'),
         'sheet-panel rect: ' + (sheetRect ? ('top='+Math.round(sheetRect.top)+' bottom='+Math.round(sheetRect.bottom)+' height='+Math.round(sheetRect.height)) : 'closed/absent'),
         'document.documentElement rect height: ' + Math.round(document.documentElement.getBoundingClientRect().height),
         'state.screen: ' + state.screen
@@ -3114,7 +3115,7 @@
       origOnViewportChange();
       renderDebug();
     };
-    /* render() itself calls positionTabbarForIOS()/updateStackClearance() on every
+    /* render() itself calls updateStackClearance() on every
        screen change (not just on a resize/orientationchange), so the panel should stay
        live across navigation too, not just viewport events -- cheapest way to get that
        without threading a call through every render() call site is a light poll while
