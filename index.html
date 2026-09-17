@@ -452,6 +452,11 @@
      the vertical rhythm directly (that's each row's own margin-bottom now), because
      the connecting dashed line needs to bleed past its own row's bottom edge into the
      gap to reach the next dot, which a shared flex `gap` can't do. */
+  /* round 24: full-screen Stays detail view (openStayFlip()/closeStayFlip()) -- reuses
+     the same .about-item/.about-group rows the bottom-sheet About panel already used
+     for stay content (stayAboutHTML()), just laid out as plain flowing page content
+     instead of inside a scrollable sheet-body. */
+  .stay-detail-body{ margin:28px 24px 8px; display:flex; flex-direction:column; gap:10px; }
   .chapters{ margin:40px 24px 8px; display:flex; flex-direction:column; }
   .chapters-label{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:12px; letter-spacing:.1em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:10px; }
   .chaprow{ display:flex; align-items:stretch; margin-bottom:16px; }
@@ -720,16 +725,59 @@
     box-shadow:0 4px 12px -4px rgba(0,0,0,.25);
   }
   .tabbar[hidden]{ display:none; }
+  /* ---- sliding selection indicator (round 24) ----
+     Previously each button's own background/color just snapped between "on"/"off" --
+     the user asked for the highlight to smoothly slide sideways between the two
+     options instead, like a native iOS segmented control. Implemented as a single
+     pill sitting BEHIND both buttons (z-index 0, buttons at z-index 1) that translates
+     between the two button slots, rather than animating each button's own background
+     -- animating one shared element's transform is what produces the "sliding" look;
+     cross-fading two separately-colored buttons would not. `calc(100% + 2px)` (not a
+     fixed px value) rides on the indicator's own width already matching a button's
+     width exactly, plus the row's 2px button gap -- so this keeps working correctly
+     without a matching JS-measured pixel value if a button's size ever changes. */
+  .tabbar-indicator{
+    position:absolute; top:4px; left:4px;
+    width:44px; height:40px; border-radius:999px;
+    background:var(--accent);
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+    z-index:0;
+    pointer-events:none;
+  }
+  .tabbar-indicator.right{ transform:translateX(calc(100% + 2px)); }
+  @media (prefers-reduced-motion: reduce){ .tabbar-indicator{ transition:none; } }
   .tabbar-btn{
+    position:relative; z-index:1;
     width:44px; height:40px;
     display:flex; align-items:center; justify-content:center;
     border:0; border-radius:999px; background:transparent;
     color:var(--ink-faint); cursor:pointer;
     -webkit-tap-highlight-color:transparent;
-    transition:background .18s ease, color .18s ease;
+    transition:color .18s ease;
   }
   .tabbar-btn:active{ transform:scale(.92); }
-  .tabbar-btn.on{ background:var(--accent); color:#fff; }
+  /* background removed here (round 24) -- the sliding .tabbar-indicator behind the
+     buttons supplies the accent-red fill now; .on only needs to flip the icon color */
+  .tabbar-btn.on{ color:#fff; }
+  /* ---- tabbar icons: external SVG files, colorable via mask (round 24) ----
+     The user supplied their own cards.svg/stays.svg (pushed to the repo root, same
+     folder as index.html) to replace the inline hand-drawn glyphs. An <img src="...">
+     can't be recolored to match .tabbar-btn's current/inactive text color the way the
+     old inline `stroke="currentColor"` SVG could -- so these are applied as a CSS
+     mask instead: `background:currentColor` supplies the actual visible color (so it
+     still inherits .tabbar-btn's color/`.on` white exactly like before), and
+     `mask-image` supplies the icon's SHAPE only, from the external file. If
+     cards.svg/stays.svg aren't present in the deployed folder, this renders as a
+     blank icon (no error, no broken-image glyph) rather than breaking the button. */
+  .tabbar-icon{
+    display:block; width:19px; height:19px;
+    background:currentColor;
+    -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+    -webkit-mask-position:center; mask-position:center;
+    -webkit-mask-size:contain; mask-size:contain;
+  }
+  .tabbar-icon-cards{ -webkit-mask-image:url('cards.svg'); mask-image:url('cards.svg'); }
+  .tabbar-icon-stays{ -webkit-mask-image:url('stays.svg'); mask-image:url('stays.svg'); }
 
   /* ---- Stays screen: mosaic/bento grid ----
      Matches the shape of the wireframe the user sent: one full-width card on top,
@@ -737,24 +785,52 @@
      tall card spanning both rows in the right column. Expressed with named grid
      areas rather than nth-child math so the shape stays legible and easy to re-tune. */
   .stays-view{ padding:calc(env(safe-area-inset-top, 0px) + 24px) 20px calc(env(safe-area-inset-bottom, 0px) + 110px); }
-  .stays-head{ text-align:center; margin-bottom:20px; }
-  .stays-head .wordmark{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:20px; }
-  .stays-head .sub{ font-size:13px; color:var(--ink-faint); margin-top:4px; }
+  /* round 24: the old .stays-head ("Stays" / "Where you're sleeping...") is gone --
+     the user asked for the same top hero the Explorer screen uses (mark + "japan
+     slowly" wordmark + date range, via the same heroMarkupHTML()/.home-hero the home
+     screen renders) for visual consistency between the two tabs, rather than each
+     screen having its own distinct header treatment. staysScreen() now wraps
+     heroMarkupHTML() in a plain .home-hero the same way homeScreen() does -- no
+     Stays-specific header CSS needed any more. */
+  .stays-view .home-hero{ margin-bottom:28px; }
   .stays-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
-    grid-template-rows:150px 130px 130px;
+    /* round 24: was 150px 130px 130px (left1/left2 equal height) -- user asked for
+       the second (lower-left) stay card to read as smaller than the first. Row 2
+       shrunk from 130 to 105 (left2's own row); row 1 (left1's row) bumped slightly
+       to 145 so the size difference reads clearly rather than being marginal. The
+       tall right card spans both rows either way, so its own total height changes
+       slightly (262px vs the old 260px) as a side effect -- not asked for, but
+       negligible and not worth a more complex layout to avoid. */
+    grid-template-rows:150px 145px 105px;
     grid-template-areas:"top top" "left1 right" "left2 right";
     gap:12px;
+    /* round 24: "center the grid the same way we do for the cards" -- the home
+       deck's cards cap at min(320px, 82%) and sit centered; this grid needs to be
+       wider than a single card (it's two columns), so it caps at a proportionally
+       similar but wider value instead of stretching to the full available width. */
+    max-width:min(400px, 94%);
+    margin:0 auto;
   }
   .stay-card{
     position:relative; overflow:hidden; border-radius:20px;
     border:0; padding:0; text-align:left; cursor:pointer;
     -webkit-tap-highlight-color:transparent;
     box-shadow:0 10px 22px -14px rgba(0,0,0,.35);
+    /* round 24: perspective + the .opening/.flipped rules below let this card use the
+       exact same box-morph-and-3D-flip open animation as the day deck's .stack-card --
+       see openStayFlip()/closeStayFlip(), which are directly modeled on
+       openDayFlip()/closeDayFlip(). transition here (not just on .opening) covers the
+       plain hover/settle case; .opening overrides it with the box-morph's own timing
+       exactly like .stack-card.opening does. */
+    transition:box-shadow .3s ease;
+    perspective:1600px;
   }
   .stay-card:active{ transform:scale(.98); }
   .stay-card.locked{ cursor:default; }
+  .stay-card.opening{ transition:top .52s cubic-bezier(.4,0,.2,1), left .52s cubic-bezier(.4,0,.2,1), width .52s cubic-bezier(.4,0,.2,1), height .52s cubic-bezier(.4,0,.2,1), border-radius .52s cubic-bezier(.4,0,.2,1), box-shadow .18s ease; }
+  .stay-card.flipped .flip-inner{ transform:rotateY(180deg); }
   .stay-card[data-area="top"]{ grid-area:top; }
   .stay-card[data-area="left1"]{ grid-area:left1; }
   .stay-card[data-area="left2"]{ grid-area:left2; }
@@ -778,6 +854,27 @@
     font-size:13px; color:var(--ink-faint); line-height:1.5;
     background:var(--frame); border-radius:12px; padding:10px 12px;
   }
+
+  /* ---- round 24 diagnostic overlay (see the HTML comment above debugToggle) ----
+     Deliberately unobtrusive: a 14px dot, low opacity, tucked in the safe-area-aware
+     top-left corner, present on every screen (persistent sibling of #screen, same
+     pattern as #refreshBtn/#tabbar) so it's reachable however the gap bug is currently
+     reproducing. Not meant to be a permanent feature -- just a stopgap for chasing this
+     one bug without guessing blind again. */
+  .debug-toggle{
+    position:fixed; z-index:999;
+    top:calc(env(safe-area-inset-top, 0px) + 8px); left:calc(env(safe-area-inset-left, 0px) + 8px);
+    width:14px; height:14px; border-radius:50%;
+    background:rgba(128,128,128,.28); border:0; padding:0; cursor:pointer;
+  }
+  .debug-panel{
+    position:fixed; z-index:998; left:8px; right:8px;
+    top:calc(env(safe-area-inset-top, 0px) + 30px);
+    max-height:70vh; overflow-y:auto;
+    background:rgba(20,20,20,.94); color:#8f8;
+    font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11px; line-height:1.6;
+    border-radius:10px; padding:10px 12px; white-space:pre-wrap; -webkit-user-select:text; user-select:text;
+  }
 </style>
 
 <div class="screen" id="screen"></div>
@@ -796,13 +893,26 @@
      the same reason #refreshBtn is: it must survive render()'s full innerHTML rebuild
      of #screen without being re-wired on every navigation. -->
 <div id="tabbar" class="tabbar" hidden>
+  <span class="tabbar-indicator" id="tabbarIndicator"></span>
   <button class="tabbar-btn" id="tabExplore" aria-label="Explorer" title="Explorer">
-    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="16 8 14 14 8 16 10 10 16 8"/></svg>
+    <span class="tabbar-icon tabbar-icon-cards"></span>
   </button>
   <button class="tabbar-btn" id="tabStays" aria-label="Stays" title="Stays">
-    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6"/><path d="M3 18v2M21 18v2"/><path d="M3 12V8a2 2 0 0 1 2-2h4v4"/></svg>
+    <span class="tabbar-icon tabbar-icon-stays"></span>
   </button>
 </div>
+
+<!-- round 24: a tiny, always-present diagnostic toggle for the still-unresolved
+     "gap in standalone/home-screen mode" bug -- four rounds of blind fixes (100svh ->
+     100dvh -> JS-measured --app-height -> visualViewport.height -> the #tabbar
+     top-instead-of-bottom fix) have each been structurally sound but unverifiable
+     without a real device, and the user's latest report ("double the size" gap,
+     specific to standalone vs. browser) needs real numbers to chase further rather
+     than another guess. Deliberately subtle (a barely-visible dot in the corner, not a
+     button that competes with the real UI) -- tap it to reveal a small text panel with
+     the live measurements, screenshot-able and readable enough to paste back. -->
+<button id="debugToggle" class="debug-toggle" aria-label="Diagnostics"></button>
+<div id="debugPanel" class="debug-panel" hidden></div>
 
 <script>
 (function(){
@@ -911,6 +1021,28 @@
     tabbar.style.top = Math.round(appHeight - pillHeight - gap - safeBottom) + 'px';
   }
 
+  /* ---------- round 24: the same fixed-position/containing-block fix, for the bottom
+     sheet ---------- the user's own words: "the bottom of the modal is also cropping
+     the content... it actually feels like the same margin problem for the top nav bar."
+     They're right -- .sheet-panel is `position:fixed; bottom:0; height:50%`, the exact
+     same shape of rule that mispositioned #tabbar (a percentage height off the
+     fixed-positioning containing block, anchored from `bottom`), so it's reasonable to
+     expect it misbehaves for the same underlying reason in standalone iOS. Same fix,
+     same technique: an explicit `top`/`height` in px computed from --app-height,
+     replacing the CSS `bottom:0; height:50%` pair entirely, iOS-only. Only runs while a
+     sheet is actually open (openSheetTransition()/onViewportChange() both call this;
+     there's nothing to reposition otherwise). */
+  function positionSheetForIOS(){
+    if(!isIOS) return;
+    var panel = document.querySelector('.sheet-panel');
+    if(!panel) return;
+    var appHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--app-height')) || window.innerHeight;
+    var h = Math.round(appHeight * 0.5);
+    panel.style.bottom = 'auto';
+    panel.style.height = h + 'px';
+    panel.style.top = (appHeight - h) + 'px';
+  }
+
   /* ---------- single consolidated viewport-change handler ----------
      setAppHeight() / positionTabbarForIOS() / updateStackClearance() each build on the
      one before it (a current --app-height, then #tabbar's real resulting position, then
@@ -918,11 +1050,14 @@
      registered independently would run in registration order, which is fragile (adding
      or reordering one of the three functions above could silently break the chain).
      Calling all three from one handler, in this fixed order, every time, removes that
-     footgun entirely. */
+     footgun entirely. positionSheetForIOS() is appended the same way -- it only ever
+     finds work to do while a sheet is mounted, so its cost is a single null-check the
+     rest of the time. */
   function onViewportChange(){
     setAppHeight();
     positionTabbarForIOS();
     updateStackClearance();
+    positionSheetForIOS();
   }
   window.addEventListener('resize', onViewportChange);
   window.addEventListener('orientationchange', onViewportChange);
@@ -1319,7 +1454,7 @@
     try{
       var chapterStates = {};
       state.day2.chapters.forEach(function(c){ chapterStates[c.id] = c.state; });
-      var payload = { screen:state.screen, openDay:state.openDay, stackIndex:state.stackIndex, day2ChapterStates:chapterStates };
+      var payload = { screen:state.screen, openDay:state.openDay, openStay:state.openStay, stackIndex:state.stackIndex, day2ChapterStates:chapterStates };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     }catch(e){ /* private browsing / quota / disabled -- just don't persist */ }
   }
@@ -1340,7 +1475,7 @@
      above) can override screen/openDay/stackIndex/chapter-reveal-state below -- a
      returning visitor resumes exactly where they left off instead of always restarting
      at the intro splash with every chapter re-hidden. */
-  var state = { screen:'intro', openDay:null, day2:JSON.parse(JSON.stringify(DAY2)), weatherOpen:{}, stackIndex:1, confirmId:null, animating:false, sheetAbout:null };
+  var state = { screen:'intro', openDay:null, openStay:null, day2:JSON.parse(JSON.stringify(DAY2)), weatherOpen:{}, stackIndex:1, confirmId:null, animating:false, sheetAbout:null };
   (function applySavedProgress(){
     var saved = loadProgress();
     if(!saved) return;
@@ -1356,6 +1491,9 @@
     if(saved.screen==='day' && saved.openDay!=null){
       var d = DAYS.filter(function(x){ return x.n===saved.openDay; })[0];
       if(d && d.status!=='locked'){ state.screen='day'; state.openDay=saved.openDay; }
+    } else if(saved.screen==='stayDetail' && saved.openStay!=null){
+      var sv = STAYS.filter(function(x){ return x.id===saved.openStay; })[0];
+      if(sv && !stayLocked(sv)){ state.screen='stayDetail'; state.openStay=saved.openStay; }
     } else if(saved.screen==='home' || saved.screen==='stays'){
       state.screen = saved.screen;
     }
@@ -1544,19 +1682,29 @@
     ], st.id) + '<div class="stay-tbd-note">Content for this stay is still an open point — placeholder only.</div>';
   }
 
+  /* round 24: full-screen Stays detail (replaces the old bottom-sheet modal for stays --
+     see openStayFlip()/closeStayFlip()). Modeled directly on dayDetailScreen()'s own
+     close-fab + header + content shape, reusing stayAboutHTML() unchanged for the body
+     so the actual hotel/area content is identical either way. */
+  function stayDetailScreen(st){
+    var html = '<button class="close-fab" data-stay-back aria-label="Close">'+closeIcon+'</button>';
+    html += '<div class="dayhead"></div>';
+    html += '<div class="backhero-text"><div class="day-date">'+st.range+'</div>' +
+      '<div class="day-title">'+(st.areaName || st.label)+'</div></div>';
+    html += '<div class="stay-detail-body">' + stayAboutHTML(st) + '</div>';
+    return html;
+  }
+
   /* the bottom-sheet modal itself -- rendered as a sibling of .view (see render()),
      covering half the screen, sliding up from the bottom. Returns '' when closed so
-     it's simply absent from the DOM rather than hidden. Doubles as the Stays detail
-     sheet: state.sheetAbout holds either a day-chapter id (looked up via
-     currentDayData()) or, prefixed 'stay:', a Stays entry id -- same open/close/drag
-     state, same DOM shape, just a different content source. */
+     it's simply absent from the DOM rather than hidden. Used for a day-chapter's About
+     panel (state.sheetAbout holds the chapter id, looked up via currentDayData()) --
+     round 24: the Stays detail view no longer goes through this sheet at all, it fully
+     opens instead (see stayDetailScreen()/openStayFlip()/closeStayFlip()), so the old
+     'stay:'-prefixed branch here is gone; sheetShell()/stayAboutHTML() are still shared
+     with stayDetailScreen() though, just called directly rather than through this id. */
   function sheetHTML(){
     if(!state.sheetAbout) return '';
-    if(state.sheetAbout.indexOf('stay:')===0){
-      var st = STAYS.filter(function(s){return s.id===state.sheetAbout.slice(5);})[0];
-      if(!st || stayLocked(st)) return '';
-      return sheetShell(st.areaName || st.label, stayAboutHTML(st));
-    }
     var dayData = currentDayData();
     var ch = dayData ? dayData.chapters.filter(function(c){return c.id===state.sheetAbout;})[0] : null;
     if(!ch || !ch.about) return '';
@@ -1573,6 +1721,7 @@
     var backdrop = document.querySelector('.sheet-backdrop');
     var panel = document.querySelector('.sheet-panel');
     if(!backdrop || !panel) return;
+    positionSheetForIOS();
     if(reduceMotion){ backdrop.classList.add('open'); panel.classList.add('open'); return; }
     panel.getBoundingClientRect(); /* force reflow so the transition has a "from" state to animate from */
     requestAnimationFrame(function(){
@@ -1889,25 +2038,40 @@
      carousel -- these aren't meant to be flipped through one at a time, they're a
      reference the user dips into. Locking is day-based (stayLocked(), same status
      field DAYS already uses) not location-based, per the user's explicit ask. */
-  function staysScreen(){
+  function staysScreen(excludeStayId){
     var areas = ['top','left1','left2','right'];
+    /* round 24: same hero the Explorer screen uses (see the CSS comment above), not a
+       Stays-specific header. */
     var html = '<div class="stays-view">' +
-      '<div class="stays-head"><div class="wordmark">Stays</div>' +
-        '<div class="sub">Where you’re sleeping, unlocked day by day</div></div>' +
+      '<div class="home-hero">' + heroMarkupHTML() + '</div>' +
       '<div class="stays-grid">';
     STAYS.forEach(function(st, i){
+      if(st.id===excludeStayId) return; /* off being flipped open elsewhere -- see openStayFlip() */
       var locked = stayLocked(st);
+      /* round 24: locked cards drop the "Stay withheld" title entirely, per the user's
+         explicit ask -- only the date range stays visible. */
       html += '<button class="stay-card'+(locked?' locked':'')+'" data-area="'+areas[i]+'" data-stay="'+st.id+'">' +
-        '<div class="hero" style="'+heroStyle(st.mood)+'"></div>' + grainDiv() + '<div class="shade"></div>' +
-        (locked ? '<div class="status-pill">Locked</div>' : '') +
-        '<div class="content">' +
-          '<div class="stay-label">'+(locked ? 'Stay withheld' : (st.areaName || st.label))+'</div>' +
-          '<div class="stay-range">'+st.range+'</div>' +
+        '<div class="flip-inner">' +
+          '<div class="flip-face flip-front">' + stayCardFrontHTML(st) + '</div>' +
+          '<div class="flip-face flip-back"></div>' +
         '</div>' +
       '</button>';
     });
     html += '</div></div>';
     return html;
+  }
+
+  /* shared front-face markup for a Stays grid card -- reused by staysScreen() and by
+     the transient flip element closeStayFlip() rebuilds for the reverse (close)
+     animation, exactly mirroring stackCardFrontHTML()'s role for the day deck. */
+  function stayCardFrontHTML(st){
+    var locked = stayLocked(st);
+    return '<div class="hero" style="'+heroStyle(st.mood)+'"></div>' + grainDiv() + '<div class="shade"></div>' +
+      (locked ? '<div class="status-pill">Locked</div>' : '') +
+      '<div class="content">' +
+        (locked ? '' : '<div class="stay-label">'+(st.areaName || st.label)+'</div>') +
+        '<div class="stay-range">'+st.range+'</div>' +
+      '</div>';
   }
 
   /* shared front-face markup, reused by the home stack cards and by the
@@ -2085,17 +2249,21 @@
        represents and only restore the old scrollTop when re-rendering the exact same
        one; a genuine navigation to a different screen/day (which tags differently)
        still correctly starts at the top. */
-    var screenKey = state.screen + ':' + state.openDay;
+    var screenKey = state.screen + ':' + state.openDay + ':' + state.openStay;
     var prevView = el.querySelector('.view');
     var keepScroll = (prevView && prevView.dataset.screenKey === screenKey) ? prevView.scrollTop : null;
 
-    var html = '<div class="view'+(state.screen==='day' ? ' view-day' : '')+'" data-screen-key="'+screenKey+'">';
+    var isDetailScreen = (state.screen==='day' || state.screen==='stayDetail');
+    var html = '<div class="view'+(isDetailScreen ? ' view-day' : '')+'" data-screen-key="'+screenKey+'">';
     if(state.screen==='intro'){
       html += introScreen();
     } else if(state.screen==='home'){
       html += homeScreen();
     } else if(state.screen==='stays'){
       html += staysScreen();
+    } else if(state.screen==='stayDetail'){
+      var st = STAYS.filter(function(s){return s.id===state.openStay;})[0];
+      html += st ? stayDetailScreen(st) : '';
     } else {
       var day = DAYS.filter(function(d){return d.n===state.openDay;})[0];
       var dayData = day.n===1 ? DAY1 : day.n===2 ? state.day2 : null;
@@ -2128,11 +2296,13 @@
        own chrome, same reasoning as refreshBtn above). */
     var tabbar = document.getElementById('tabbar');
     if(tabbar){
-      tabbar.hidden = (state.screen!=='home' && state.screen!=='stays');
+      tabbar.hidden = !(state.screen==='home' || state.screen==='stays');
       var tabExplore = document.getElementById('tabExplore');
       var tabStays = document.getElementById('tabStays');
       if(tabExplore) tabExplore.classList.toggle('on', state.screen==='home');
       if(tabStays) tabStays.classList.toggle('on', state.screen==='stays');
+      var tabbarIndicator = document.getElementById('tabbarIndicator');
+      if(tabbarIndicator) tabbarIndicator.classList.toggle('right', state.screen==='stays');
     }
     positionTabbarForIOS(); // must run before updateStackClearance() -- see onViewportChange()'s comment
     updateStackClearance();
@@ -2447,6 +2617,8 @@
         var tabStaysEl = document.getElementById('tabStays');
         if(tabExploreEl) tabExploreEl.classList.add('on');
         if(tabStaysEl) tabStaysEl.classList.remove('on');
+        var tabbarIndicatorEl = document.getElementById('tabbarIndicator');
+        if(tabbarIndicatorEl) tabbarIndicatorEl.classList.remove('right'); /* state.screen is always 'home' by the time we get here */
       }
       /* same bypass-of-render() reasoning as the refreshBtn/tabbar fix directly above --
          render() is also the only place that normally calls saveProgress()/
@@ -2462,10 +2634,198 @@
     };
   }
 
+  /* ---------- Stays: open/close the same box-morph-and-flip animation as the day deck
+     ---------- round 24: the Stays detail view used to be a bottom-sheet modal
+     (sheetHTML(), state.sheetAbout='stay:...') -- the user asked for it to fully open
+     the same way a day card does instead. Modeled directly on openDayFlip()/
+     closeDayFlip() above, with one real difference: a .stay-card lives in a CSS Grid
+     (.stays-grid), not an absolutely-stacked/overlapping deck, so there's no "gather
+     the other cards inward" step that makes sense here -- the opening/closing card
+     simply grows over/shrinks back from whatever the grid's other cards happen to be
+     doing, fully covering them (z-index:500) for the whole animation either way. */
+  function openStayFlip(stayId){
+    if(state.animating) return;
+    var st = STAYS.filter(function(s){return s.id===stayId;})[0];
+    if(!st || stayLocked(st)) return;
+    if(reduceMotion){
+      state.screen='stayDetail'; state.openStay=st.id; state.sheetAbout=null; render();
+      return;
+    }
+    var screenEl = document.getElementById('screen');
+    var cardEl = screenEl.querySelector('.stay-card[data-stay="'+st.id+'"]');
+    if(!cardEl){ state.screen='stayDetail'; state.openStay=st.id; state.sheetAbout=null; render(); return; }
+
+    state.animating = true;
+    var backEl = cardEl.querySelector('.flip-back');
+    backEl.innerHTML = stayDetailScreen(st);
+
+    var rect = cardEl.getBoundingClientRect();
+    var parentRect = screenEl.getBoundingClientRect();
+
+    /* cache where this card sits (and its grid slot), so the close animation can morph
+       the fullscreen view back down to this exact spot and rejoin the same grid area */
+    state.closeStayTargetRect = { top: rect.top-parentRect.top, left: rect.left-parentRect.left, width: rect.width, height: rect.height };
+    state.closeStayId = st.id;
+    state.closeStayArea = cardEl.getAttribute('data-area');
+
+    /* reparent into #screen so top/left/width/height below are measured against the
+       right containing block -- same reasoning as openDayFlip(). .stay-card is
+       position:relative by default (it sits in a CSS grid, not an absolute stack), so
+       unlike a .stack-card this needs an explicit position:absolute override too. */
+    screenEl.appendChild(cardEl);
+    cardEl.style.position = 'absolute';
+    cardEl.style.margin = '0';
+    cardEl.style.zIndex = 500;
+    cardEl.style.top = (rect.top-parentRect.top)+'px';
+    cardEl.style.left = (rect.left-parentRect.left)+'px';
+    cardEl.style.width = rect.width+'px';
+    cardEl.style.height = rect.height+'px';
+    cardEl.classList.add('opening');
+    cardEl.getBoundingClientRect(); /* force reflow so the "from" box is registered */
+
+    requestAnimationFrame(function(){
+      cardEl.style.top = '0px';
+      cardEl.style.left = '0px';
+      cardEl.style.width = parentRect.width+'px';
+      cardEl.style.height = parentRect.height+'px';
+      cardEl.style.borderRadius = '0px';
+      cardEl.style.boxShadow = 'none';
+      cardEl.classList.add('flipped');
+    });
+
+    setTimeout(function(){
+      state.screen='stayDetail'; state.openStay=st.id; state.animating=false; state.sheetAbout=null;
+      render();
+    }, 580);
+  }
+
+  function closeStayFlip(){
+    if(reduceMotion){ state.screen='stays'; state.openStay=null; state.sheetAbout=null; render(); return; }
+    var screenEl = document.getElementById('screen');
+    var viewEl = screenEl.querySelector('.view');
+    var target = state.closeStayTargetRect;
+    var st = STAYS.filter(function(s){return s.id===state.closeStayId;})[0];
+    if(!viewEl || !target || !st || state.animating){ state.screen='stays'; state.openStay=null; state.sheetAbout=null; render(); return; }
+    state.animating = true;
+
+    var parentRect = screenEl.getBoundingClientRect();
+    var locked = stayLocked(st);
+
+    /* the rest of the grid, rebuilt behind everything -- no gather/spread motion needed
+       here (unlike the day deck), it's just sitting in its normal resting layout the
+       whole time, fully hidden under the animating card until the very end */
+    var bgEl = document.createElement('div');
+    bgEl.className = 'view';
+    bgEl.style.pointerEvents = 'none';
+    bgEl.style.zIndex = 400;
+    bgEl.innerHTML = staysScreen(st.id); /* the flipping card itself is excluded until it lands */
+    screenEl.appendChild(bgEl);
+
+    /* transient flip element: the live view becomes the back face, a fresh front face
+       carries the card's own photo -- exactly mirroring closeDayFlip() */
+    var wrapper = document.createElement('div');
+    wrapper.className = 'stay-card flipped is-front closing' + (locked ? ' locked' : '');
+    wrapper.setAttribute('data-area', state.closeStayArea);
+    wrapper.setAttribute('data-stay', st.id);
+    wrapper.style.position = 'absolute';
+    wrapper.style.margin = '0';
+    wrapper.style.zIndex = 500;
+    wrapper.style.top = '0px';
+    wrapper.style.left = '0px';
+    wrapper.style.width = parentRect.width+'px';
+    wrapper.style.height = parentRect.height+'px';
+    wrapper.style.borderRadius = '0px';
+    wrapper.style.boxShadow = 'none';
+
+    var flipInner = document.createElement('div');
+    flipInner.className = 'flip-inner';
+    var flipFront = document.createElement('div');
+    flipFront.className = 'flip-face flip-front';
+    flipFront.innerHTML = stayCardFrontHTML(st);
+    var flipBack = document.createElement('div');
+    flipBack.className = 'flip-face flip-back';
+    flipBack.appendChild(viewEl); /* reparents the live, still-wired view -- no content is lost */
+
+    flipInner.appendChild(flipFront);
+    flipInner.appendChild(flipBack);
+    wrapper.appendChild(flipInner);
+    screenEl.appendChild(wrapper);
+
+    wrapper.getBoundingClientRect(); /* force reflow so the "from" (fullscreen, flipped) state is registered */
+    wrapper.classList.add('opening'); /* reuse its box-morph transition timing */
+
+    requestAnimationFrame(function(){
+      wrapper.style.top = target.top+'px';
+      wrapper.style.left = target.left+'px';
+      wrapper.style.width = target.width+'px';
+      wrapper.style.height = target.height+'px';
+      wrapper.style.borderRadius = '20px';
+      wrapper.classList.remove('flipped'); /* flip-inner transitions rotateY(180deg) -> 0 */
+    });
+
+    /* the card's own shadow waits until it's essentially finished settling (the
+       box-morph is a .52s transition) before popping back in, same timing as
+       closeDayFlip()'s equivalent */
+    setTimeout(function(){
+      wrapper.style.transition = 'box-shadow .12s ease';
+      wrapper.style.boxShadow = '0 10px 22px -14px rgba(0,0,0,.35)';
+    }, 560);
+
+    setTimeout(function(){
+      state.screen='stays'; state.openStay=null; state.animating=false; state.sheetAbout=null;
+
+      /* fold `wrapper` directly into the grid as its real card -- avoids a full render()
+         swap for the same GPU-compositing/shimmer reason explained in closeDayFlip() */
+      var flipBackEl = wrapper.querySelector('.flip-back');
+      if(flipBackEl) flipBackEl.innerHTML = '';
+
+      wrapper.className = 'stay-card' + (locked ? ' locked' : '');
+      wrapper.style.position = '';
+      wrapper.style.top = '';
+      wrapper.style.left = '';
+      wrapper.style.width = '';
+      wrapper.style.height = '';
+      wrapper.style.margin = '';
+      wrapper.style.borderRadius = '';
+      wrapper.style.transition = '';
+      wrapper.style.zIndex = '';
+      wrapper.style.boxShadow = '';
+      wrapper.style.transform = '';
+
+      var gridEl = bgEl.querySelector('.stays-grid');
+      if(gridEl) gridEl.appendChild(wrapper);
+
+      bgEl.style.pointerEvents = '';
+      bgEl.style.zIndex = '';
+
+      /* mirrors closeDayFlip()'s own refreshBtn/tabbar/positionTabbarForIOS/
+         updateStackClearance/saveProgress bypass-of-render() fix -- same reasoning */
+      var refreshBtn = document.getElementById('refreshBtn');
+      if(refreshBtn) refreshBtn.hidden = false;
+      var tabbarEl = document.getElementById('tabbar');
+      if(tabbarEl){
+        tabbarEl.hidden = false;
+        var tabExploreEl = document.getElementById('tabExplore');
+        var tabStaysEl = document.getElementById('tabStays');
+        if(tabExploreEl) tabExploreEl.classList.remove('on');
+        if(tabStaysEl) tabStaysEl.classList.add('on');
+        var tabbarIndicatorEl = document.getElementById('tabbarIndicator');
+        if(tabbarIndicatorEl) tabbarIndicatorEl.classList.add('right');
+      }
+      positionTabbarForIOS(); // must run before updateStackClearance() -- see onViewportChange()'s comment
+      updateStackClearance();
+      saveProgress();
+
+      wire();
+    }, 650);
+  }
+
   /* ---------- shared handlers for the day-detail content (chapters, about, weather, back, reset) ---------- */
   function wireCommon(root){
     var back = root.querySelector('[data-back]');
     if(back) back.addEventListener('click', function(){ closeDayFlip(); });
+    var stayBack = root.querySelector('[data-stay-back]');
+    if(stayBack) stayBack.addEventListener('click', function(){ closeStayFlip(); });
     var reset = root.querySelector('[data-reset]');
     if(reset) reset.addEventListener('click', function(){ state.day2 = JSON.parse(JSON.stringify(DAY2)); state.confirmId=null; render(); });
 
@@ -2645,10 +3005,9 @@
   function wireStays(){
     var el = document.getElementById('screen');
     el.querySelectorAll('.stay-card').forEach(function(b){
-      if(b.classList.contains('locked')) return; /* no sheet for a stay that hasn't unlocked yet */
+      if(b.classList.contains('locked')) return; /* no detail view for a stay that hasn't unlocked yet */
       b.addEventListener('click', function(){
-        state.sheetAbout = 'stay:'+b.getAttribute('data-stay');
-        render();
+        openStayFlip(b.getAttribute('data-stay'));
       });
     });
   }
@@ -2683,6 +3042,71 @@
     var tabStays = document.getElementById('tabStays');
     if(tabExplore) tabExplore.addEventListener('click', function(){ goExplore(); });
     if(tabStays) tabStays.addEventListener('click', function(){ goStays(); });
+  })();
+
+  /* ---------- round 24: diagnostic overlay (see debugToggle's HTML comment) ----------
+     Reads every number the viewport-fix chain (setAppHeight/positionTabbarForIOS/
+     positionSheetForIOS) depends on, plus how this launch was opened (standalone vs.
+     browser tab -- the exact distinction the user's latest report hinges on), and
+     prints them as plain text. Refreshes live on the same onViewportChange() cadence
+     as everything else while the panel is open, so pulling the browser chrome
+     open/closed while watching it updates the numbers in real time. */
+  (function wireDebugPanel(){
+    var toggle = document.getElementById('debugToggle');
+    var panel = document.getElementById('debugPanel');
+    if(!toggle || !panel) return;
+    var open = false;
+
+    function isStandalone(){
+      return (window.navigator.standalone === true) ||
+        (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    }
+
+    function renderDebug(){
+      if(!open) return;
+      var cs = getComputedStyle(document.documentElement);
+      var tabbar = document.getElementById('tabbar');
+      var tabbarRect = (tabbar && !tabbar.hidden) ? tabbar.getBoundingClientRect() : null;
+      var sheetPanel = document.querySelector('.sheet-panel');
+      var sheetRect = sheetPanel ? sheetPanel.getBoundingClientRect() : null;
+      var lines = [
+        'standalone: ' + isStandalone(),
+        'isIOS (this app\'s own check): ' + isIOS,
+        'platform: ' + navigator.platform,
+        'userAgent: ' + navigator.userAgent,
+        'window.innerHeight: ' + window.innerHeight,
+        'window.innerWidth: ' + window.innerWidth,
+        'visualViewport.height: ' + (window.visualViewport ? Math.round(window.visualViewport.height) : 'n/a'),
+        'visualViewport.offsetTop: ' + (window.visualViewport ? window.visualViewport.offsetTop : 'n/a'),
+        'screen.height: ' + (window.screen ? window.screen.height : 'n/a'),
+        '--app-height: ' + cs.getPropertyValue('--app-height'),
+        '--safe-bottom: ' + cs.getPropertyValue('--safe-bottom'),
+        'tabbar rect: ' + (tabbarRect ? ('top='+Math.round(tabbarRect.top)+' bottom='+Math.round(tabbarRect.bottom)+' height='+Math.round(tabbarRect.height)) : 'hidden/absent'),
+        'tabbar inline top/bottom: ' + (tabbar ? ('top='+tabbar.style.top+' bottom='+tabbar.style.bottom) : 'n/a'),
+        'sheet-panel rect: ' + (sheetRect ? ('top='+Math.round(sheetRect.top)+' bottom='+Math.round(sheetRect.bottom)+' height='+Math.round(sheetRect.height)) : 'closed/absent'),
+        'document.documentElement rect height: ' + Math.round(document.documentElement.getBoundingClientRect().height),
+        'state.screen: ' + state.screen
+      ];
+      panel.textContent = lines.join('\n');
+    }
+
+    toggle.addEventListener('click', function(){
+      open = !open;
+      panel.hidden = !open;
+      renderDebug();
+    });
+
+    var origOnViewportChange = onViewportChange;
+    onViewportChange = function(){
+      origOnViewportChange();
+      renderDebug();
+    };
+    /* render() itself calls positionTabbarForIOS()/updateStackClearance() on every
+       screen change (not just on a resize/orientationchange), so the panel should stay
+       live across navigation too, not just viewport events -- cheapest way to get that
+       without threading a call through every render() call site is a light poll while
+       the panel is actually open. */
+    setInterval(function(){ if(open) renderDebug(); }, 1000);
   })();
 
   render();
