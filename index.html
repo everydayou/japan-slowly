@@ -262,7 +262,17 @@
        space *below* stack-wrap's box, inside .view, via a margin -- which flexbox still
        correctly subtracts from what flex:1 1 auto claims as "remaining space", so the
        page still never needs to scroll. 48px comfortably covers the shadow's ~44px bleed. */
-    margin-bottom:48px;
+    /* was a flat 48px (round 8, sized to cover the front card's own ~44px shadow bleed).
+       Round 21: the user asked for the cards to leave a deliberate, screen-size-aware
+       gap above #tabbar specifically (24px above the pill), not just enough room for
+       the shadow -- so this is now driven by --stack-clearance, a custom property JS
+       sets via updateStackClearance() (measuring #tabbar's actual rendered position,
+       recalculated on every render() and on resize/orientationchange) rather than a
+       second hardcoded number that could drift out of sync with the pill's own real
+       height/offset. 48px remains the fallback (same as before) for the instant before
+       that JS runs, and for any screen where #tabbar isn't shown at all (day-detail),
+       where the plain shadow-bleed reasoning above still applies unchanged. */
+    margin-bottom:var(--stack-clearance, 48px);
     padding:2px 0 14px;
     /* was pan-y -- but a real finger drag is never perfectly horizontal, so the
        browser's own vertical-pan gesture kept hijacking the drag-to-browse
@@ -792,21 +802,61 @@
      ADDED TO THE HOME SCREEN and opened standalone (no browser chrome at all) -- which
      `dvh`'s own definition shouldn't be affected by (there's no chrome to dynamically
      account for), but iOS's actual WebKit implementation has a long-documented history of
-     getting `dvh`/`vh` wrong specifically in standalone `display-mode` (over- or under-
-     reporting by roughly the height of the browser chrome that *would* be there in a
-     normal tab, as if some layout code path still assumes it exists). CSS alone can't work
+     getting `dvh`/`vh` wrong specifically in standalone `display-mode`. CSS alone can't work
      around a viewport-unit bug in the engine computing that unit -- so this measures the
-     real visible height directly via `window.innerHeight` (which standalone iOS reports
-     correctly even when `dvh` doesn't) and exposes it as `--app-height`, which `.screen`
-     now prefers via `var(--app-height, 100dvh)` -- the `100dvh` stays as the fallback for
-     the instant before this runs, or on any environment where this script is blocked. */
+     real visible height directly and exposes it as `--app-height`, which `.screen` now
+     prefers via `var(--app-height, 100dvh)` -- `100dvh` stays as the fallback for the
+     instant before this runs, or on any environment where this script is blocked.
+     Round 20 follow-up #2: that JS fix STILL didn't close the gap, and the user's own
+     description of what they saw pinned down why -- other sites don't reserve any space
+     for Safari's bottom bar at all ("it's floating"), matching iOS 15+'s compact/floating
+     tab-bar mode, where Safari's own chrome overlays on top of the page instead of
+     docking and resizing the page's layout viewport. `window.innerHeight` reflects the
+     LAYOUT viewport, which in this floating-chrome mode can still be reported as though
+     the bar were docked and taking up permanent space, even though visually it no longer
+     is. `window.visualViewport.height` is the API actually designed for this exact
+     situation -- it tracks the real visible/rendered area, correctly shrinking only for
+     things that truly overlay content (the keyboard, a floating toolbar) -- so this now
+     prefers it over `innerHeight` wherever it's available (all real iOS Safari versions
+     that have the floating-bar behavior in the first place; falls back to `innerHeight`
+     only on the rare engine with no visualViewport support at all). */
   function setAppHeight(){
-    document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
+    var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    document.documentElement.style.setProperty('--app-height', h + 'px');
   }
   setAppHeight();
   window.addEventListener('resize', setAppHeight);
   window.addEventListener('orientationchange', setAppHeight);
   if(window.visualViewport) window.visualViewport.addEventListener('resize', setAppHeight);
+
+  /* ---------- home-deck bottom clearance above #tabbar (round 21) ----------
+     The user asked for the home screen's card deck to resize with the screen and leave
+     a deliberate 24px gap above the floating Explorer/Stays segmented control, rather
+     than a flat shadow-bleed-only margin that doesn't know the pill is there. Reads
+     #tabbar's own ACTUAL rendered position (not a second, easily-drifting recalculation
+     of its CSS formula) so this stays correct even if the pill's own size/offset/safe-
+     area math ever changes independently -- one source of truth, measured, not
+     duplicated. Only applies while #tabbar is actually visible (home/stays screens);
+     everywhere else falls back to the plain 48px shadow-bleed value, unchanged from
+     round 8. Called from render() (so it's current after every navigation/re-render)
+     and from resize/orientationchange (so rotating the device or a viewport-size change
+     recalculates it without needing a full re-render). */
+  function updateStackClearance(){
+    var wrap = document.querySelector('.stack-wrap');
+    if(!wrap) return; // not on the home screen right now -- nothing to size
+    var tabbar = document.getElementById('tabbar');
+    var screenEl = document.querySelector('.screen');
+    if(tabbar && !tabbar.hidden && screenEl){
+      var tabRect = tabbar.getBoundingClientRect();
+      var screenRect = screenEl.getBoundingClientRect();
+      var clearance = Math.round((screenRect.bottom - tabRect.top) + 24);
+      document.documentElement.style.setProperty('--stack-clearance', Math.max(48, clearance) + 'px');
+    } else {
+      document.documentElement.style.removeProperty('--stack-clearance'); // falls back to the CSS default (48px)
+    }
+  }
+  window.addEventListener('resize', updateStackClearance);
+  window.addEventListener('orientationchange', updateStackClearance);
 
   /* ---------- noise texture ---------- */
   function noiseDataURL(size){
@@ -1171,13 +1221,77 @@
     tomorrowGateChapter:'pasela'
   };
 
+  /* ---------- progress persistence (round 21) ----------
+     Previously EVERYTHING was from-scratch on every reload -- which chapters had been
+     revealed, which day/screen you were on, even which card was in focus -- because
+     nothing was ever written to storage. That's fine for a demo you're actively
+     clicking through in one sitting, but wrong for the real trip: closing and reopening
+     the app (or iOS just evicting the tab from memory, which it does constantly) can't
+     be allowed to wipe out revealed chapters or arrival confirmations.
+     Only PROGRESS is persisted, not the raw `state` object wholesale -- deliberately
+     narrow, for two reasons: (1) a handful of `state` fields are transient UI-only
+     (`animating`, `confirmId`, `sheetAbout`, `weatherOpen`) and should always start
+     fresh, never resume mid-animation or with a stale sheet/confirm-row still "open";
+     (2) `state.day2` is a full deep-clone of DAY2's static content, and blindly
+     persisting/restoring that wholesale would let a stale saved copy silently shadow
+     any future content edit to DAY2 itself. Instead, only each chapter's mutable
+     `id`+`state` (hidden/revealed/ontheway) is saved, and it's re-applied onto a FRESH
+     `JSON.parse(JSON.stringify(DAY2))` clone by id -- so a chapter added/removed/
+     reworked in DAY2 later is picked up correctly either way, only the reveal
+     progress itself survives.
+     Versioned key (`_v1`): bump this if `state`'s or a chapter's saved shape ever
+     changes incompatibly, so an old/mismatched saved blob is cleanly ignored instead
+     of crashing or half-applying. Wrapped in try/catch throughout -- private
+     browsing, storage quota, or a disabled localStorage should degrade to "just don't
+     persist", never break the app. */
+  var STORAGE_KEY = 'japanSlowlyProgress_v1';
+  function saveProgress(){
+    try{
+      var chapterStates = {};
+      state.day2.chapters.forEach(function(c){ chapterStates[c.id] = c.state; });
+      var payload = { screen:state.screen, openDay:state.openDay, stackIndex:state.stackIndex, day2ChapterStates:chapterStates };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    }catch(e){ /* private browsing / quota / disabled -- just don't persist */ }
+  }
+  function loadProgress(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return null;
+      var parsed = JSON.parse(raw);
+      return (parsed && typeof parsed==='object') ? parsed : null;
+    }catch(e){ return null; }
+  }
+
   /* ---------- state ---------- */
   /* screen starts on 'intro' (round 9) -- the big centered splash with the "Start your
      journey" CTA -- rather than dropping straight into the card deck. Tapping the CTA
      morphs into 'home' (see goHome()); tapping the compact hero on 'home' morphs back
-     (see goIntro()). Both are a from-scratch state, not persisted across reloads, same
-     as everything else in this prototype. */
+     (see goIntro()). Round 21: a saved progress blob (see saveProgress()/loadProgress()
+     above) can override screen/openDay/stackIndex/chapter-reveal-state below -- a
+     returning visitor resumes exactly where they left off instead of always restarting
+     at the intro splash with every chapter re-hidden. */
   var state = { screen:'intro', openDay:null, day2:JSON.parse(JSON.stringify(DAY2)), weatherOpen:{}, stackIndex:1, confirmId:null, animating:false, sheetAbout:null };
+  (function applySavedProgress(){
+    var saved = loadProgress();
+    if(!saved) return;
+    if(saved.day2ChapterStates){
+      state.day2.chapters.forEach(function(c){
+        var savedState = saved.day2ChapterStates[c.id];
+        if(savedState==='hidden' || savedState==='ontheway' || savedState==='revealed') c.state = savedState;
+      });
+    }
+    if(typeof saved.stackIndex==='number') state.stackIndex = saved.stackIndex;
+    // openDay/screen only restored together, and only if that day still exists and isn't locked --
+    // guards against a stale save pointing at a day that's since been removed or re-locked.
+    if(saved.screen==='day' && saved.openDay!=null){
+      var d = DAYS.filter(function(x){ return x.n===saved.openDay; })[0];
+      if(d && d.status!=='locked'){ state.screen='day'; state.openDay=saved.openDay; }
+    } else if(saved.screen==='home' || saved.screen==='stays'){
+      state.screen = saved.screen;
+    }
+    // saved.screen==='intro' (or anything else) deliberately falls through and keeps
+    // the 'intro' default -- nothing to resume into.
+  })();
   var dragState = { startX:0, lastX:0, lastT:0, vx:0, moved:false, active:false, el:null };
 
   /* stamped once when the app/session loads, standing in for "when content was last
@@ -1950,6 +2064,8 @@
       if(tabExplore) tabExplore.classList.toggle('on', state.screen==='home');
       if(tabStays) tabStays.classList.toggle('on', state.screen==='stays');
     }
+    updateStackClearance();
+    saveProgress();
   }
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2261,6 +2377,13 @@
         if(tabExploreEl) tabExploreEl.classList.add('on');
         if(tabStaysEl) tabStaysEl.classList.remove('on');
       }
+      /* same bypass-of-render() reasoning as the refreshBtn/tabbar fix directly above --
+         render() is also the only place that normally calls saveProgress()/
+         updateStackClearance(), so this path (closing a day back to home) needs its own
+         explicit calls or a reload right after closing a day would silently resume with
+         stale screen/openDay progress and an un-recalculated card clearance. */
+      updateStackClearance();
+      saveProgress();
 
       wire();
     };
