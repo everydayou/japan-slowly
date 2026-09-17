@@ -657,6 +657,86 @@
   .refresh-fab.spinning{ pointer-events:none; opacity:.7; }
   .refresh-fab.spinning svg{ animation:refreshspin .7s linear infinite; }
   @keyframes refreshspin{ to{ transform:rotate(360deg); } }
+
+  /* ---- bottom segmented control bar (Explorer / Stays) ----
+     A floating pill, bottom-center, that hugs its content instead of spanning full
+     width -- the user was explicit this should read as a small segmented control,
+     not a full-width tab bar. Icon-only (no labels), same fixed/persistent-sibling-
+     of-#screen pattern as .refresh-fab so it survives render() without re-wiring,
+     shown only on the two screens it actually switches between (home/stays) -- see
+     render()'s tabbar[hidden] toggle at the bottom of that function. */
+  .tabbar{
+    position:fixed;
+    left:50%;
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 18px);
+    transform:translateX(-50%);
+    z-index:50;
+    display:flex; align-items:center; gap:2px;
+    background:var(--bg-elevated);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:4px;
+    box-shadow:0 8px 24px -8px rgba(0,0,0,.25);
+  }
+  .tabbar[hidden]{ display:none; }
+  .tabbar-btn{
+    width:44px; height:40px;
+    display:flex; align-items:center; justify-content:center;
+    border:0; border-radius:999px; background:transparent;
+    color:var(--ink-faint); cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:background .18s ease, color .18s ease;
+  }
+  .tabbar-btn:active{ transform:scale(.92); }
+  .tabbar-btn.on{ background:var(--accent); color:#fff; }
+
+  /* ---- Stays screen: mosaic/bento grid ----
+     Matches the shape of the wireframe the user sent: one full-width card on top,
+     then two columns below it -- two smaller cards stacked in the left column, one
+     tall card spanning both rows in the right column. Expressed with named grid
+     areas rather than nth-child math so the shape stays legible and easy to re-tune. */
+  .stays-view{ padding:calc(env(safe-area-inset-top, 0px) + 24px) 20px calc(env(safe-area-inset-bottom, 0px) + 110px); }
+  .stays-head{ text-align:center; margin-bottom:20px; }
+  .stays-head .wordmark{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:20px; }
+  .stays-head .sub{ font-size:13px; color:var(--ink-faint); margin-top:4px; }
+  .stays-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:150px 130px 130px;
+    grid-template-areas:"top top" "left1 right" "left2 right";
+    gap:12px;
+  }
+  .stay-card{
+    position:relative; overflow:hidden; border-radius:20px;
+    border:0; padding:0; text-align:left; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    box-shadow:0 10px 22px -14px rgba(0,0,0,.35);
+  }
+  .stay-card:active{ transform:scale(.98); }
+  .stay-card.locked{ cursor:default; }
+  .stay-card[data-area="top"]{ grid-area:top; }
+  .stay-card[data-area="left1"]{ grid-area:left1; }
+  .stay-card[data-area="left2"]{ grid-area:left2; }
+  .stay-card[data-area="right"]{ grid-area:right; }
+  .stay-card .hero{ position:absolute; inset:0; }
+  .stay-card.locked .hero{ filter:grayscale(1) blur(4px) brightness(.6) contrast(1.05); }
+  .stay-card .shade{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,.7) 100%); }
+  .stay-card .content{ position:absolute; left:14px; right:14px; bottom:12px; color:#F3EEE1; }
+  .stay-card .stay-label{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:15px; }
+  .stay-card .stay-range{ font-size:11px; opacity:.85; margin-top:2px; letter-spacing:.03em; }
+  .stay-card .status-pill{
+    position:absolute; top:11px; left:12px;
+    font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:10px; letter-spacing:.07em;
+    padding:3px 8px; border-radius:20px; text-transform:uppercase;
+    background:rgba(0,0,0,.4); color:#F3EEE1;
+  }
+  /* ---- Stay detail sheet body (open point) ----
+     Reuses the same .about-item row styling the day-chapter sheet already has, plus
+     a small explicit "TBD" note so nobody mistakes the placeholder for real content. */
+  .stay-tbd-note{
+    font-size:13px; color:var(--ink-faint); line-height:1.5;
+    background:var(--frame); border-radius:12px; padding:10px 12px;
+  }
 </style>
 
 <div class="screen" id="screen"></div>
@@ -670,6 +750,18 @@
 <button id="refreshBtn" class="refresh-fab" aria-label="Reload latest version" title="Reload latest version">
   <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
 </button>
+
+<!-- Bottom segmented control (Explorer / Stays) -- persistent sibling of #screen for
+     the same reason #refreshBtn is: it must survive render()'s full innerHTML rebuild
+     of #screen without being re-wired on every navigation. -->
+<div id="tabbar" class="tabbar" hidden>
+  <button class="tabbar-btn" id="tabExplore" aria-label="Explorer" title="Explorer">
+    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="16 8 14 14 8 16 10 10 16 8"/></svg>
+  </button>
+  <button class="tabbar-btn" id="tabStays" aria-label="Stays" title="Stays">
+    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6"/><path d="M3 18v2M21 18v2"/><path d="M3 12V8a2 2 0 0 1 2-2h4v4"/></svg>
+  </button>
+</div>
 
 <script>
 (function(){
@@ -759,6 +851,27 @@
       teaser:'One last look before the doors close.', status:'locked'}
   ];
 
+  /* ---- Stays tab data (open point) ----
+     No confirmed accommodation content yet (names/addresses/area write-ups) -- the
+     user explicitly asked for this to stay a structural placeholder rather than
+     fabricated content. Each entry only carries what IS settled: which leg of the
+     trip it covers and which day it should unlock on. Locking reuses DAYS' own
+     status field (found via unlockDay) rather than a separate lock flag, so a stay
+     unlocks the same way a day does -- by time/day, never by physical proximity,
+     since the user wants this reachable before actually arriving there. `mood` picks
+     a placeholder gradient from heroStyle()/MOODS (same mechanism day cards use when
+     they have no real photo yet) until real photos are supplied. */
+  var STAYS = [
+    {id:'s1', label:'Stay 1', range:'Days 1–2', unlockDay:1, mood:1},
+    {id:'s2', label:'Stay 2', range:'Days 3–5', unlockDay:3, mood:4},
+    {id:'s3', label:'Stay 3', range:'Days 6–8', unlockDay:6, mood:6},
+    {id:'s4', label:'Stay 4', range:'Days 9–10', unlockDay:9, mood:9}
+  ];
+  function stayLocked(st){
+    var d = DAYS.filter(function(x){ return x.n===st.unlockDay; })[0];
+    return !!d && d.status==='locked';
+  }
+
   var DAY1 = {
     weather:{lo:19,hi:24,cond:'Clear, mild', hourly:[['13:00','24°'],['16:00','23°'],['19:00','21°'],['22:00','19°'],['01:00','18°'],['04:00','17°']]},
     energy:'Low–medium', walking:'Low–medium', outside:'Mixed indoor/outdoor',
@@ -779,7 +892,9 @@
       {id:'return-haneda', name:'Return to Haneda', tag:'TIME', state:'revealed',
         blurb:'EK312 lands at 22:20 — the reunion point for all three travellers.', meta:'Aim to arrive 21:30–21:45'},
       {id:'late-food', name:'Late food', tag:'SEQ', state:'revealed',
-        blurb:'Pick up food on the way back from Haneda so nobody has to search for a meal after midnight.'}
+        blurb:'Swing through Shin-Okubo on the way back from Haneda — Tokyo’s Koreatown runs late, so there’s always something open for a post-midnight meal.',
+        about:[['Why it matters','Most of central Tokyo shuts its kitchens by 11pm; Shin-Okubo, a few minutes from Isshuku Noma, is one of the few pockets that genuinely stays open past midnight.'],
+               ['Look for','Korean BBQ, tteokbokki stalls, convenience-store gaps filled by 24-hour spots — no single destination, just walk until something looks good.']]}
     ],
     tomorrow:'No fixed early start tomorrow — the day can begin slowly after the late pickup.',
     tomorrowReady:true
@@ -1064,26 +1179,53 @@
     return day.n===1 ? DAY1 : day.n===2 ? state.day2 : null;
   }
 
-  /* the bottom-sheet modal itself -- rendered as a sibling of .view (see render()),
-     covering half the screen, sliding up from the bottom. Returns '' when closed so
-     it's simply absent from the DOM rather than hidden. */
-  function sheetHTML(){
-    if(!state.sheetAbout) return '';
-    var dayData = currentDayData();
-    var ch = dayData ? dayData.chapters.filter(function(c){return c.id===state.sheetAbout;})[0] : null;
-    if(!ch || !ch.about) return '';
+  /* shared bottom-sheet shell (backdrop/panel/handle/header/body) -- factored out so
+     the Stays detail sheet can reuse the exact same markup, drag-to-dismiss and
+     transition wiring as the day-chapter About sheet instead of duplicating it. */
+  function sheetShell(title, bodyHTML){
     return '' +
     '<div class="sheet-backdrop" data-sheet-close></div>' +
-    '<div class="sheet-panel" role="dialog" aria-modal="true" aria-label="'+ch.name+'">' +
+    '<div class="sheet-panel" role="dialog" aria-modal="true" aria-label="'+title+'">' +
       '<div class="sheet-handle"></div>' +
       /* iOS-style bar: close (X) on the left, title centered -- see .sheet-header's
          3-column grid for how the centering actually works regardless of title length. */
       '<div class="sheet-header">' +
         '<button class="sheet-close" data-sheet-close aria-label="Close">'+closeIcon+'</button>' +
-        '<div class="sheet-title">'+ch.name+'</div>' +
+        '<div class="sheet-title">'+title+'</div>' +
       '</div>' +
-      '<div class="sheet-body">' + aboutItemsHTML(ch.about, ch.id) + '</div>' +
+      '<div class="sheet-body">' + bodyHTML + '</div>' +
     '</div>';
+  }
+
+  /* placeholder body for a Stay's detail sheet -- there's no real accommodation
+     content yet (hotel name/address, area write-up), so this deliberately renders
+     as clearly-marked TBD scaffolding rather than inventing anything. Structured as
+     the same [label,value] row shape aboutItemsHTML() already knows how to render,
+     so swapping in real content later is just filling these two rows in. */
+  function stayAboutHTML(st){
+    return aboutItemsHTML([
+      ['Hotel', 'Name and address — to be added once booked.'],
+      ['The area', 'A short guide to what’s around it — to be added.']
+    ], st.id) + '<div class="stay-tbd-note">Content for this stay is still an open point — placeholder only.</div>';
+  }
+
+  /* the bottom-sheet modal itself -- rendered as a sibling of .view (see render()),
+     covering half the screen, sliding up from the bottom. Returns '' when closed so
+     it's simply absent from the DOM rather than hidden. Doubles as the Stays detail
+     sheet: state.sheetAbout holds either a day-chapter id (looked up via
+     currentDayData()) or, prefixed 'stay:', a Stays entry id -- same open/close/drag
+     state, same DOM shape, just a different content source. */
+  function sheetHTML(){
+    if(!state.sheetAbout) return '';
+    if(state.sheetAbout.indexOf('stay:')===0){
+      var st = STAYS.filter(function(s){return s.id===state.sheetAbout.slice(5);})[0];
+      if(!st || stayLocked(st)) return '';
+      return sheetShell(st.label, stayAboutHTML(st));
+    }
+    var dayData = currentDayData();
+    var ch = dayData ? dayData.chapters.filter(function(c){return c.id===state.sheetAbout;})[0] : null;
+    if(!ch || !ch.about) return '';
+    return sheetShell(ch.name, aboutItemsHTML(ch.about, ch.id));
   }
 
   /* runs the entrance transition after render() has mounted a freshly-opened sheet --
@@ -1406,6 +1548,33 @@
     return html;
   }
 
+  /* ---------- Stays screen ----------
+     A 4-card bento/mosaic grid (1 full-width card, then 2 stacked left + 1 tall
+     right, matching the wireframe the user sent) rather than the day deck's swipeable
+     carousel -- these aren't meant to be flipped through one at a time, they're a
+     reference the user dips into. Locking is day-based (stayLocked(), same status
+     field DAYS already uses) not location-based, per the user's explicit ask. */
+  function staysScreen(){
+    var areas = ['top','left1','left2','right'];
+    var html = '<div class="stays-view">' +
+      '<div class="stays-head"><div class="wordmark">Stays</div>' +
+        '<div class="sub">Where you’re sleeping, unlocked day by day</div></div>' +
+      '<div class="stays-grid">';
+    STAYS.forEach(function(st, i){
+      var locked = stayLocked(st);
+      html += '<button class="stay-card'+(locked?' locked':'')+'" data-area="'+areas[i]+'" data-stay="'+st.id+'">' +
+        '<div class="hero" style="'+heroStyle(st.mood)+'"></div>' + grainDiv() + '<div class="shade"></div>' +
+        (locked ? '<div class="status-pill">Locked</div>' : '') +
+        '<div class="content">' +
+          '<div class="stay-label">'+(locked ? 'Stay withheld' : st.label)+'</div>' +
+          '<div class="stay-range">'+st.range+'</div>' +
+        '</div>' +
+      '</button>';
+    });
+    html += '</div></div>';
+    return html;
+  }
+
   /* shared front-face markup, reused by the home stack cards and by the
      transient flip element rebuilt for the reverse (close) animation */
   function stackCardFrontHTML(d){
@@ -1553,6 +1722,24 @@
     }, 160);
   }
 
+  /* ---------- Stays tab <-> Explorer tab (segmented control) ----------
+     A plain screen swap, not the intro/home hero-morph treatment above -- these two
+     screens don't share a common hero element to morph between, and a simple
+     cross-fade reads as a tab switch rather than a "journey" transition, which is
+     the right register for a segmented control. */
+  function goStays(){
+    if(state.animating || state.screen==='stays') return;
+    state.sheetAbout = null;
+    state.screen = 'stays';
+    render();
+  }
+  function goExplore(){
+    if(state.animating || state.screen==='home') return;
+    state.sheetAbout = null;
+    state.screen = 'home';
+    render();
+  }
+
   function render(){
     var el = document.getElementById('screen');
     /* el.innerHTML gets torn down and rebuilt on every render(), which by default
@@ -1572,6 +1759,8 @@
       html += introScreen();
     } else if(state.screen==='home'){
       html += homeScreen();
+    } else if(state.screen==='stays'){
+      html += staysScreen();
     } else {
       var day = DAYS.filter(function(d){return d.n===state.openDay;})[0];
       var dayData = day.n===1 ? DAY1 : day.n===2 ? state.day2 : null;
@@ -1598,6 +1787,18 @@
        force-fetch a fresh copy of the app.) */
     var refreshBtn = document.getElementById('refreshBtn');
     if(refreshBtn) refreshBtn.hidden = (state.screen!=='home' && state.screen!=='intro');
+    /* the segmented control only makes sense once there's more than one place to be --
+       shown on the two screens it switches between (home/stays), hidden on the intro
+       splash and on a day-detail screen (which already owns that corner/edge with its
+       own chrome, same reasoning as refreshBtn above). */
+    var tabbar = document.getElementById('tabbar');
+    if(tabbar){
+      tabbar.hidden = (state.screen!=='home' && state.screen!=='stays');
+      var tabExplore = document.getElementById('tabExplore');
+      var tabStays = document.getElementById('tabStays');
+      if(tabExplore) tabExplore.classList.toggle('on', state.screen==='home');
+      if(tabStays) tabStays.classList.toggle('on', state.screen==='stays');
+    }
   }
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2083,9 +2284,24 @@
     if(cta) cta.addEventListener('click', function(){ goHome(); });
   }
 
+  /* ---------- Stays grid ---------- */
+  function wireStays(){
+    var el = document.getElementById('screen');
+    el.querySelectorAll('.stay-card').forEach(function(b){
+      if(b.classList.contains('locked')) return; /* no sheet for a stay that hasn't unlocked yet */
+      b.addEventListener('click', function(){
+        state.sheetAbout = 'stay:'+b.getAttribute('data-stay');
+        render();
+      });
+    });
+  }
+
   function wire(){
     var el = document.getElementById('screen');
-    if(state.screen==='intro'){ wireIntro(); } else if(state.screen==='home'){ wireHome(); } else { wireCommon(el); }
+    if(state.screen==='intro'){ wireIntro(); }
+    else if(state.screen==='home'){ wireHome(); }
+    else if(state.screen==='stays'){ wireStays(); wireCommon(el); }
+    else { wireCommon(el); }
   }
 
   /* ---------- reload-latest button ---------- */
@@ -2100,6 +2316,16 @@
         location.replace(location.pathname + '?v=' + Date.now());
       }, 220);
     });
+  })();
+
+  /* ---------- bottom segmented control (Explorer / Stays) ----------
+     Persistent sibling of #screen, wired once (not inside wire(), which reruns on
+     every render()) -- same reasoning as wireRefresh() above. */
+  (function wireTabbar(){
+    var tabExplore = document.getElementById('tabExplore');
+    var tabStays = document.getElementById('tabStays');
+    if(tabExplore) tabExplore.addEventListener('click', function(){ goExplore(); });
+    if(tabStays) tabStays.addEventListener('click', function(){ goStays(); });
   })();
 
   render();
