@@ -148,7 +148,8 @@
   .screen{
     position:relative;
     width:100%;
-    height:100dvh;
+    height:100dvh; /* fallback until the JS below runs (or if it's ever blocked) */
+    height:var(--app-height, 100dvh); /* real measured height -- see the JS comment for why this is needed on top of dvh */
     background:var(--bg);
     overflow:hidden;
     display:flex;
@@ -783,6 +784,29 @@
 
 <script>
 (function(){
+
+  /* ---------- real viewport height (belt-and-suspenders for iOS standalone PWA) ----------
+     Round 20 switched .screen from `100svh` to `100dvh` to close a dead-space gap at the
+     bottom of the screen. That fix is correct for the general "Safari tab, address bar
+     shows/hides" case, but the user then reported the gap specifically when the app is
+     ADDED TO THE HOME SCREEN and opened standalone (no browser chrome at all) -- which
+     `dvh`'s own definition shouldn't be affected by (there's no chrome to dynamically
+     account for), but iOS's actual WebKit implementation has a long-documented history of
+     getting `dvh`/`vh` wrong specifically in standalone `display-mode` (over- or under-
+     reporting by roughly the height of the browser chrome that *would* be there in a
+     normal tab, as if some layout code path still assumes it exists). CSS alone can't work
+     around a viewport-unit bug in the engine computing that unit -- so this measures the
+     real visible height directly via `window.innerHeight` (which standalone iOS reports
+     correctly even when `dvh` doesn't) and exposes it as `--app-height`, which `.screen`
+     now prefers via `var(--app-height, 100dvh)` -- the `100dvh` stays as the fallback for
+     the instant before this runs, or on any environment where this script is blocked. */
+  function setAppHeight(){
+    document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
+  }
+  setAppHeight();
+  window.addEventListener('resize', setAppHeight);
+  window.addEventListener('orientationchange', setAppHeight);
+  if(window.visualViewport) window.visualViewport.addEventListener('resize', setAppHeight);
 
   /* ---------- noise texture ---------- */
   function noiseDataURL(size){
