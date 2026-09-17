@@ -519,7 +519,12 @@
      the page scroll position underneath -- see the render() comment for why that
      matters. */
   .sheet-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,0); transition:background .28s ease; z-index:80; touch-action:none; }
-  .sheet-backdrop.open{ background:rgba(0,0,0,.44); }
+  /* darker than a typical .4-.45 scrim (round 17 follow-up, was rgba(0,0,0,.44)) so the
+     content behind the sheet reads as clearly backgrounded/non-interactive instead of
+     still competing for attention -- kept in sync with the two matching values inside
+     wireSheetDrag() (drag tracks this same darkness 1:1 as the sheet is pulled open/
+     closed by hand, not just the two CSS-transition endpoints). */
+  .sheet-backdrop.open{ background:rgba(0,0,0,.65); }
   .sheet-panel{
     position:fixed; left:0; right:0; bottom:0; height:50%; z-index:81;
     background:var(--bg-elevated); border-radius:20px 20px 0 0;
@@ -543,8 +548,20 @@
      close button's own footprint (32px) -- so the title's center lines up with the
      panel's center regardless of title length, matching the platform convention this
      was asked to feel like. touch-action:none for the same reason as .sheet-handle:
-     this row doesn't scroll, it only starts a drag. */
-  .sheet-header{ display:grid; grid-template-columns:32px 1fr 32px; align-items:center; gap:8px; padding:10px 16px 0; flex:none; touch-action:none; }
+     this row doesn't scroll, it only starts a drag (see wireSheetDrag() -- the close
+     button itself is explicitly excluded from that, so it keeps working as a plain
+     tap target). `position:sticky` + a solid background pins it to the panel's own
+     top edge for real (round-17 follow-up ask) -- it was already effectively fixed in
+     practice (a flex:none row above the one scrolling child, never inside the scroll
+     box), but this makes that literal rather than incidental, and matters once
+     anything else about the panel's layout changes later. Bottom padding widened from
+     0 to 18px (was flush against .sheet-body's own top padding) for real breathing
+     room between the header and the first row of content, also asked for. */
+  .sheet-header{
+    position:sticky; top:0; z-index:2; background:var(--bg-elevated);
+    display:grid; grid-template-columns:32px 1fr 32px; align-items:center; gap:8px;
+    padding:10px 16px 18px; flex:none; touch-action:none;
+  }
   .sheet-title{ grid-column:2; text-align:center; font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:16px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .sheet-close{
     grid-column:1; width:32px; height:32px; border-radius:50%;
@@ -1156,12 +1173,20 @@
       panel.addEventListener('transitionend', onEnd);
       requestAnimationFrame(function(){
         panel.style.transform = toOpen ? 'translateY(0)' : 'translateY(100%)';
-        backdrop.style.background = toOpen ? 'rgba(0,0,0,.44)' : 'rgba(0,0,0,0)';
+        backdrop.style.background = toOpen ? 'rgba(0,0,0,.65)' : 'rgba(0,0,0,0)';
       });
     }
 
     function onDown(e){
       if(e.button!==undefined && e.button!==0) return;
+      /* the close button lives inside .sheet-header, one of this function's own drag
+         sources -- without this check, tapping it started a (zero-distance) drag that
+         captured the pointer to the header, which silently ate the button's own click
+         (a captured pointer's subsequent events, including the synthetic click, are
+         retargeted to the capturing element instead of the button), so the X stopped
+         dismissing the sheet the moment drag-to-dismiss was added. Let it through
+         untouched instead. */
+      if(e.target.closest && e.target.closest('.sheet-close')) return;
       var fromBody = (e.currentTarget===body);
       drag = {
         startY:e.clientY, lastY:e.clientY, lastT:performance.now(), vy:0, dy:0,
@@ -1195,16 +1220,23 @@
       }
       if(!drag.active) return;
       if(e.cancelable) e.preventDefault();
-      var dy = rawDy < 0 ? rawDy/4 : rawDy; /* slight resistance if it overshoots upward past open */
+      /* downward tracks the finger 1:1, same as a native sheet. Upward is now real,
+         visible (resisted) movement too -- not floored to 0 -- so the sheet actually
+         follows the finger a little instead of feeling stuck/frozen when dragged up;
+         capped at -56px so it can't rubber-band further than a native sheet would.
+         Either way, releasing net-upward always just snaps back open (see onUp) --
+         upward motion can never dismiss it. */
+      var dy = rawDy < 0 ? Math.max(rawDy/3, -56) : rawDy;
       var now = performance.now();
       var dt = now - drag.lastT;
       if(dt>0) drag.vy = (e.clientY - drag.lastY)/dt;
       drag.lastY = e.clientY; drag.lastT = now;
       drag.dy = dy;
-      var clamped = Math.max(0, dy);
-      panel.style.transform = 'translateY('+clamped+'px)';
-      var progress = Math.min(1, clamped / panelHeight());
-      backdrop.style.background = 'rgba(0,0,0,'+(0.44*(1-progress)).toFixed(3)+')';
+      panel.style.transform = 'translateY('+dy+'px)';
+      /* only downward movement dims the backdrop -- an upward pull stays at full
+         darkness (the sheet is still fully "open" from the backdrop's point of view). */
+      var openFrac = Math.min(1, Math.max(0, dy) / panelHeight());
+      backdrop.style.background = 'rgba(0,0,0,'+(0.65*(1-openFrac)).toFixed(3)+')';
     }
     function onUp(e){
       if(!drag || drag.pointerId!==e.pointerId) return;
@@ -1916,13 +1948,27 @@
         if(!item || !collapse || !sheetBody) return;
         var opening = !item.classList.contains('open');
 
+        /* collapsing siblings ABOVE `item` in the list shrink over the same .3s
+           transition as item's own expand -- which shifts item's own top position
+           throughout that .3s, not just at the end. Measuring/scrolling too early
+           (the original round-17 version did this on the very next animation frame)
+           computed the target against item's pre-shift position, so the scroll landed
+           partway into item's revealed content instead of at its header once the
+           layout actually settled. Track whichever siblings are actually collapsing
+           here and wait for their own max-height transition to finish before
+           measuring anything, so the scroll target reflects the final, settled
+           layout. */
+        var collapsingOthers = [];
         sheetBody.querySelectorAll('.about-group.collapsible.open').forEach(function(other){
           if(other===item) return;
           other.classList.remove('open');
           var otherBtn = other.querySelector('[data-group-toggle]');
           if(otherBtn) otherBtn.setAttribute('aria-expanded','false');
           var otherCollapse = other.querySelector('.about-group-collapse');
-          if(otherCollapse) otherCollapse.style.maxHeight = '0px';
+          if(otherCollapse){
+            otherCollapse.style.maxHeight = '0px';
+            collapsingOthers.push(otherCollapse);
+          }
         });
 
         item.classList.toggle('open', opening);
@@ -1931,18 +1977,39 @@
 
         if(opening){
           /* scroll so the newly opened row's own header (the start of its now-visible
-             content) is visible within the sheet's scroll box -- item's own position
-             doesn't shift as its content grows below it, so this can be computed right
-             away rather than waiting for the expand transition to finish. Measured via
+             content) is visible within the sheet's scroll box. Measured via
              getBoundingClientRect (not offsetTop) so it's correct regardless of which
              element ends up being the nearest positioned ancestor. */
+          var scrolled = false;
           var doScroll = function(){
+            if(scrolled) return;
+            scrolled = true;
             var sbRect = sheetBody.getBoundingClientRect();
             var itemRect = item.getBoundingClientRect();
             var target = sheetBody.scrollTop + (itemRect.top - sbRect.top) - 8;
             sheetBody.scrollTo({ top:Math.max(0,target), behavior: reduceMotion ? 'auto' : 'smooth' });
           };
-          if(reduceMotion) doScroll(); else requestAnimationFrame(doScroll);
+          if(reduceMotion || !collapsingOthers.length){
+            /* nothing else is collapsing (item was the only thing changing height
+               above the fold), or motion is reduced and nothing will animate at all
+               -- either way item's position is already final, no need to wait. */
+            requestAnimationFrame(doScroll);
+          } else {
+            var pending = collapsingOthers.length;
+            collapsingOthers.forEach(function(el){
+              var onEnd = function(ev){
+                if(ev.target!==el || ev.propertyName!=='max-height') return;
+                el.removeEventListener('transitionend', onEnd);
+                pending--;
+                if(pending<=0) doScroll();
+              };
+              el.addEventListener('transitionend', onEnd);
+            });
+            /* safety net in case a transitionend somehow never fires (e.g. the
+               collapsing row had zero height to begin with, so no property actually
+               changed) -- matches .about-group-collapse's own .3s transition. */
+            setTimeout(doScroll, 350);
+          }
         }
       });
     });
