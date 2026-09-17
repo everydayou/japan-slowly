@@ -4,6 +4,13 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 23 — 2026-09-17
+Two small style asks on `#tabbar`: move it to 16px from the bottom (was 18px), and cap its shadow at a 12px max spread. Reduced `box-shadow` from `0 8px 24px -8px rgba(0,0,0,.25)` to `0 4px 12px -4px rgba(0,0,0,.25)` (smaller blur, smaller y-offset, proportionally tighter negative spread) and `bottom` from `calc(env(safe-area-inset-bottom,0px)+18px)` to `+16px`. Updated `positionTabbarForIOS()`'s own `gap` constant (round 22) from `18` to `16` to match, so the iOS-only repositioning logic stays visually identical to the plain-CSS position on every other platform. Verified via Playwright: computed `box-shadow` and `bottom` both read the new values.
+
+Not pushed from this session — same as every round since 10.
+
+---
+
 ## ROUND 22 — 2026-09-17
 The user tested round 21's `visualViewport.height` fix live and reported the same gap, same size, `#tabbar` still sitting well above the true bottom edge. They offered a sharp piece of pragmatism alongside the bug report: fix it properly only if iOS/Android can be told apart cleanly, otherwise don't touch it — a fair line, since Android/desktop Chrome were already confirmed correct.
 
