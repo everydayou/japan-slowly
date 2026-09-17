@@ -366,6 +366,15 @@
        for its own env(safe-area-inset-top) padding, which is what actually clears the
        iPhone status bar/clock for the title/teaser text that follows it. */
     padding:calc(env(safe-area-inset-top, 0px) + 16px) 24px 8px;
+    /* min-height added -- on a day/stay with no reset button, this row had no content
+       at all, so its total height (just its own padding) fell short of clearing the
+       fixed .close-fab sitting on top of it (top:safe+14, 34px tall, so its bottom
+       edge sits at safe+48). The title text that follows (.backhero-text) started
+       right after this row and ended up sliding underneath the X -- most visible on
+       the Stays detail view's "DAYS 1–3" line, but the same gap existed on any day
+       with no reset button too. 34px (the close button's own diameter) is enough to
+       push the following content safely below it with a small margin to spare. */
+    min-height:34px;
     gap:8px; position:relative; z-index:5;
   }
   /* ---- floating close button (day-detail screen) ----
@@ -771,8 +780,7 @@
      the pill starting to sit inside the actual system gesture zone, which isn't a
      tuning choice, it's Apple's own reserved area -- if this still doesn't look flush
      enough on a device, that's no longer a "reduce the gap further" problem, it's a
-     "something else is adding space" problem, worth another #debugPanel check rather
-     than another px decrement. */
+     "something else is adding space" problem. */
   .tabbar{
     position:absolute;
     pointer-events:auto;
@@ -890,7 +898,12 @@
     position:relative; overflow:hidden; border-radius:20px;
     border:0; padding:0; text-align:left; cursor:pointer;
     -webkit-tap-highlight-color:transparent;
-    box-shadow:0 10px 22px -14px rgba(0,0,0,.35);
+    /* round 26: was 0 10px 22px -14px -- read as basically invisible against the
+       grid's own background (the -14px spread was eating almost all of the 22px
+       blur). Two layers now: a soft, wide-spread ambient shadow plus a tighter,
+       darker contact shadow close under the card, the same recipe modern card UIs
+       use for a shadow that reads clearly without looking heavy. */
+    box-shadow:0 16px 28px -12px rgba(0,0,0,.32), 0 5px 10px -4px rgba(0,0,0,.22);
     /* round 26: simplified from a 3D flip to a plain box expand/collapse -- see
        openStayFlip()/closeStayFlip(). .opening's transition covers the box-morph
        (top/left/width/height/border-radius); the plain `transition` here just
@@ -900,6 +913,20 @@
   .stay-card:active{ transform:scale(.98); }
   .stay-card.locked{ cursor:default; }
   .stay-card.opening{ transition:top .52s cubic-bezier(.4,0,.2,1), left .52s cubic-bezier(.4,0,.2,1), width .52s cubic-bezier(.4,0,.2,1), height .52s cubic-bezier(.4,0,.2,1), border-radius .52s cubic-bezier(.4,0,.2,1), box-shadow .18s ease; }
+  /* ---- round 26: "zoom to white, then grow" open/close flash ----
+     A thin overlay (the page's own --bg tone, not necessarily pure white, so it also
+     reads correctly in dark mode) that briefly covers the card: a quick zoom+fade-in
+     right at the tap (openStayFlip's phase A), stays opaque white through the whole
+     box-morph grow/shrink (so the visible motion during that phase is a plain white
+     rectangle changing size, not the photo itself), then fades back out once the box
+     has landed, revealing whatever's now underneath (the detail screen on open, the
+     card's own photo on close). `.stay-flash-fixed` is the same overlay repositioned
+     as `position:fixed` for the brief moment it needs to survive a render() swap
+     (openStayFlip's phase C) or bridge the live view being torn down (closeStayFlip's
+     phase A) -- render() replaces #screen's innerHTML wholesale, so anything that
+     needs to outlive that swap has to be reparented outside #screen first. */
+  .stay-flash{ position:absolute; inset:0; background:var(--bg); opacity:0; pointer-events:none; z-index:5; }
+  .stay-flash-fixed{ position:fixed; inset:0; background:var(--bg); opacity:1; pointer-events:none; z-index:600; }
   .stay-card[data-area="top"]{ grid-area:top; }
   .stay-card[data-area="left1"]{ grid-area:left1; }
   .stay-card[data-area="left2"]{ grid-area:left2; }
@@ -924,26 +951,6 @@
     background:var(--frame); border-radius:12px; padding:10px 12px;
   }
 
-  /* ---- round 24 diagnostic overlay (see the HTML comment above debugToggle) ----
-     Deliberately unobtrusive: a 14px dot, low opacity, tucked in the safe-area-aware
-     top-left corner, present on every screen (persistent sibling of #screen, same
-     pattern as #refreshBtn/#tabbar) so it's reachable however the gap bug is currently
-     reproducing. Not meant to be a permanent feature -- just a stopgap for chasing this
-     one bug without guessing blind again. */
-  .debug-toggle{
-    position:fixed; z-index:999;
-    top:calc(env(safe-area-inset-top, 0px) + 8px); left:calc(env(safe-area-inset-left, 0px) + 8px);
-    width:14px; height:14px; border-radius:50%;
-    background:rgba(128,128,128,.28); border:0; padding:0; cursor:pointer;
-  }
-  .debug-panel{
-    position:fixed; z-index:998; left:8px; right:8px;
-    top:calc(env(safe-area-inset-top, 0px) + 30px);
-    max-height:70vh; overflow-y:auto;
-    background:rgba(20,20,20,.94); color:#8f8;
-    font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11px; line-height:1.6;
-    border-radius:10px; padding:10px 12px; white-space:pre-wrap; -webkit-user-select:text; user-select:text;
-  }
 </style>
 
 <div class="screen" id="screen"></div>
@@ -984,18 +991,6 @@
     </button>
   </div>
 </div>
-
-<!-- round 24: a tiny, always-present diagnostic toggle for the still-unresolved
-     "gap in standalone/home-screen mode" bug -- four rounds of blind fixes (100svh ->
-     100dvh -> JS-measured --app-height -> visualViewport.height -> the #tabbar
-     top-instead-of-bottom fix) have each been structurally sound but unverifiable
-     without a real device, and the user's latest report ("double the size" gap,
-     specific to standalone vs. browser) needs real numbers to chase further rather
-     than another guess. Deliberately subtle (a barely-visible dot in the corner, not a
-     button that competes with the real UI) -- tap it to reveal a small text panel with
-     the live measurements, screenshot-able and readable enough to paste back. -->
-<button id="debugToggle" class="debug-toggle" aria-label="Diagnostics"></button>
-<div id="debugPanel" class="debug-panel" hidden></div>
 
 <script>
 (function(){
@@ -2247,17 +2242,69 @@
      screens don't share a common hero element to morph between, and a simple
      cross-fade reads as a tab switch rather than a "journey" transition, which is
      the right register for a segmented control. */
+  /* round 26: the user asked for the day deck sitting behind the Explorer screen to
+     visibly settle before leaving for Stays, and to visibly unsettle back into its
+     usual messy fan on the way back -- reusing the exact gather/spread motion (and
+     gatherStyle()/stackStyle()/stackTransform() helpers) that openDayFlip()/
+     closeDayFlip() already use for the same "tidy stack <-> fanned deck" transition,
+     just triggered by a tab switch instead of a card opening. */
   function goStays(){
     if(state.animating || state.screen==='stays') return;
     state.sheetAbout = null;
+    var stackwrap = state.screen==='home' ? document.getElementById('stackwrap') : null;
+    if(stackwrap && !reduceMotion){
+      state.animating = true;
+      stackwrap.querySelectorAll('.stack-card').forEach(function(el){
+        var i = parseInt(el.getAttribute('data-idx'),10);
+        el.style.transition = 'transform .32s cubic-bezier(.4,0,.2,1), box-shadow .16s ease';
+        el.style.transform = stackTransform(gatherStyle(i - state.stackIndex, i));
+        el.style.boxShadow = 'none';
+      });
+      setTimeout(function(){
+        state.animating = false;
+        state.screen = 'stays';
+        render();
+      }, 320);
+      return;
+    }
     state.screen = 'stays';
     render();
   }
   function goExplore(){
     if(state.animating || state.screen==='home') return;
     state.sheetAbout = null;
+    var wasStays = state.screen==='stays';
     state.screen = 'home';
     render();
+    if(wasStays && !reduceMotion){
+      var stackwrap = document.getElementById('stackwrap');
+      if(stackwrap){
+        var cards = Array.prototype.slice.call(stackwrap.querySelectorAll('.stack-card'));
+        /* start gathered (no transition -- this is the "from" state, not itself
+           animated), then transition out to each card's normal resting fan position */
+        cards.forEach(function(el){
+          var i = parseInt(el.getAttribute('data-idx'),10);
+          el.style.transition = 'none';
+          el.style.transform = stackTransform(gatherStyle(i - state.stackIndex, i));
+          el.style.boxShadow = 'none';
+        });
+        stackwrap.getBoundingClientRect(); /* force reflow so the gathered "from" state is registered */
+        requestAnimationFrame(function(){
+          cards.forEach(function(el){
+            var i = parseInt(el.getAttribute('data-idx'),10);
+            var offset = i - state.stackIndex;
+            el.style.transition = 'transform .5s cubic-bezier(.22,.9,.32,1), box-shadow .3s ease';
+            el.style.transform = stackTransform(stackStyle(offset, i));
+            el.style.boxShadow = '';
+          });
+        });
+        /* drop the inline transition once settled so a later drag-to-browse gesture
+           picks the deck's own default spring transition back up, not this one */
+        setTimeout(function(){
+          cards.forEach(function(el){ el.style.transition = ''; });
+        }, 520);
+      }
+    }
   }
 
   function render(){
@@ -2652,16 +2699,25 @@
     };
   }
 
-  /* ---------- Stays: open/close as a plain expand/collapse ----------
-     round 26: this used to mirror the day deck's 3D-flip-and-box-morph animation
-     (see the CHANGELOG for the old approach), but the user asked to simplify it --
-     no flip, just the card's own box growing to fill the screen and shrinking back
-     to its grid slot. That also removes a bug where the closing card would flash
-     white: the old version rotated a live (unstyled-background) copy of the detail
-     view through 3D space as its "back face" while the box was still mid-shrink,
-     and .flip-back's background (var(--bg), a light cream tone) could show through
-     during that rotation. With no flip and no back face at all, there's nothing
-     that can show that background any more. */
+  /* ---------- Stays: open/close as a "zoom to white, then grow" expand/collapse ----------
+     round 26: a plain box-expand (no flip) grows/shrinks the card between its grid
+     slot and fullscreen. The user asked for a smoother transition than a bare
+     box-morph, so each direction now has three phases, using a .stay-flash overlay
+     (see its CSS comment) as the connective tissue between them:
+       open:  A) quick zoom + fade to white, still in the grid slot
+              B) box-morph grows to fullscreen while the flash stays opaque white
+              C) render() swaps in the real detail screen, then the flash fades out
+                 to reveal it
+       close: A) the live detail screen fades to white in place
+              B) box-morph shrinks back down to the grid slot while the flash stays
+                 opaque white
+              C) the flash fades out to reveal the card's own photo underneath
+     PHASE_ZOOM/PHASE_GROW/PHASE_REVEAL name the three durations so open and close
+     stay in lockstep. */
+  var STAY_PHASE_ZOOM = 150;   /* A: zoom+flash-to-white */
+  var STAY_PHASE_GROW = 480;   /* B: box-morph grow/shrink while opaque white */
+  var STAY_PHASE_REVEAL = 260; /* C: flash fades out to reveal what's underneath */
+
   function openStayFlip(stayId){
     if(state.animating) return;
     var st = STAYS.filter(function(s){return s.id===stayId;})[0];
@@ -2697,24 +2753,56 @@
     cardEl.style.left = (rect.left-parentRect.left)+'px';
     cardEl.style.width = rect.width+'px';
     cardEl.style.height = rect.height+'px';
-    cardEl.classList.add('opening');
-    cardEl.getBoundingClientRect(); /* force reflow so the "from" box is registered */
+
+    /* phase A: a quick zoom + fade to white, still sitting in the grid slot */
+    var flash = document.createElement('div');
+    flash.className = 'stay-flash';
+    cardEl.appendChild(flash);
+    cardEl.style.transition = 'transform '+STAY_PHASE_ZOOM+'ms ease';
+    flash.style.transition = 'opacity '+STAY_PHASE_ZOOM+'ms ease';
+    cardEl.getBoundingClientRect(); /* force reflow so the "from" state is registered */
 
     requestAnimationFrame(function(){
-      cardEl.style.top = '0px';
-      cardEl.style.left = '0px';
-      cardEl.style.width = parentRect.width+'px';
-      cardEl.style.height = parentRect.height+'px';
-      cardEl.style.borderRadius = '0px';
-      cardEl.style.boxShadow = 'none';
+      cardEl.style.transform = 'scale(1.05)';
+      flash.style.opacity = '1';
     });
 
-    /* the card's own photo/label just sit there growing to fill the screen -- once
-       that's done, a normal render() swaps straight to the real detail screen. */
     setTimeout(function(){
-      state.screen='stayDetail'; state.openStay=st.id; state.animating=false; state.sheetAbout=null;
-      render();
-    }, 520);
+      /* phase B: box-morph grows to fullscreen while the flash stays opaque white --
+         the visible motion here is just a plain white rectangle changing size. */
+      cardEl.style.transition = '';
+      cardEl.style.transform = '';
+      cardEl.classList.add('opening');
+      cardEl.getBoundingClientRect();
+
+      requestAnimationFrame(function(){
+        cardEl.style.top = '0px';
+        cardEl.style.left = '0px';
+        cardEl.style.width = parentRect.width+'px';
+        cardEl.style.height = parentRect.height+'px';
+        cardEl.style.borderRadius = '0px';
+        cardEl.style.boxShadow = 'none';
+      });
+
+      setTimeout(function(){
+        /* phase C: swap in the real detail screen, then fade the flash out to
+           reveal it. The overlay has to survive render() wiping out #screen's own
+           content, so it's reparented into #uiLayer (a persistent sibling) as a
+           `position:fixed` copy an instant before render() runs -- same opacity, so
+           there's no visible seam. */
+        var fixedFlash = document.createElement('div');
+        fixedFlash.className = 'stay-flash stay-flash-fixed';
+        document.getElementById('uiLayer').appendChild(fixedFlash);
+
+        state.screen='stayDetail'; state.openStay=st.id; state.animating=false; state.sheetAbout=null;
+        render();
+
+        fixedFlash.style.transition = 'opacity '+STAY_PHASE_REVEAL+'ms ease';
+        fixedFlash.getBoundingClientRect();
+        requestAnimationFrame(function(){ fixedFlash.style.opacity = '0'; });
+        setTimeout(function(){ fixedFlash.remove(); }, STAY_PHASE_REVEAL + 60);
+      }, STAY_PHASE_GROW);
+    }, STAY_PHASE_ZOOM);
   }
 
   function closeStayFlip(){
@@ -2728,104 +2816,124 @@
     var parentRect = screenEl.getBoundingClientRect();
     var locked = stayLocked(st);
 
-    /* the live detail view is no longer carried through the animation (see the round
-       26 comment above openStayFlip()) -- remove it outright, otherwise it's left
-       sitting in the DOM underneath the grid that's about to replace it. */
-    var viewEl = screenEl.querySelector('.view');
-    if(viewEl) viewEl.remove();
-
-    /* the rest of the grid, rebuilt behind everything -- it's just sitting in its
-       normal resting layout the whole time, fully hidden under the shrinking card
-       until the very end */
-    var bgEl = document.createElement('div');
-    bgEl.className = 'view';
-    bgEl.style.pointerEvents = 'none';
-    bgEl.style.zIndex = 400;
-    bgEl.innerHTML = staysScreen(st.id); /* the closing card itself is excluded until it lands */
-    screenEl.appendChild(bgEl);
-
-    /* the detail view is simply dropped here -- no live content is carried through
-       the animation any more. A fresh card element (fullscreen, showing the card's
-       own photo/label) starts in the detail view's place and shrinks straight down
-       to its grid slot. */
-    var wrapper = document.createElement('div');
-    wrapper.className = 'stay-card closing' + (locked ? ' locked' : '');
-    wrapper.setAttribute('data-area', state.closeStayArea);
-    wrapper.setAttribute('data-stay', st.id);
-    wrapper.innerHTML = stayCardFrontHTML(st);
-    wrapper.style.position = 'absolute';
-    wrapper.style.margin = '0';
-    wrapper.style.zIndex = 500;
-    wrapper.style.top = '0px';
-    wrapper.style.left = '0px';
-    wrapper.style.width = parentRect.width+'px';
-    wrapper.style.height = parentRect.height+'px';
-    wrapper.style.borderRadius = '0px';
-    wrapper.style.boxShadow = 'none';
-    screenEl.appendChild(wrapper);
-
-    wrapper.getBoundingClientRect(); /* force reflow so the "from" (fullscreen) state is registered */
-    wrapper.classList.add('opening'); /* reuse its box-morph transition timing */
-
-    requestAnimationFrame(function(){
-      wrapper.style.top = target.top+'px';
-      wrapper.style.left = target.left+'px';
-      wrapper.style.width = target.width+'px';
-      wrapper.style.height = target.height+'px';
-      wrapper.style.borderRadius = '20px';
-    });
-
-    /* the card's own shadow waits until it's essentially finished settling (the
-       box-morph is a .52s transition) before popping back in, same timing as
-       closeDayFlip()'s equivalent */
-    setTimeout(function(){
-      wrapper.style.transition = 'box-shadow .12s ease';
-      wrapper.style.boxShadow = '0 10px 22px -14px rgba(0,0,0,.35)';
-    }, 520);
+    /* phase A: the live detail screen fades to white in place, via a fixed overlay
+       (same reasoning as openStayFlip's phase C, just in reverse -- this needs to
+       sit above the still-live view, which is about to be torn down). */
+    var fixedFlash = document.createElement('div');
+    fixedFlash.className = 'stay-flash stay-flash-fixed';
+    fixedFlash.style.opacity = '0';
+    document.getElementById('uiLayer').appendChild(fixedFlash);
+    fixedFlash.getBoundingClientRect();
+    fixedFlash.style.transition = 'opacity '+STAY_PHASE_ZOOM+'ms ease';
+    requestAnimationFrame(function(){ fixedFlash.style.opacity = '1'; });
 
     setTimeout(function(){
-      state.screen='stays'; state.openStay=null; state.animating=false; state.sheetAbout=null;
+      /* phase B: tear down the live view, rebuild the grid behind everything (it just
+         sits in its normal resting layout, fully hidden under the shrinking card
+         until the very end), and start a fresh fullscreen card -- still covered by
+         the (now reparented-as-a-child) flash -- shrinking down to its grid slot. */
+      var viewEl = screenEl.querySelector('.view');
+      if(viewEl) viewEl.remove();
 
-      /* fold `wrapper` directly into the grid as its real card -- avoids a full render()
-         swap for the same GPU-compositing/shimmer reason explained in closeDayFlip() */
-      wrapper.className = 'stay-card' + (locked ? ' locked' : '');
-      wrapper.style.position = '';
-      wrapper.style.top = '';
-      wrapper.style.left = '';
-      wrapper.style.width = '';
-      wrapper.style.height = '';
-      wrapper.style.margin = '';
-      wrapper.style.borderRadius = '';
-      wrapper.style.transition = '';
-      wrapper.style.zIndex = '';
-      wrapper.style.boxShadow = '';
-      wrapper.style.transform = '';
+      var bgEl = document.createElement('div');
+      bgEl.className = 'view';
+      bgEl.style.pointerEvents = 'none';
+      bgEl.style.zIndex = 400;
+      bgEl.innerHTML = staysScreen(st.id); /* the closing card itself is excluded until it lands */
+      screenEl.appendChild(bgEl);
 
-      var gridEl = bgEl.querySelector('.stays-grid');
-      if(gridEl) gridEl.appendChild(wrapper);
+      var wrapper = document.createElement('div');
+      wrapper.className = 'stay-card closing' + (locked ? ' locked' : '');
+      wrapper.setAttribute('data-area', state.closeStayArea);
+      wrapper.setAttribute('data-stay', st.id);
+      wrapper.innerHTML = stayCardFrontHTML(st);
+      wrapper.style.position = 'absolute';
+      wrapper.style.margin = '0';
+      wrapper.style.zIndex = 500;
+      wrapper.style.top = '0px';
+      wrapper.style.left = '0px';
+      wrapper.style.width = parentRect.width+'px';
+      wrapper.style.height = parentRect.height+'px';
+      wrapper.style.borderRadius = '0px';
+      wrapper.style.boxShadow = 'none';
+      screenEl.appendChild(wrapper);
 
-      bgEl.style.pointerEvents = '';
-      bgEl.style.zIndex = '';
+      /* the flash keeps covering everything (still fully opaque) -- move it from the
+         fixed overlay into a child of `wrapper` so it shrinks along with the box-morph
+         below, same opacity throughout so there's no visible seam. */
+      var flash = document.createElement('div');
+      flash.className = 'stay-flash';
+      flash.style.opacity = '1';
+      wrapper.appendChild(flash);
+      fixedFlash.remove();
 
-      /* mirrors closeDayFlip()'s own refreshBtn/tabbar/updateStackClearance/
-         saveProgress bypass-of-render() fix -- same reasoning */
-      var refreshBtn = document.getElementById('refreshBtn');
-      if(refreshBtn) refreshBtn.hidden = false;
-      var tabbarEl = document.getElementById('tabbar');
-      if(tabbarEl){
-        tabbarEl.hidden = false;
-        var tabExploreEl = document.getElementById('tabExplore');
-        var tabStaysEl = document.getElementById('tabStays');
-        if(tabExploreEl) tabExploreEl.classList.remove('on');
-        if(tabStaysEl) tabStaysEl.classList.add('on');
-        var tabbarIndicatorEl = document.getElementById('tabbarIndicator');
-        if(tabbarIndicatorEl) tabbarIndicatorEl.classList.add('right');
-      }
-      updateStackClearance();
-      saveProgress();
+      wrapper.getBoundingClientRect(); /* force reflow so the "from" (fullscreen) state is registered */
+      wrapper.classList.add('opening'); /* reuse its box-morph transition timing */
 
-      wire();
-    }, 590);
+      requestAnimationFrame(function(){
+        wrapper.style.top = target.top+'px';
+        wrapper.style.left = target.left+'px';
+        wrapper.style.width = target.width+'px';
+        wrapper.style.height = target.height+'px';
+        wrapper.style.borderRadius = '20px';
+      });
+
+      setTimeout(function(){
+        /* phase C: landed at the grid slot -- fade the flash out to reveal the
+           card's own photo underneath, and bring its resting shadow back. */
+        flash.style.transition = 'opacity '+STAY_PHASE_REVEAL+'ms ease';
+        requestAnimationFrame(function(){ flash.style.opacity = '0'; });
+
+        wrapper.style.transition = 'box-shadow .12s ease';
+        wrapper.style.boxShadow = '0 16px 28px -12px rgba(0,0,0,.32), 0 5px 10px -4px rgba(0,0,0,.22)';
+      }, STAY_PHASE_GROW);
+
+      setTimeout(function(){
+        state.screen='stays'; state.openStay=null; state.animating=false; state.sheetAbout=null;
+
+        /* fold `wrapper` directly into the grid as its real card -- avoids a full
+           render() swap for the same GPU-compositing/shimmer reason explained in
+           closeDayFlip() */
+        flash.remove();
+        wrapper.className = 'stay-card' + (locked ? ' locked' : '');
+        wrapper.style.position = '';
+        wrapper.style.top = '';
+        wrapper.style.left = '';
+        wrapper.style.width = '';
+        wrapper.style.height = '';
+        wrapper.style.margin = '';
+        wrapper.style.borderRadius = '';
+        wrapper.style.transition = '';
+        wrapper.style.zIndex = '';
+        wrapper.style.boxShadow = '';
+        wrapper.style.transform = '';
+
+        var gridEl = bgEl.querySelector('.stays-grid');
+        if(gridEl) gridEl.appendChild(wrapper);
+
+        bgEl.style.pointerEvents = '';
+        bgEl.style.zIndex = '';
+
+        /* mirrors closeDayFlip()'s own refreshBtn/tabbar/updateStackClearance/
+           saveProgress bypass-of-render() fix -- same reasoning */
+        var refreshBtn = document.getElementById('refreshBtn');
+        if(refreshBtn) refreshBtn.hidden = false;
+        var tabbarEl = document.getElementById('tabbar');
+        if(tabbarEl){
+          tabbarEl.hidden = false;
+          var tabExploreEl = document.getElementById('tabExplore');
+          var tabStaysEl = document.getElementById('tabStays');
+          if(tabExploreEl) tabExploreEl.classList.remove('on');
+          if(tabStaysEl) tabStaysEl.classList.add('on');
+          var tabbarIndicatorEl = document.getElementById('tabbarIndicator');
+          if(tabbarIndicatorEl) tabbarIndicatorEl.classList.add('right');
+        }
+        updateStackClearance();
+        saveProgress();
+
+        wire();
+      }, STAY_PHASE_GROW + STAY_PHASE_REVEAL + 70);
+    }, STAY_PHASE_ZOOM);
   }
 
   /* ---------- shared handlers for the day-detail content (chapters, about, weather, back, reset) ---------- */
@@ -3050,80 +3158,6 @@
     var tabStays = document.getElementById('tabStays');
     if(tabExplore) tabExplore.addEventListener('click', function(){ goExplore(); });
     if(tabStays) tabStays.addEventListener('click', function(){ goStays(); });
-  })();
-
-  /* ---------- round 24: diagnostic overlay (see debugToggle's HTML comment) ----------
-     Reads every number the viewport-fix chain (setAppHeight, now just feeding CSS
-     directly as of round 25 -- see .ui-layer's comment for why positionTabbarForIOS/
-     positionSheetForIOS are gone) depends on, plus how this launch was opened
-     (standalone vs. browser tab -- the exact distinction the user's original report
-     hinged on), and prints them as plain text. Refreshes live on the same
-     onViewportChange() cadence as everything else while the panel is open, so pulling
-     the browser chrome open/closed while watching it updates the numbers in real time.
-     Still the right tool for confirming round 25 on a real device: --app-height and
-     ui-layer height should always match, and tabbar/sheet-panel rect should show the
-     expected clearance above the true safe-area edge in both launch modes. */
-  (function wireDebugPanel(){
-    var toggle = document.getElementById('debugToggle');
-    var panel = document.getElementById('debugPanel');
-    if(!toggle || !panel) return;
-    var open = false;
-
-    function isStandalone(){
-      return (window.navigator.standalone === true) ||
-        (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
-    }
-
-    function renderDebug(){
-      if(!open) return;
-      var cs = getComputedStyle(document.documentElement);
-      var tabbar = document.getElementById('tabbar');
-      var tabbarRect = (tabbar && !tabbar.hidden) ? tabbar.getBoundingClientRect() : null;
-      var uiLayer = document.getElementById('uiLayer');
-      var uiLayerRect = uiLayer ? uiLayer.getBoundingClientRect() : null;
-      var sheetPanel = document.querySelector('.sheet-panel');
-      var sheetRect = sheetPanel ? sheetPanel.getBoundingClientRect() : null;
-      var screenEl = document.querySelector('.screen');
-      var screenRect = screenEl ? screenEl.getBoundingClientRect() : null;
-      var lines = [
-        'standalone: ' + isStandalone(),
-        'isIOS (this app\'s own check): ' + isIOS,
-        'platform: ' + navigator.platform,
-        'userAgent: ' + navigator.userAgent,
-        'window.innerHeight: ' + window.innerHeight,
-        'window.innerWidth: ' + window.innerWidth,
-        'visualViewport.height: ' + (window.visualViewport ? Math.round(window.visualViewport.height) : 'n/a'),
-        'visualViewport.offsetTop: ' + (window.visualViewport ? window.visualViewport.offsetTop : 'n/a'),
-        'screen.height: ' + (window.screen ? window.screen.height : 'n/a'),
-        '--app-height: ' + cs.getPropertyValue('--app-height'),
-        '--safe-bottom: ' + cs.getPropertyValue('--safe-bottom'),
-        '.screen rect: ' + (screenRect ? ('top='+Math.round(screenRect.top)+' bottom='+Math.round(screenRect.bottom)+' height='+Math.round(screenRect.height)) : 'absent'),
-        '.ui-layer rect: ' + (uiLayerRect ? ('top='+Math.round(uiLayerRect.top)+' bottom='+Math.round(uiLayerRect.bottom)+' height='+Math.round(uiLayerRect.height)) : 'absent'),
-        'tabbar rect: ' + (tabbarRect ? ('top='+Math.round(tabbarRect.top)+' bottom='+Math.round(tabbarRect.bottom)+' height='+Math.round(tabbarRect.height)) : 'hidden/absent'),
-        'sheet-panel rect: ' + (sheetRect ? ('top='+Math.round(sheetRect.top)+' bottom='+Math.round(sheetRect.bottom)+' height='+Math.round(sheetRect.height)) : 'closed/absent'),
-        'document.documentElement rect height: ' + Math.round(document.documentElement.getBoundingClientRect().height),
-        'state.screen: ' + state.screen
-      ];
-      panel.textContent = lines.join('\n');
-    }
-
-    toggle.addEventListener('click', function(){
-      open = !open;
-      panel.hidden = !open;
-      renderDebug();
-    });
-
-    var origOnViewportChange = onViewportChange;
-    onViewportChange = function(){
-      origOnViewportChange();
-      renderDebug();
-    };
-    /* render() itself calls updateStackClearance() on every
-       screen change (not just on a resize/orientationchange), so the panel should stay
-       live across navigation too, not just viewport events -- cheapest way to get that
-       without threading a call through every render() call site is a light poll while
-       the panel is actually open. */
-    setInterval(function(){ if(open) renderDebug(); }, 1000);
   })();
 
   render();
