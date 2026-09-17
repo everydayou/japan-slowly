@@ -125,12 +125,30 @@
   h1,h2,h3{ text-wrap:balance; margin:0; }
   .mono{ font-family:'Outfit',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; }
 
-  /* ---- screen (fills the viewport; svh not dvh so a mobile browser's address bar
-     showing/hiding doesn't resize -- and jump -- the whole layout) ---- */
+  /* ---- screen (fills the viewport) ----
+     Was `100svh` (small viewport height -- locked to the viewport's size when the
+     browser's own chrome, e.g. Safari's address/toolbar, is fully expanded). That was
+     a deliberate choice to stop the layout resizing/jumping every time that chrome
+     shows or hides on scroll -- but the trade-off turned out worse than the jump it
+     avoided: on a real phone, once Safari's chrome auto-hides (the common case after
+     any scroll), the real visible viewport grows taller than 100svh, and `.screen`
+     doesn't grow with it. The result is a dead strip of plain `body` background at the
+     very bottom, below where `.screen` actually ends -- same color as the app itself
+     (`body`'s `background:var(--bg)` matches `.screen`'s), so it reads as an unexplained
+     "gap" rather than an obvious seam. Every element anchored to `.screen`'s bottom edge
+     (`#tabbar`, `.intro-cta`, the day-view's safe-area padding) ends up sitting that same
+     distance above the *true* bottom of the visible window -- which is exactly the two
+     symptoms reported: the tabbar/segmented-control reading as pushed upward, and
+     day-detail content reading as cropped (the actually-visible page is shorter than
+     the real screen, so more of the content sits below the fold than it should).
+     `100dvh` (dynamic viewport height) instead tracks the *current* real viewport at all
+     times, so there's never a gap -- the "jump" the original comment worried about is,
+     on current iOS/Android, a smooth live resize as the chrome animates, not an abrupt
+     cut, and is the standard fix for this exact class of bug. */
   .screen{
     position:relative;
     width:100%;
-    height:100svh;
+    height:100dvh;
     background:var(--bg);
     overflow:hidden;
     display:flex;

@@ -4,6 +4,21 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 20 — 2026-09-17
+User reported an issue on a real phone with two screenshots: extra empty space at the very bottom of the screen, visible two ways — on the home screen it reads as the `#tabbar` segmented control sitting pushed upward, away from the true bottom edge; on the day-detail screen it reads as content being cropped. Asked whether this was an iOS safe-area problem.
+
+It wasn't. Every `env(safe-area-inset-*)` rule in the file was checked (`.dayhead`, `.close-fab`, `.home-hero`, `.intro-cta`, `.view.view-day`, `#tabbar`, `.stays-view`, `.sheet-panel`) — each applies exactly once, on the correct edge, nothing double-counted.
+
+The real cause was `.screen{ height:100svh; }`. This was a deliberate choice from round 1 (see the CSS comment that was there) — `svh` ("small viewport height") locks to the viewport's height when a mobile browser's own chrome (Safari's address bar / bottom toolbar) is fully expanded, specifically so the layout wouldn't visibly resize/jump every time that chrome shows or hides on scroll. The trade-off nobody caught until now: once Safari's chrome actually auto-hides — which happens on essentially any scroll, i.e. constantly in normal use — the real visible viewport becomes taller than `100svh`, but `.screen` stays locked at the smaller size. The newly-revealed strip at the bottom isn't covered by `.screen` at all; it's just plain `<body>` showing through. Since `body{ background:var(--bg) }` is the exact same color as `.screen`'s own background, there's no visible seam — it just reads as "the app doesn't reach the bottom," which is exactly what was reported. Everything pinned to `.screen`'s bottom edge (`#tabbar`, `.intro-cta`, day-view padding) inherited the same offset from the window's true bottom.
+
+Fix: swapped `100svh` for `100dvh` (dynamic viewport height), which tracks the browser's *current* real viewport continuously rather than locking to its smallest possible state. Updated the CSS comment to explain the trade-off and why `dvh` wins now: the "jump" `svh` was trying to prevent is, on current iOS/Android, a smooth live resize as the browser chrome animates in/out — not the jarring instant cut the original comment was guarding against.
+
+Verification: grepped the whole file for `svh`/`dvh` to confirm `.screen` was the only place using either unit (so nothing else needed a matching change), then a Playwright check against a local server with an iPhone 13 device profile confirming `.screen`'s rendered `getBoundingClientRect().height` exactly equals `window.innerHeight` with the new `100dvh` value and zero page errors. Real address-bar show/hide behavior itself can't be simulated in headless Chromium (there's no actual browser chrome to hide), so the fix should still be confirmed on a real phone — flagged in Known Gaps.
+
+Not pushed — same as every round since 10, this session's git credentials aren't authorized to push; local commit only, waiting on the user's own machine.
+
+---
+
 ## ROUND 19 — 2026-09-17
 Two asks resolved this round: applied the "Late food" chapter reword parked since round 16 (confirmed "looks good" this round), and built the new Stays tab end to end from the spec worked out in round 18's discussion.
 
