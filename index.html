@@ -701,7 +701,9 @@
   .tabbar{
     position:fixed;
     left:50%;
-    bottom:calc(env(safe-area-inset-bottom, 0px) + 18px);
+    /* was +18px (round 21: gap:18 in positionTabbarForIOS() below is kept in sync with
+       this) -- round 23: user asked for exactly 16px from the bottom. */
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 16px);
     transform:translateX(-50%);
     z-index:50;
     display:flex; align-items:center; gap:2px;
@@ -709,7 +711,13 @@
     border:1px solid var(--line);
     border-radius:999px;
     padding:4px;
-    box-shadow:0 8px 24px -8px rgba(0,0,0,.25);
+    /* was 0 8px 24px -8px (24px blur, -8px spread -- a ~20px effective downward reach).
+       Round 23: user asked for a smaller shadow, capped at a 12px max spread -- reduced
+       blur to 12px and offset-y to 4px to match (4px offset + 12px blur's ~6px per-side
+       falloff keeps the total visible reach at roughly 12px, not stacking a separate
+       12px on top of the existing offset), spread tightened from -8 to -4 to match the
+       smaller blur proportionally. */
+    box-shadow:0 4px 12px -4px rgba(0,0,0,.25);
   }
   .tabbar[hidden]{ display:none; }
   .tabbar-btn{
@@ -898,7 +906,7 @@
     var appHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--app-height')) || window.innerHeight;
     var safeBottom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom')) || 0;
     var pillHeight = tabbar.offsetHeight;
-    var gap = 18; // matches the original CSS bottom offset's own gap -- only the anchor point changes here, not the spacing itself
+    var gap = 16; // matches .tabbar's CSS bottom offset (round 23) -- only the anchor point changes here, not the spacing itself; keep these two in sync
     tabbar.style.bottom = 'auto';
     tabbar.style.top = Math.round(appHeight - pillHeight - gap - safeBottom) + 'px';
   }
