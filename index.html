@@ -758,14 +758,20 @@
      iOS without the JS-computed `top` positionTabbarForIOS() used to need (now
      deleted). Also restores the round-23 value (16px from the bottom) for every
      platform -- the round-24 iOS-only 8px override existed only to compensate for
-     the large-viewport bug this fix removes at the root; easy to bring back per
-     platform if 16px turns out to look different from what round 24 intended once
-     this is actually seen on a device. */
+     the large-viewport bug this fix removes at the root. round 25 follow-up: seen live
+     on a device (both a Safari tab and standalone), the 16px design gap on top of
+     standalone's mandatory 34px safe-area read as noticeably more floaty than the
+     Safari-tab pill sitting close under its own chrome -- the user asked for the pill
+     to just sit down at the bottom, not hover. Reduced to 6px, every platform (not an
+     iOS-only override this time -- the whole point of this round was to stop needing
+     one). The mandatory safe-area clearance itself (34px standalone / 0px in a
+     Safari tab, Apple's own contract) still applies on top of this and can't shrink
+     further; this 6px is the only part that's this app's own call. */
   .tabbar{
     position:absolute;
     pointer-events:auto;
     left:50%;
-    bottom:calc(env(safe-area-inset-bottom, 0px) + 16px);
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 6px);
     transform:translateX(-50%);
     z-index:50;
     display:flex; align-items:center; gap:2px;

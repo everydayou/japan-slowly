@@ -20,7 +20,16 @@ New chat session, opened by reading PROJECT-CONTEXT.txt as instructed. The user 
 
 **Verification.** Playwright, 402×812 viewport (Chromium has no safe-area-inset simulation, so this can only confirm the CSS math and DOM structure, not the specific iOS large-viewport quirk itself — same caveat every round since 20 has carried, and still true here): confirmed `.screen` and `.ui-layer` report byte-identical rects on every screen (home, day-detail, stays); confirmed `#tabbar`'s rendered position matches the CSS formula exactly (`appHeight - safeBottom - 16 - pillHeight`); confirmed the About sheet, opened for real (via a genuine pointerdown/pointerup drag-card interaction, not a synthetic click — the deck's drag-vs-tap discrimination needs a real gesture), renders `.sheet-backdrop` and `.sheet-panel` both `position:absolute` with rects that exactly match `#screen`'s own box (panel flush with the true bottom, no dead strip below it); zero console/page errors on any screen. Screenshots of home, day-detail, the open sheet, the debug panel, and the Stays tab all visually match pre-round-25 behavior with no regressions.
 
-Not pushed from this session yet — pending the user's go-ahead, and real-device confirmation (standalone + Safari tab, via the debug panel, the same way round 24-followup finally nailed down the previous round's numbers) that this is what actually fixes it on a device, not just in theory.
+Pushed and confirmed by the user from their own machine.
+
+---
+
+## ROUND 25 FOLLOW-UP — 2026-09-17
+The user tested on a real device (screenshots from both a Safari tab and standalone) and sent the debug panel from both. The numbers were the actual win: `.screen`/`.ui-layer` matched exactly in both modes, and `#tabbar`'s rendered rect matched the CSS formula precisely in both (`appHeight - safeBottom - 16 - 50`) — confirming round 25's architecture change genuinely works on-device, computed purely by CSS with no JS timing dependency. That's a first for this bug across six rounds (20-25).
+
+What was left wasn't a bug: standalone's mandatory 34px home-indicator safe-area (which a Safari tab doesn't carry, since Safari's own chrome already owns that strip there) stacked on top of the 16px design gap made the pill read as visibly more "floaty" in standalone than in a tab, and the user just wants it sitting down near the bottom, not hovering. Reduced `.tabbar`'s design gap from 16px to 6px, uniformly across platforms this time (not another iOS-only override — the whole point of round 25 was to stop needing platform-specific branches). Verified via Playwright: tabbar bottom edge now sits exactly `6px + safe-area` above the true bottom, confirmed against the live formula.
+
+Not pushed from this session (same access restriction as every round) — delivered as updated files for the user to drop in and push themselves.
 
 ---
 
