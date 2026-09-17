@@ -1,4 +1,12 @@
-<title>Japan, unscripted</title>
+<meta charset="UTF-8">
+<!-- there was no charset declared anywhere (no meta tag, and GitHub Pages' own
+     Content-Type header is the only other thing that could have supplied one) -- this
+     file already had non-ASCII characters in it (the curly apostrophe in "you've
+     arrived?") before this round, and now has more (the wordmark's "…" ellipsis, this
+     round's app rename), so it shouldn't keep depending on the browser correctly
+     guessing UTF-8 with zero explicit signal. Must be within the document's first
+     1024 bytes to reliably take effect, hence right at the very top. -->
+<title>japan slowly</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,7 +35,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Japan, unscripted">
+<meta name="apple-mobile-web-app-title" content="japan slowly">
 <meta name="theme-color" content="#fafafa">
 <style>
   /* ============================================================================
@@ -131,6 +139,17 @@
 
   .view{ position:absolute; inset:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; display:flex; flex-direction:column; }
   .view::-webkit-scrollbar{ width:0; }
+  /* the day-detail view's content (chapters, the tomorrow card) had nothing reserving
+     room for the iPhone home-indicator safe area at the very bottom of the scroll range
+     -- .dayhead/.close-fab/.sheet-panel all already account for env(safe-area-inset-*)
+     on their own edges (see their rules), but .view itself never did on its bottom edge,
+     so scrolling all the way down still left the last ~24px of content (.tomorrow's own
+     margin-bottom) sitting right at the safe-area boundary, reading as visibly cropped
+     on a real device (fine in desktop/Playwright, which has no safe-area inset to miss).
+     Scoped to the day screen only -- the home/intro screens' .view never scrolls and
+     .stack-wrap's own bottom spacing is a separate, already-tuned value (round 8's
+     shadow-bleed margin) that this shouldn't also stack with. */
+  .view.view-day{ padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 24px); }
 
   /* ---- grain overlay ---- */
   .grain{ position:absolute; inset:0; pointer-events:none; opacity:var(--grain-opacity); mix-blend-mode:overlay; background-repeat:repeat; }
@@ -294,19 +313,45 @@
 
   /* ---- day detail ---- */
   .dayhead{
-    display:flex; align-items:center; justify-content:space-between;
-    /* same env(safe-area-inset-top) treatment the home hero already got -- without it
-       this row (and the only way back to the home reel, the back button) sat directly
-       under the iPhone status bar/clock, sometimes unreachable under it entirely. */
+    display:flex; align-items:center; justify-content:flex-end;
+    /* was space-between (back button on the left, reset on the right) -- the back
+       button is gone now (see .close-fab below), so this row only ever holds the
+       optional day-2 reset button and just needs to keep it pinned to the right.
+       Still kept as a real row (not dropped from days without a reset button) purely
+       for its own env(safe-area-inset-top) padding, which is what actually clears the
+       iPhone status bar/clock for the title/teaser text that follows it. */
     padding:calc(env(safe-area-inset-top, 0px) + 16px) 24px 8px;
     gap:8px; position:relative; z-index:5;
   }
-  .backbtn{
-    display:flex; align-items:center; gap:6px;
-    background:none; border:0; color:var(--ink-soft); font:inherit; cursor:pointer;
-    font-size:14px; padding:6px 4px;
+  /* ---- floating close button (day-detail screen) ----
+     Replaces the old inline "< The Reel" back button/label. That button scrolled away
+     with the rest of .dayhead's content, so it wasn't reachable once you'd scrolled
+     down a chapter list. This is `position:fixed` (not part of the scrolling .view
+     content's normal flow) so it always stays put in the top-left corner, the same
+     way .refresh-fab already does in the top-right on the home/intro screens -- same
+     size/shape/shadow recipe, mirrored to the opposite corner, an X instead of a
+     refresh glyph. Rendered as part of the day-detail screen's own HTML (not a
+     persistent sibling of #screen like .refresh-fab) since it only ever needs to
+     exist while state.screen==='day' -- render() naturally removes it on any other
+     screen, no manual [hidden] toggling required. */
+  .close-fab{
+    position:fixed;
+    top:calc(env(safe-area-inset-top,0px) + 14px);
+    left:14px;
+    z-index:50;
+    width:34px; height:34px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--bg-elevated);
+    color:var(--ink-soft);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 10px rgba(0,0,0,.14);
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .15s ease;
   }
-  .backbtn svg{ width:13px; height:13px; }
+  .close-fab:active{ transform:scale(.9); }
+  .close-fab svg{ width:14px; height:14px; }
   .resetbtn{
     background:none; border:1px solid var(--line); color:var(--ink-faint);
     font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:12px; letter-spacing:.05em;
@@ -474,7 +519,12 @@
      the page scroll position underneath -- see the render() comment for why that
      matters. */
   .sheet-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,0); transition:background .28s ease; z-index:80; touch-action:none; }
-  .sheet-backdrop.open{ background:rgba(0,0,0,.44); }
+  /* darker than a typical .4-.45 scrim (round 17 follow-up, was rgba(0,0,0,.44)) so the
+     content behind the sheet reads as clearly backgrounded/non-interactive instead of
+     still competing for attention -- kept in sync with the two matching values inside
+     wireSheetDrag() (drag tracks this same darkness 1:1 as the sheet is pulled open/
+     closed by hand, not just the two CSS-transition endpoints). */
+  .sheet-backdrop.open{ background:rgba(0,0,0,.65); }
   .sheet-panel{
     position:fixed; left:0; right:0; bottom:0; height:50%; z-index:81;
     background:var(--bg-elevated); border-radius:20px 20px 0 0;
@@ -484,26 +534,75 @@
     padding-bottom:env(safe-area-inset-bottom, 0px);
   }
   .sheet-panel.open{ transform:translateY(0); }
-  .sheet-handle{ width:36px; height:4px; border-radius:2px; background:var(--line); margin:10px auto 0; flex:none; }
-  .sheet-header{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 24px 0; flex:none; }
-  .sheet-title{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:16px; font-weight:500; }
-  .sheet-close{ background:none; border:0; color:var(--ink-faint); padding:6px; margin:-6px; cursor:pointer; display:flex; }
-  .sheet-close:hover{ color:var(--ink-soft); }
+  /* dragging (see wireSheetDrag()) sets transform/transition inline directly on this
+     element while a gesture is active/settling, always out-ranking the class rules
+     above -- same "inline beats class" fact the round-4/7 animation bug was about,
+     used deliberately here instead of fought. */
+  .sheet-handle{
+    width:36px; height:4px; border-radius:2px; background:var(--line); margin:10px auto 0; flex:none;
+    touch-action:none; /* this row's only job is the drag-to-dismiss gesture, never scrolling */
+  }
+  /* iOS-modal-style header: a fixed-width close button on the left, the title truly
+     centered (not just flex-centered around whatever the close button's own width
+     happens to be) via a 3-column grid whose outer tracks are both pinned to the
+     close button's own footprint (32px) -- so the title's center lines up with the
+     panel's center regardless of title length, matching the platform convention this
+     was asked to feel like. touch-action:none for the same reason as .sheet-handle:
+     this row doesn't scroll, it only starts a drag (see wireSheetDrag() -- the close
+     button itself is explicitly excluded from that, so it keeps working as a plain
+     tap target). `position:sticky` + a solid background pins it to the panel's own
+     top edge for real (round-17 follow-up ask) -- it was already effectively fixed in
+     practice (a flex:none row above the one scrolling child, never inside the scroll
+     box), but this makes that literal rather than incidental, and matters once
+     anything else about the panel's layout changes later. Bottom padding widened from
+     0 to 18px (was flush against .sheet-body's own top padding) for real breathing
+     room between the header and the first row of content, also asked for. */
+  .sheet-header{
+    position:sticky; top:0; z-index:2; background:var(--bg-elevated);
+    display:grid; grid-template-columns:32px 1fr 32px; align-items:center; gap:8px;
+    padding:10px 16px 18px; flex:none; touch-action:none;
+  }
+  .sheet-title{ grid-column:2; text-align:center; font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:16px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .sheet-close{
+    grid-column:1; width:32px; height:32px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--frame); border:0; color:var(--ink-soft); cursor:pointer;
+  }
+  .sheet-close:hover{ color:var(--ink); }
   .sheet-body{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; display:flex; flex-direction:column; gap:10px; padding:14px 24px 24px; }
   .about-item .k{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:12px; letter-spacing:.07em; color:var(--reveal); text-transform:uppercase; }
   .about-item .v{ font-size:16px; color:var(--ink-soft); line-height:1.45; margin-top:2px; }
   /* grouped About panels (content-upgrade round) -- a chapter's `about` can now be either
      the original flat [label,value] row list (rendered exactly as before), or a list of
      named sub-places (Shibuya's About panel opening into "Shibuya Crossing", "Hachiko",
-     etc). Each group after the first gets a top border + extra margin to read as a
-     visually separate section within the same scrollable sheet; the group's own items
-     reuse .about-item/.k/.v unchanged, so this is purely a wrapping/heading addition. */
+     etc). A chapter with exactly ONE group (e.g. nightlife/MITSUKI) renders it plain and
+     always-expanded, same as before -- the collapse UI below only kicks in once there's
+     actually more than one place to choose between. */
   .about-group + .about-group{ margin-top:10px; padding-top:18px; border-top:1px solid var(--line); }
   .about-group-head{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:2px; }
   .about-group-title{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:16px; color:var(--ink); }
   .about-group-tag{ flex:none; font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:11px; letter-spacing:.05em; color:var(--ink-faint); text-transform:uppercase; }
   .about-group-rows{ display:flex; flex-direction:column; gap:10px; margin-top:8px; }
-  @media (prefers-reduced-motion: reduce){ .sheet-backdrop, .sheet-panel{ transition:none; } }
+  /* ---- collapsible variant: more than one place in this chapter's About panel ----
+     Rendered as a flat list of tappable rows (not the plain-group layout above), each
+     starting collapsed; opening one closes whichever other row was open (see the
+     data-group-toggle handler in wireCommon()). Reuses .about-group-rows/.about-item
+     unchanged for the revealed content -- only the row chrome and the collapse
+     mechanics are new. */
+  .about-group.collapsible{ border-top:1px solid var(--line); margin-top:0; padding-top:0; }
+  .about-group.collapsible:first-child{ border-top:0; }
+  .about-group-toggle{
+    display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%;
+    background:none; border:0; padding:12px 0; margin:0; font:inherit; text-align:left; cursor:pointer; color:inherit;
+  }
+  .about-group-toggle .about-group-title{ font-weight:500; }
+  .about-group-headright{ display:flex; align-items:center; gap:8px; flex:none; }
+  .about-group-caret{ display:flex; color:var(--ink-faint); transition:transform .2s ease; }
+  .about-group-caret svg{ width:10px; height:10px; }
+  .about-group.collapsible.open .about-group-caret{ transform:rotate(90deg); }
+  .about-group-collapse{ max-height:0; overflow:hidden; transition:max-height .3s cubic-bezier(.22,1,.36,1); }
+  .about-group-collapse .about-group-rows{ padding-bottom:14px; }
+  @media (prefers-reduced-motion: reduce){ .sheet-backdrop, .sheet-panel, .about-group-collapse, .about-group-caret{ transition:none; } }
 
   @keyframes sweep{
     0%{ transform:translateX(-100%); }
@@ -558,6 +657,86 @@
   .refresh-fab.spinning{ pointer-events:none; opacity:.7; }
   .refresh-fab.spinning svg{ animation:refreshspin .7s linear infinite; }
   @keyframes refreshspin{ to{ transform:rotate(360deg); } }
+
+  /* ---- bottom segmented control bar (Explorer / Stays) ----
+     A floating pill, bottom-center, that hugs its content instead of spanning full
+     width -- the user was explicit this should read as a small segmented control,
+     not a full-width tab bar. Icon-only (no labels), same fixed/persistent-sibling-
+     of-#screen pattern as .refresh-fab so it survives render() without re-wiring,
+     shown only on the two screens it actually switches between (home/stays) -- see
+     render()'s tabbar[hidden] toggle at the bottom of that function. */
+  .tabbar{
+    position:fixed;
+    left:50%;
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 18px);
+    transform:translateX(-50%);
+    z-index:50;
+    display:flex; align-items:center; gap:2px;
+    background:var(--bg-elevated);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:4px;
+    box-shadow:0 8px 24px -8px rgba(0,0,0,.25);
+  }
+  .tabbar[hidden]{ display:none; }
+  .tabbar-btn{
+    width:44px; height:40px;
+    display:flex; align-items:center; justify-content:center;
+    border:0; border-radius:999px; background:transparent;
+    color:var(--ink-faint); cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:background .18s ease, color .18s ease;
+  }
+  .tabbar-btn:active{ transform:scale(.92); }
+  .tabbar-btn.on{ background:var(--accent); color:#fff; }
+
+  /* ---- Stays screen: mosaic/bento grid ----
+     Matches the shape of the wireframe the user sent: one full-width card on top,
+     then two columns below it -- two smaller cards stacked in the left column, one
+     tall card spanning both rows in the right column. Expressed with named grid
+     areas rather than nth-child math so the shape stays legible and easy to re-tune. */
+  .stays-view{ padding:calc(env(safe-area-inset-top, 0px) + 24px) 20px calc(env(safe-area-inset-bottom, 0px) + 110px); }
+  .stays-head{ text-align:center; margin-bottom:20px; }
+  .stays-head .wordmark{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:20px; }
+  .stays-head .sub{ font-size:13px; color:var(--ink-faint); margin-top:4px; }
+  .stays-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:150px 130px 130px;
+    grid-template-areas:"top top" "left1 right" "left2 right";
+    gap:12px;
+  }
+  .stay-card{
+    position:relative; overflow:hidden; border-radius:20px;
+    border:0; padding:0; text-align:left; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    box-shadow:0 10px 22px -14px rgba(0,0,0,.35);
+  }
+  .stay-card:active{ transform:scale(.98); }
+  .stay-card.locked{ cursor:default; }
+  .stay-card[data-area="top"]{ grid-area:top; }
+  .stay-card[data-area="left1"]{ grid-area:left1; }
+  .stay-card[data-area="left2"]{ grid-area:left2; }
+  .stay-card[data-area="right"]{ grid-area:right; }
+  .stay-card .hero{ position:absolute; inset:0; }
+  .stay-card.locked .hero{ filter:grayscale(1) blur(4px) brightness(.6) contrast(1.05); }
+  .stay-card .shade{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,.7) 100%); }
+  .stay-card .content{ position:absolute; left:14px; right:14px; bottom:12px; color:#F3EEE1; }
+  .stay-card .stay-label{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:15px; }
+  .stay-card .stay-range{ font-size:11px; opacity:.85; margin-top:2px; letter-spacing:.03em; }
+  .stay-card .status-pill{
+    position:absolute; top:11px; left:12px;
+    font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:10px; letter-spacing:.07em;
+    padding:3px 8px; border-radius:20px; text-transform:uppercase;
+    background:rgba(0,0,0,.4); color:#F3EEE1;
+  }
+  /* ---- Stay detail sheet body (open point) ----
+     Reuses the same .about-item row styling the day-chapter sheet already has, plus
+     a small explicit "TBD" note so nobody mistakes the placeholder for real content. */
+  .stay-tbd-note{
+    font-size:13px; color:var(--ink-faint); line-height:1.5;
+    background:var(--frame); border-radius:12px; padding:10px 12px;
+  }
 </style>
 
 <div class="screen" id="screen"></div>
@@ -571,6 +750,18 @@
 <button id="refreshBtn" class="refresh-fab" aria-label="Reload latest version" title="Reload latest version">
   <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
 </button>
+
+<!-- Bottom segmented control (Explorer / Stays) -- persistent sibling of #screen for
+     the same reason #refreshBtn is: it must survive render()'s full innerHTML rebuild
+     of #screen without being re-wired on every navigation. -->
+<div id="tabbar" class="tabbar" hidden>
+  <button class="tabbar-btn" id="tabExplore" aria-label="Explorer" title="Explorer">
+    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="16 8 14 14 8 16 10 10 16 8"/></svg>
+  </button>
+  <button class="tabbar-btn" id="tabStays" aria-label="Stays" title="Stays">
+    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6"/><path d="M3 18v2M21 18v2"/><path d="M3 12V8a2 2 0 0 1 2-2h4v4"/></svg>
+  </button>
+</div>
 
 <script>
 (function(){
@@ -660,6 +851,87 @@
       teaser:'One last look before the doors close.', status:'locked'}
   ];
 
+  /* ---- Stays tab data ----
+     All 4 real accommodations, sourced from "Japan Day-by-Day Itinerary (Current).docx"
+     (docs/) -- names, addresses (where the doc has one) and area/ryokan notes are the
+     doc's own content, not invented. Two shapes coexist here: Stay 1 pulls its area copy
+     live from Day 1's own `kita-shinjuku` chapter (see stayAboutHTML() below) since that
+     content already existed in-app before the Stays tab did; Stays 2-4 have no equivalent
+     in-app chapter (Days 3-10 have no real chapter data yet), so their `about` rows are
+     written directly here, adapted from the same source doc into this file's usual
+     [label,value] row shape rather than pasted verbatim. Day ranges are the doc's actual
+     check-in/checkout days (worked out from each day's own natural-flow line), replacing
+     the earlier round's evenly-spread guess: Isshuku Noma covers nights 1-3 (checkout
+     day 4 morning), Komanoyu is a single-night ryokan stay (day 4 only), Kabin Gion
+     covers nights 5-7 (checkout during day 8), and ARIA Takanawa covers nights 8-10
+     through departure. Exact street addresses that the doc itself doesn't give (Komanoyu,
+     ARIA Takanawa) are left explicitly marked rather than guessed. Locking reuses DAYS'
+     own status field (found via unlockDay) rather than a separate lock flag, so a stay
+     unlocks the same way a day does -- by time/day, never by physical proximity, since
+     the user wants this reachable before actually arriving there. `mood` picks a
+     placeholder gradient from heroStyle()/MOODS (same mechanism day cards use when they
+     have no real photo yet) until real photos are supplied. */
+  var STAYS = [
+    {id:'s1', label:'Stay 1', areaName:'Kita-Shinjuku', range:'Days 1–3', unlockDay:1, mood:1, hotel:'Isshuku Noma',
+      address:'4 Chome-14-7 Kita-Shinjuku, Room 101, Shinjuku City, Tokyo', areaChapterId:'kita-shinjuku'},
+    {id:'s2', label:'Stay 2', areaName:'Kiso-Fukushima', range:'Day 4', unlockDay:4, mood:4, hotel:'Komanoyu',
+      about:[
+        {group:'Komanoyu', tag:'THE RYOKAN', rows:[
+          ['Why it matters', 'This is not merely the hotel at the end of the day. The ryokan format — tatami, futon, communal bathing, local food and hospitality — turns accommodation itself into part of the cultural experience.'],
+          ['A little history', 'Komanoyu was established in 1897 and sits in the Kiso mountains. The property describes itself as one of the few hot-spring inns in Kiso-Fukushima with its own source, with an indoor bath made from Kiso hinoki cypress and iron-rich water. Its cuisine emphasizes Kiso and Shinshu mountain-and-river ingredients.'],
+          ['Look for', 'Notice the transition rituals: shoes off, tatami rooms, yukata, dinner pacing, bedding appearing later, bath etiquette and the quieter relationship between building and landscape. In the bath, notice the scent and feel of hinoki if using the cypress indoor bath.'],
+          ['How to experience it', 'Let the evening stay slow. Bathe before or after dinner depending on the ryokan rhythm, wear the yukata if comfortable, and treat dinner as an experience rather than refuelling.'],
+          ['Etiquette / sensitivity', 'For onsen: wash thoroughly before entering; bathe nude unless the facility states otherwise; keep towels and hair out of the water; keep phones out of the bathing area; speak quietly.'],
+          ['One memorable detail', 'Komanoyu combines a late-19th-century inn lineage with a private hot-spring source in the same mountain corridor you’ve just crossed.'],
+          ['Getting there', 'Collected by the ryokan’s own shuttle from JR Kiso-Fukushima Station — confirm the exact pickup time directly with them before travelling.']
+        ]},
+        {group:'Kiso-Fukushima', tag:'THE TOWN', rows:[
+          ['Why it matters', 'For the itinerary it’s mostly a transfer point, but a little context prevents it from feeling arbitrary: Kiso-Fukushima was historically one of the important control points on the Nakasendo and the administrative centre of the Kiso area.'],
+          ['A little history', 'During the Edo period, the town was a post town and the site of one of the route’s major checkpoints, where movement of people and goods was controlled. It later developed as a regional centre along the Kiso River.'],
+          ['Look for', 'From the station/vehicle, notice the narrow valley geography, river, wooded slopes and older building pockets compressed between them.'],
+          ['One memorable detail', 'The historic checkpoint gives a concrete mental image of how controlled long-distance travel could be in the Edo period — useful context before sleeping in the same valley.']
+        ]}
+      ]},
+    {id:'s3', label:'Stay 3', areaName:'Gion, Kyoto', range:'Days 5–7', unlockDay:5, mood:6, hotel:'Kabin Gion',
+      address:'18-12 Yamatocho, Higashiyama Ward, Kyoto',
+      about:[
+        {group:'Gion', tag:'HISTORIC KAGAI', rows:[
+          ['Why it matters', 'Gion is valuable not because you might “spot a geisha,” but because it remains one of Kyoto’s kagai — districts where geiko and maiko live, train and work within a highly developed performing-arts and hospitality culture.'],
+          ['A little history', 'The district grew around Yasaka Shrine and developed into an entertainment area of teahouses and performance culture. The connection between Gion, Yasaka Shrine and seasonal traditions remains visible today, especially through the Gion Matsuri and the area’s active geiko culture.'],
+          ['Look for', 'Ochaya-style architecture, subdued machiya fronts, lattices, noren curtains, lanterns, narrow entrances and the transition between busy Shijo-dori and quieter lanes. The visual restraint is part of the identity.'],
+          ['How to experience it', 'Walk slowly after the daytime crowds thin. Treat the district as an atmosphere to inhabit, not a hunt for performers.'],
+          ['Etiquette / sensitivity', 'Do not photograph maiko or geiko without permission; do not trespass into private alleys or properties; keep to the side of roads; obey no-photography signs — Gion is a place where people live and work, not a theme park.'],
+          ['One memorable detail', 'The word “geiko” is Kyoto’s regional term for geisha. A maiko is an apprentice; the culture includes dance, music, seasonal dress, conversation and hospitality — not simply appearance.']
+        ]},
+        {group:'Hanamikoji', tag:'GION STREET', rows:[
+          ['Why it matters', 'Hanamikoji is one of the clearest places to read Gion’s architectural language and understand the district as a working kagai rather than a themed attraction.'],
+          ['A little history', 'The southern Gion area contains historic machiya and teahouse architecture and is protected for its landscape. Geiko and maiko still move through the district between training, engagements and performances.'],
+          ['Look for', 'The restrained wooden fronts, lattices, lanterns and entrances that reveal very little of the interiors. The architecture often creates privacy rather than display.'],
+          ['How to experience it', 'Walk it once without trying to photograph every façade — the experience is strongest when you notice how quiet the buildings can feel even on a busy street.'],
+          ['Etiquette / sensitivity', 'Photography restrictions and private-property boundaries matter here. Do not pursue or obstruct geiko/maiko. Stay out of private side lanes where access is prohibited.'],
+          ['One memorable detail', 'The understated façades are intentional: much of Gion’s cultural life happens behind doors rather than being staged in the street.']
+        ]},
+        {group:'Yasaka Shrine', tag:'GION ANCHOR', rows:[
+          ['Why it matters', 'Yasaka Shrine is the spiritual anchor at the eastern end of Shijo and helps explain why Gion developed where it did. It is also the home shrine of the Gion Matsuri, one of Kyoto’s defining festivals.'],
+          ['A little history', 'The shrine’s history reaches back at least to the 9th century in official Kyoto accounts, with traditions placing its origins even earlier. Worship here became strongly associated with protection from epidemic disease — the Gion festival traces its origin to rituals held during a plague in 869.'],
+          ['Look for', 'The relationship between the west gate, Shijo Street and Gion; inside, worshippers ringing bells, offering coins and clapping. The main hall uses a distinctive Gion-zukuri form in which worship and sanctuary spaces are covered by one large roof.'],
+          ['How to experience it', 'Visit after dark if the evening allows — the shrine isn’t simply a daytime monument, and the lantern-lit atmosphere makes a good transition back into Gion.'],
+          ['Etiquette / sensitivity', 'It’s an active shrine. Give space to people praying; do not stand directly in front of worshippers for photos; follow normal Shinto courtesy.'],
+          ['One memorable detail', 'In 869, sixty-six halberds were erected to represent Japan’s provinces as part of prayers to end a plague — an origin that gives today’s huge summer Gion Matsuri an unexpectedly serious foundation.']
+        ]}
+      ]},
+    {id:'s4', label:'Stay 4', areaName:'Takanawa', range:'Days 8–10', unlockDay:8, mood:9, hotel:'ARIA Takanawa',
+      about:[
+        ['Why it matters', 'The base for the trip’s final stretch — reached from Shinagawa Station after the Shinkansen back from Kyoto, and the anchor for the deliberately open final days.'],
+        ['Getting there', 'A short continuation from Shinagawa Station once the Nozomi from Kyoto arrives.'],
+        ['Look for', 'Close enough to keep luggage and timing easy on the last morning before heading to the airport.']
+      ]}
+  ];
+  function stayLocked(st){
+    var d = DAYS.filter(function(x){ return x.n===st.unlockDay; })[0];
+    return !!d && d.status==='locked';
+  }
+
   var DAY1 = {
     weather:{lo:19,hi:24,cond:'Clear, mild', hourly:[['13:00','24°'],['16:00','23°'],['19:00','21°'],['22:00','19°'],['01:00','18°'],['04:00','17°']]},
     energy:'Low–medium', walking:'Low–medium', outside:'Mixed indoor/outdoor',
@@ -673,14 +945,42 @@
                ['A little history','Terminal 3’s Edo Koji strip recreates an Edo-period shopping street, a taste of old Japan before you’ve even left the airport.']]},
       {id:'kita-shinjuku', name:'Kita-Shinjuku', tag:'SEQ', state:'revealed',
         blurb:'Drop the bags at Isshuku Noma and notice the neighbourhood rather than trying to sightsee.',
-        about:[['Why it matters','A quieter, residential pocket a few minutes from Tokyo’s busiest transit hub.'],
-               ['Look for','Narrow backstreets, small shopfronts, laundry on balconies — ordinary Tokyo rather than tourist Tokyo.']]},
+        about:[['Why it matters','This is the trip’s first lived-in Tokyo context rather than a sightseeing target. It gives the group a useful contrast: one of the world’s most intense urban centres is only a short walk away, yet the accommodation sits in a much quieter residential fabric.'],
+               ['A little context','The itinerary uses Kita-Shinjuku mainly as a base. For the app, the useful context is not a long history lesson but orientation: this is the northern residential side of the greater Shinjuku area, with smaller streets, local housing and everyday shops rather than landmark tourism.'],
+               ['Look for','Notice the scale change from Shinjuku: narrower streets, low-rise homes and apartments, bicycles, convenience stores and local restaurants. The contrast itself is the point.'],
+               ['How to experience it','Do not create a checklist here. Treat the first walk from the accommodation as “ordinary Tokyo” — the place where the group learns how bins, vending machines, konbini, crossings and residential quiet actually feel.'],
+               ['Etiquette / sensitivity','Keep voices low late at night, especially when returning after karaoke or clubbing. Residential lanes are not nightlife spaces even when the centre of Shinjuku is nearby.'],
+               ['One memorable detail','A good first Tokyo reveal is the speed of the urban transition: within a short walk, the city can move from near-silence to rail infrastructure, giant department stores and neon.']]},
       {id:'shinjuku-shop', name:'Shinjuku', tag:'SEQ', state:'revealed',
-        blurb:'Practical shopping for anything missing from the flight — UNIQLO, MUJI, toiletries, snacks.'},
+        blurb:'Practical shopping for anything missing from the flight — UNIQLO, MUJI, toiletries, snacks.',
+        about:[['Why it matters','Shinjuku is both practical infrastructure and a defining Tokyo experience: transport, department stores, skyscrapers, shopping and nightlife all collide around one enormous station complex.'],
+               ['A little context','Modern Shinjuku grew into one of Tokyo’s major commercial and transport centres after rail development shifted activity westward from the older city core. Today the station area has distinct faces: the office-tower district to the west, major retail to the east and nightlife around Kabukicho.'],
+               ['Look for','Instead of “seeing Shinjuku,” notice the transitions: elevated rail lines, department stores integrated into the station, dense signage, the west-side towers and the more chaotic east-side streets.'],
+               ['How to experience it','Use it as a living orientation challenge rather than an attraction. On arrival day, let shopping and navigation be the experience.'],
+               ['Etiquette / sensitivity','Station flows are fast. Stop at the side before checking the phone or regrouping; do not block gates or stair landings.'],
+               ['One memorable detail','Shinjuku Station is famous for its sheer complexity. The useful story is not a record-number statistic but the feeling that “the station is a district” — exits can place you in completely different urban environments.']]},
       {id:'return-haneda', name:'Return to Haneda', tag:'TIME', state:'revealed',
         blurb:'EK312 lands at 22:20 — the reunion point for all three travellers.', meta:'Aim to arrive 21:30–21:45'},
       {id:'late-food', name:'Late food', tag:'SEQ', state:'revealed',
-        blurb:'Pick up food on the way back from Haneda so nobody has to search for a meal after midnight.'}
+        blurb:'Okubo and Shin-Okubo, on the way back from Haneda — this stretch of Tokyo runs late, so there’s always something open for a post-midnight meal.',
+        about:[
+          {group:'Okubo', tag:'LATE-FOOD FALLBACK', rows:[
+            ['Why it matters','Okubo broadens the group’s first impression of Tokyo beyond “Japanese-only” imagery. The area is markedly multicultural and sits close enough to the accommodation to be a realistic late-food fallback.'],
+            ['A little context','The Okubo / Shin-Okubo area developed into one of Tokyo’s best-known multicultural neighbourhoods, with especially strong Korean communities and businesses as well as shops and restaurants serving other Asian and Muslim communities.'],
+            ['Look for','Watch for the shift in food signage, grocery stores, restaurants and languages. Compared with Shinjuku’s department-store scale, Okubo feels more street-level and community-driven.'],
+            ['How to experience it','If the group passes through late on arrival night, keep it practical and spontaneous — one of Tokyo’s most multicultural pockets, and a useful place for food after normal restaurant hours.'],
+            ['Etiquette / sensitivity','Late-night residential streets still require normal quiet. Do not treat local community businesses as a theme-park “ethnic district.”'],
+            ['One memorable detail','One of Tokyo’s charms is that a one-stop train ride can change the city’s cultural texture completely; Okubo is a strong early example.']
+          ]},
+          {group:'Shin-Okubo', tag:'KOREATOWN', rows:[
+            ['Why it matters','Shin-Okubo is the more immediately recognisable “Koreatown” face of the wider Okubo area, with dense Korean food, beauty, music and retail around the station.'],
+            ['A little context','The neighbourhood’s Korean commercial identity expanded strongly from the late 20th century and became especially visible through food, K-pop and beauty culture. Official Tokyo tourism material describes the wider area as Japan’s largest Koreatown while also highlighting its broader multicultural character.'],
+            ['Look for','Korean restaurant queues, cosmetics, supermarkets, music merchandise and crowded pedestrian streets around the station. The visual density differs from nearby residential Kita-Shinjuku.'],
+            ['How to experience it','Use it only if it naturally serves the evening — it’s not a planned sightseeing block, just context around the base and an example of contemporary Tokyo’s cultural diversity.'],
+            ['Etiquette / sensitivity','Busy pavements can become very congested. Queue neatly, keep bags tight and avoid stopping in the middle of pedestrian flow.'],
+            ['One memorable detail','The area is a useful counterpoint to the trip’s later preserved-town imagery: contemporary Japan also absorbs and remixes regional pop culture at high speed.']
+          ]}
+        ]}
     ],
     tomorrow:'No fixed early start tomorrow — the day can begin slowly after the late pickup.',
     tomorrowReady:true
@@ -868,7 +1168,9 @@
   }
   var chevronDown = '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>';
   var chevronRight = '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M9 6l6 6-6 6"/></svg>';
-  var backArrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 5l-7 7 7 7"/></svg>';
+  /* backArrow (the old "< The Reel" back-button glyph) removed -- the day-detail
+     screen now uses a floating .close-fab (X, see its CSS/markup) instead, wired to
+     the same data-back handler in wireCommon(). */
   var chevronRightNav = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5l7 7-7 7"/></svg>';
   var closeIcon = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
@@ -916,16 +1218,39 @@
      chapters whose About panel opens into several sub-places -- detected by checking
      whether the first entry itself looks like a [label,value] row (a 2-element array)
      versus a group object. Mixing the two shapes within one chapter's `about` is not
-     supported; pick one per chapter. */
-  function aboutItemsHTML(rows){
+     supported; pick one per chapter.
+
+     A single group (e.g. nightlife's MITSUKI-only panel) still renders plain and
+     always-expanded -- there's nothing to choose between. More than one group renders
+     as a collapsed, tappable list instead (see wireCommon()'s data-group-toggle
+     handler for the "only one open at a time" + scroll-into-view behavior); each row
+     needs a stable id to toggle by, built from the chapter id + its index in the list
+     so it's unique within the sheet without needing the place name to be unique. */
+  function aboutItemsHTML(rows, chId){
     if(!rows || !rows.length) return '';
     var isGrouped = !Array.isArray(rows[0]);
     if(!isGrouped) return rows.map(aboutRowHTML).join('');
-    return rows.map(function(g){
+    if(rows.length===1){
+      var g0 = rows[0];
       return '<div class="about-group">' +
-        '<div class="about-group-head"><div class="about-group-title">'+g.group+'</div>' +
-          (g.tag ? '<div class="about-group-tag">'+g.tag+'</div>' : '') + '</div>' +
-        '<div class="about-group-rows">' + g.rows.map(aboutRowHTML).join('') + '</div>' +
+        '<div class="about-group-head"><div class="about-group-title">'+g0.group+'</div>' +
+          (g0.tag ? '<div class="about-group-tag">'+g0.tag+'</div>' : '') + '</div>' +
+        '<div class="about-group-rows">' + g0.rows.map(aboutRowHTML).join('') + '</div>' +
+      '</div>';
+    }
+    return rows.map(function(g, idx){
+      var gid = chId+'::'+idx;
+      return '<div class="about-group collapsible" data-group-id="'+gid+'">' +
+        '<button class="about-group-toggle" data-group-toggle="'+gid+'" aria-expanded="false">' +
+          '<div class="about-group-title">'+g.group+'</div>' +
+          '<div class="about-group-headright">' +
+            (g.tag ? '<div class="about-group-tag">'+g.tag+'</div>' : '') +
+            '<div class="about-group-caret">'+chevronRight+'</div>' +
+          '</div>' +
+        '</button>' +
+        '<div class="about-group-collapse">' +
+          '<div class="about-group-rows">' + g.rows.map(aboutRowHTML).join('') + '</div>' +
+        '</div>' +
       '</div>';
     }).join('');
   }
@@ -940,22 +1265,76 @@
     return day.n===1 ? DAY1 : day.n===2 ? state.day2 : null;
   }
 
+  /* shared bottom-sheet shell (backdrop/panel/handle/header/body) -- factored out so
+     the Stays detail sheet can reuse the exact same markup, drag-to-dismiss and
+     transition wiring as the day-chapter About sheet instead of duplicating it. */
+  function sheetShell(title, bodyHTML){
+    return '' +
+    '<div class="sheet-backdrop" data-sheet-close></div>' +
+    '<div class="sheet-panel" role="dialog" aria-modal="true" aria-label="'+title+'">' +
+      '<div class="sheet-handle"></div>' +
+      /* iOS-style bar: close (X) on the left, title centered -- see .sheet-header's
+         3-column grid for how the centering actually works regardless of title length. */
+      '<div class="sheet-header">' +
+        '<button class="sheet-close" data-sheet-close aria-label="Close">'+closeIcon+'</button>' +
+        '<div class="sheet-title">'+title+'</div>' +
+      '</div>' +
+      '<div class="sheet-body">' + bodyHTML + '</div>' +
+    '</div>';
+  }
+
+  /* body for a Stay's detail sheet. All 4 stays now have a real, documented hotel name
+     (see the STAYS comment above for the source) -- content comes from one of two
+     places: Stay 1's area copy is pulled live from Day 1's own `kita-shinjuku` chapter
+     (`areaChapterId`, written before the Stays tab existed, so it's read live rather
+     than duplicated -- if that chapter's copy ever changes, this updates with it
+     automatically); Stays 2-4 have no equivalent in-app chapter to read from (Days 3-10
+     have no real chapter data yet), so their `about` rows live directly on the STAYS
+     entry itself. Either way, only a genuinely undocumented field (currently just
+     Komanoyu's and ARIA Takanawa's exact street addresses -- the source doc never gives
+     one) falls back to an explicit "still to be added" instead of a guess. The old
+     all-placeholder branch only fires now if a stay has no `hotel` at all, which
+     shouldn't happen with the current data but is kept as a safety net rather than
+     assumed impossible. */
+  function stayAboutHTML(st){
+    var areaCh = st.areaChapterId ? DAY1.chapters.filter(function(c){return c.id===st.areaChapterId;})[0] : null;
+    var areaRows = (areaCh && areaCh.about) ? areaCh.about : (st.about || null);
+    if(st.hotel && areaRows){
+      var hotelValue = st.hotel + (st.address ? ', ' + st.address + '.' : ' — exact address still to be added.');
+      /* The Hotel row is always a plain [label,value] row, but `areaRows` can be either
+         that same flat shape (Stay 1, a single chapter's about) or a list of named
+         groups (Stays 2/3, several named sub-places sharing one sheet). Concatenating
+         the two directly into one aboutItemsHTML() call would corrupt its shape
+         detection -- it only inspects the FIRST entry to decide flat-vs-grouped, so a
+         leading flat Hotel row would make it treat real group objects as flat rows too
+         and break. Rendered separately instead: the Hotel row directly via
+         aboutRowHTML(), then areaRows through its own aboutItemsHTML() call exactly as
+         a chapter's own about panel would. */
+      return aboutRowHTML(['Hotel', hotelValue]) + aboutItemsHTML(areaRows, st.id);
+    }
+    return aboutItemsHTML([
+      ['Hotel', 'Name and address — to be added once booked.'],
+      ['The area', 'A short guide to what’s around it — to be added.']
+    ], st.id) + '<div class="stay-tbd-note">Content for this stay is still an open point — placeholder only.</div>';
+  }
+
   /* the bottom-sheet modal itself -- rendered as a sibling of .view (see render()),
      covering half the screen, sliding up from the bottom. Returns '' when closed so
-     it's simply absent from the DOM rather than hidden. */
+     it's simply absent from the DOM rather than hidden. Doubles as the Stays detail
+     sheet: state.sheetAbout holds either a day-chapter id (looked up via
+     currentDayData()) or, prefixed 'stay:', a Stays entry id -- same open/close/drag
+     state, same DOM shape, just a different content source. */
   function sheetHTML(){
     if(!state.sheetAbout) return '';
+    if(state.sheetAbout.indexOf('stay:')===0){
+      var st = STAYS.filter(function(s){return s.id===state.sheetAbout.slice(5);})[0];
+      if(!st || stayLocked(st)) return '';
+      return sheetShell(st.areaName || st.label, stayAboutHTML(st));
+    }
     var dayData = currentDayData();
     var ch = dayData ? dayData.chapters.filter(function(c){return c.id===state.sheetAbout;})[0] : null;
     if(!ch || !ch.about) return '';
-    return '' +
-    '<div class="sheet-backdrop" data-sheet-close></div>' +
-    '<div class="sheet-panel" role="dialog" aria-modal="true" aria-label="'+ch.name+'">' +
-      '<div class="sheet-handle"></div>' +
-      '<div class="sheet-header"><div class="sheet-title">'+ch.name+'</div>' +
-        '<button class="sheet-close" data-sheet-close aria-label="Close">'+closeIcon+'</button></div>' +
-      '<div class="sheet-body">' + aboutItemsHTML(ch.about) + '</div>' +
-    '</div>';
+    return sheetShell(ch.name, aboutItemsHTML(ch.about, ch.id));
   }
 
   /* runs the entrance transition after render() has mounted a freshly-opened sheet --
@@ -992,6 +1371,147 @@
         render();
       }
     });
+  }
+
+  /* ---------- drag-to-dismiss on the About sheet ----------
+     Lets the sheet be pulled down and let go, like a native iOS/Android sheet, instead
+     of only closing via the X button or a backdrop tap. Wired fresh after every render
+     that mounts the sheet (see render()'s call site), same as openSheetTransition().
+
+     Drag can start from the handle or header (always -- neither one scrolls), or from
+     the body's own content, but ONLY when the body is already scrolled to its very top
+     -- otherwise a downward drag starting mid-scroll would fight normal scrolling back
+     up to the top instead of ever reaching the sheet itself, which doesn't feel native.
+     `pending` below defers that decision until the first real pointermove, since at
+     pointerdown time knowing the body is scrolled to 0 doesn't yet tell us which way
+     the user is about to drag.
+
+     While a drag is live, both the panel's transform and the backdrop's background are
+     driven directly (transition set to 'none' so they track the finger 1:1, exactly the
+     technique wireHome()'s card drag already uses) -- on release, transition is handed
+     back so the snap-back or the dismiss slide-out both animate, and once that finishes
+     every inline override this function set is cleared back to '', letting the normal
+     .open/.sheet-panel class rules fully govern the sheet again (the same "clean up
+     after yourself" rule the round-4/7 transition:none regression exists to warn about
+     applies here just as much). */
+  function wireSheetDrag(){
+    var panel = document.querySelector('.sheet-panel');
+    var backdrop = document.querySelector('.sheet-backdrop');
+    if(!panel || !backdrop) return;
+    var body = panel.querySelector('.sheet-body');
+    var dragEls = [panel.querySelector('.sheet-handle'), panel.querySelector('.sheet-header'), body];
+
+    var drag = null; /* {startY, lastY, lastT, vy, dy, fromBody, pending, committed} while active */
+
+    function panelHeight(){ return panel.getBoundingClientRect().height || 1; }
+
+    function settle(toOpen){
+      panel.style.transition = 'transform .32s cubic-bezier(.22,1,.36,1)';
+      backdrop.style.transition = 'background .28s ease';
+      var onEnd = function(ev){
+        if(ev.target!==panel || ev.propertyName!=='transform') return;
+        panel.removeEventListener('transitionend', onEnd);
+        if(!toOpen){
+          state.sheetAbout = null;
+          render();
+        } else {
+          /* snapped back to open -- clear every inline override so the .open class
+             rules take over again cleanly, same as before the drag ever started. */
+          panel.style.transition = ''; panel.style.transform = '';
+          backdrop.style.transition = ''; backdrop.style.background = '';
+        }
+      };
+      panel.addEventListener('transitionend', onEnd);
+      requestAnimationFrame(function(){
+        panel.style.transform = toOpen ? 'translateY(0)' : 'translateY(100%)';
+        backdrop.style.background = toOpen ? 'rgba(0,0,0,.65)' : 'rgba(0,0,0,0)';
+      });
+    }
+
+    function onDown(e){
+      if(e.button!==undefined && e.button!==0) return;
+      /* the close button lives inside .sheet-header, one of this function's own drag
+         sources -- without this check, tapping it started a (zero-distance) drag that
+         captured the pointer to the header, which silently ate the button's own click
+         (a captured pointer's subsequent events, including the synthetic click, are
+         retargeted to the capturing element instead of the button), so the X stopped
+         dismissing the sheet the moment drag-to-dismiss was added. Let it through
+         untouched instead. */
+      if(e.target.closest && e.target.closest('.sheet-close')) return;
+      var fromBody = (e.currentTarget===body);
+      drag = {
+        startY:e.clientY, lastY:e.clientY, lastT:performance.now(), vy:0, dy:0,
+        fromBody:fromBody, pending:fromBody, active:!fromBody, pointerId:e.pointerId, el:e.currentTarget
+      };
+      if(!fromBody){
+        panel.style.transition = 'none';
+        backdrop.style.transition = 'none';
+        /* captured immediately (unlike the body case below, which only captures once a
+           downward drag is confirmed) -- the handle/header never has competing native
+           scroll behavior to preserve, so there's no reason to wait. Without this, a
+           fast drag that carries the pointer outside the shrinking panel's hit area
+           would silently stop delivering pointermove here. */
+        try{ e.currentTarget.setPointerCapture(e.pointerId); }catch(err){}
+      }
+    }
+    function beginBodyDrag(){
+      if(body.scrollTop>0){ drag = null; return false; }
+      drag.pending = false; drag.active = true;
+      panel.style.transition = 'none';
+      backdrop.style.transition = 'none';
+      try{ drag.el.setPointerCapture(drag.pointerId); }catch(err){}
+      return true;
+    }
+    function onMove(e){
+      if(!drag || drag.pointerId!==e.pointerId) return;
+      var rawDy = e.clientY - drag.startY;
+      if(drag.pending){
+        if(rawDy <= 0) return; /* only a downward pull from the top of the body starts this */
+        if(!beginBodyDrag()) return;
+      }
+      if(!drag.active) return;
+      if(e.cancelable) e.preventDefault();
+      /* downward tracks the finger 1:1, same as a native sheet. Upward is now real,
+         visible (resisted) movement too -- not floored to 0 -- so the sheet actually
+         follows the finger a little instead of feeling stuck/frozen when dragged up;
+         capped at -56px so it can't rubber-band further than a native sheet would.
+         Either way, releasing net-upward always just snaps back open (see onUp) --
+         upward motion can never dismiss it. */
+      var dy = rawDy < 0 ? Math.max(rawDy/3, -56) : rawDy;
+      var now = performance.now();
+      var dt = now - drag.lastT;
+      if(dt>0) drag.vy = (e.clientY - drag.lastY)/dt;
+      drag.lastY = e.clientY; drag.lastT = now;
+      drag.dy = dy;
+      panel.style.transform = 'translateY('+dy+'px)';
+      /* only downward movement dims the backdrop -- an upward pull stays at full
+         darkness (the sheet is still fully "open" from the backdrop's point of view). */
+      var openFrac = Math.min(1, Math.max(0, dy) / panelHeight());
+      backdrop.style.background = 'rgba(0,0,0,'+(0.65*(1-openFrac)).toFixed(3)+')';
+    }
+    function onUp(e){
+      if(!drag || drag.pointerId!==e.pointerId) return;
+      var wasActive = drag.active;
+      var dy = Math.max(0, drag.dy);
+      var vy = drag.vy;
+      drag = null;
+      if(!wasActive) return; /* never left "pending" -- e.g. a tap, or an upward scroll gesture */
+      var commit = dy > panelHeight()*0.28 || vy > 0.6;
+      settle(!commit);
+    }
+
+    dragEls.forEach(function(el){
+      if(!el) return;
+      el.addEventListener('pointerdown', onDown);
+    });
+    /* move/up listen on the panel itself (not each drag-source element) since
+       setPointerCapture during a body-drag targets the body element, but a
+       handle/header drag never captures -- listening on the panel covers both, and a
+       plain pointermove/pointerup on document would also work but this keeps it
+       scoped to the sheet's own DOM. */
+    panel.addEventListener('pointermove', onMove);
+    panel.addEventListener('pointerup', onUp);
+    panel.addEventListener('pointercancel', onUp);
   }
 
   function confirmRow(id){
@@ -1035,9 +1555,9 @@
   function dayDetailScreen(day, dayData, dayKey){
     var isJournal = day.status==='journal';
 
-    var html = '<div class="dayhead">' +
-      '<button class="backbtn" data-back>'+backArrow+' The Reel</button>' +
-      (dayKey==='day2' ? '<button class="resetbtn" data-reset>Reset demo</button>' : '<span></span>') +
+    var html = '<button class="close-fab" data-back aria-label="Close">'+closeIcon+'</button>';
+    html += '<div class="dayhead">' +
+      (dayKey==='day2' ? '<button class="resetbtn" data-reset>Reset demo</button>' : '') +
       '</div>';
 
     var dayLocked = day.status==='locked';
@@ -1101,7 +1621,7 @@
      classes (.mark/.wordmark/.range) in both, sized differently via the .intro-hero
      modifier class, so goHome()/goIntro() can morph between them (see markMorph()). */
   function heroMarkupHTML(){
-    return '<div class="mark"><img class="mark-light" src="'+MARK_LIGHT+'" alt="Japan, unscripted" width="56" height="56"><img class="mark-dark" src="'+MARK_DARK+'" alt="Japan, unscripted" width="56" height="56"></div><div class="wordmark">Japan, unscripted</div><div class="range mono">25 SEP &ndash; 4 OCT 2026</div>';
+    return '<div class="mark"><img class="mark-light" src="'+MARK_LIGHT+'" alt="japan slowly" width="56" height="56"><img class="mark-dark" src="'+MARK_DARK+'" alt="japan slowly" width="56" height="56"></div><div class="wordmark">japan slowly</div><div class="range mono">25 SEP &ndash; 4 OCT 2026</div>';
   }
 
   /* the big centered splash shown on first load (round 9) -- see goHome()/goIntro() for
@@ -1134,6 +1654,33 @@
       '</button>';
     });
     html += '</div>';
+    return html;
+  }
+
+  /* ---------- Stays screen ----------
+     A 4-card bento/mosaic grid (1 full-width card, then 2 stacked left + 1 tall
+     right, matching the wireframe the user sent) rather than the day deck's swipeable
+     carousel -- these aren't meant to be flipped through one at a time, they're a
+     reference the user dips into. Locking is day-based (stayLocked(), same status
+     field DAYS already uses) not location-based, per the user's explicit ask. */
+  function staysScreen(){
+    var areas = ['top','left1','left2','right'];
+    var html = '<div class="stays-view">' +
+      '<div class="stays-head"><div class="wordmark">Stays</div>' +
+        '<div class="sub">Where you’re sleeping, unlocked day by day</div></div>' +
+      '<div class="stays-grid">';
+    STAYS.forEach(function(st, i){
+      var locked = stayLocked(st);
+      html += '<button class="stay-card'+(locked?' locked':'')+'" data-area="'+areas[i]+'" data-stay="'+st.id+'">' +
+        '<div class="hero" style="'+heroStyle(st.mood)+'"></div>' + grainDiv() + '<div class="shade"></div>' +
+        (locked ? '<div class="status-pill">Locked</div>' : '') +
+        '<div class="content">' +
+          '<div class="stay-label">'+(locked ? 'Stay withheld' : (st.areaName || st.label))+'</div>' +
+          '<div class="stay-range">'+st.range+'</div>' +
+        '</div>' +
+      '</button>';
+    });
+    html += '</div></div>';
     return html;
   }
 
@@ -1284,6 +1831,24 @@
     }, 160);
   }
 
+  /* ---------- Stays tab <-> Explorer tab (segmented control) ----------
+     A plain screen swap, not the intro/home hero-morph treatment above -- these two
+     screens don't share a common hero element to morph between, and a simple
+     cross-fade reads as a tab switch rather than a "journey" transition, which is
+     the right register for a segmented control. */
+  function goStays(){
+    if(state.animating || state.screen==='stays') return;
+    state.sheetAbout = null;
+    state.screen = 'stays';
+    render();
+  }
+  function goExplore(){
+    if(state.animating || state.screen==='home') return;
+    state.sheetAbout = null;
+    state.screen = 'home';
+    render();
+  }
+
   function render(){
     var el = document.getElementById('screen');
     /* el.innerHTML gets torn down and rebuilt on every render(), which by default
@@ -1298,11 +1863,13 @@
     var prevView = el.querySelector('.view');
     var keepScroll = (prevView && prevView.dataset.screenKey === screenKey) ? prevView.scrollTop : null;
 
-    var html = '<div class="view" data-screen-key="'+screenKey+'">';
+    var html = '<div class="view'+(state.screen==='day' ? ' view-day' : '')+'" data-screen-key="'+screenKey+'">';
     if(state.screen==='intro'){
       html += introScreen();
     } else if(state.screen==='home'){
       html += homeScreen();
+    } else if(state.screen==='stays'){
+      html += staysScreen();
     } else {
       var day = DAYS.filter(function(d){return d.n===state.openDay;})[0];
       var dayData = day.n===1 ? DAY1 : day.n===2 ? state.day2 : null;
@@ -1319,7 +1886,7 @@
       var newView = el.querySelector('.view');
       if(newView) newView.scrollTop = keepScroll;
     }
-    if(state.sheetAbout){ openSheetTransition(); }
+    if(state.sheetAbout){ openSheetTransition(); wireSheetDrag(); }
     /* show the reload button on the intro screen and the home reel, but not on a
        day-detail screen -- that screen already has its own top-right control
        (Reset demo) in that same corner, and this button is fixed-position so it
@@ -1329,6 +1896,18 @@
        force-fetch a fresh copy of the app.) */
     var refreshBtn = document.getElementById('refreshBtn');
     if(refreshBtn) refreshBtn.hidden = (state.screen!=='home' && state.screen!=='intro');
+    /* the segmented control only makes sense once there's more than one place to be --
+       shown on the two screens it switches between (home/stays), hidden on the intro
+       splash and on a day-detail screen (which already owns that corner/edge with its
+       own chrome, same reasoning as refreshBtn above). */
+    var tabbar = document.getElementById('tabbar');
+    if(tabbar){
+      tabbar.hidden = (state.screen!=='home' && state.screen!=='stays');
+      var tabExplore = document.getElementById('tabExplore');
+      var tabStays = document.getElementById('tabStays');
+      if(tabExplore) tabExplore.classList.toggle('on', state.screen==='home');
+      if(tabStays) tabStays.classList.toggle('on', state.screen==='stays');
+    }
   }
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1621,6 +2200,26 @@
       bgEl.style.pointerEvents = '';
       bgEl.style.zIndex = '';
 
+      /* finishClose() deliberately folds `wrapper` into the deck instead of calling
+         render() (see the comment above) -- but render() is also the ONLY place that
+         toggles #refreshBtn's/#tabbar's [hidden] state for the current screen, so
+         bypassing it here left the reload button permanently hidden after the very
+         first day-detail visit (round 17's real bug fix): openDayFlip's render() call
+         hid it on the way in, and nothing ever un-hid it on the way back out, since
+         this path never runs that logic again. The round-19 tabbar has the exact same
+         problem and needs the exact same fix -- mirror render()'s own rules directly
+         rather than calling render() itself. */
+      var refreshBtn = document.getElementById('refreshBtn');
+      if(refreshBtn) refreshBtn.hidden = false; /* state.screen is always 'home' by the time we get here */
+      var tabbarEl = document.getElementById('tabbar');
+      if(tabbarEl){
+        tabbarEl.hidden = false;
+        var tabExploreEl = document.getElementById('tabExplore');
+        var tabStaysEl = document.getElementById('tabStays');
+        if(tabExploreEl) tabExploreEl.classList.add('on');
+        if(tabStaysEl) tabStaysEl.classList.remove('on');
+      }
+
       wire();
     };
   }
@@ -1650,6 +2249,89 @@
     });
     root.querySelectorAll('[data-sheet-close]').forEach(function(b){
       b.addEventListener('click', function(){ closeSheet(); });
+    });
+    /* a chapter's About sheet with more than one place (see aboutItemsHTML()) renders
+       them as a collapsed list -- tapping one expands it and collapses whichever other
+       one was open, one at a time. Toggled by directly mutating the existing DOM nodes
+       (classList + measured max-height), the same technique the weather-cell accordion
+       above already uses, rather than going through state+render() -- that keeps the
+       CSS transition intact (a full render() would swap in a fresh, already-in-its-
+       final-state node with nothing to visibly animate from) and means this needs no
+       app-state field of its own; the open/closed state simply lives in the DOM for as
+       long as the sheet itself does, and a fresh sheet always starts fully collapsed
+       (see aboutItemsHTML()) since render() rebuilds the sheet's nodes from scratch. */
+    root.querySelectorAll('[data-group-toggle]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var item = btn.closest('.about-group.collapsible');
+        var collapse = item && item.querySelector('.about-group-collapse');
+        var sheetBody = item && item.closest('.sheet-body');
+        if(!item || !collapse || !sheetBody) return;
+        var opening = !item.classList.contains('open');
+
+        /* collapsing siblings ABOVE `item` in the list shrink over the same .3s
+           transition as item's own expand -- which shifts item's own top position
+           throughout that .3s, not just at the end. Measuring/scrolling too early
+           (the original round-17 version did this on the very next animation frame)
+           computed the target against item's pre-shift position, so the scroll landed
+           partway into item's revealed content instead of at its header once the
+           layout actually settled. Track whichever siblings are actually collapsing
+           here and wait for their own max-height transition to finish before
+           measuring anything, so the scroll target reflects the final, settled
+           layout. */
+        var collapsingOthers = [];
+        sheetBody.querySelectorAll('.about-group.collapsible.open').forEach(function(other){
+          if(other===item) return;
+          other.classList.remove('open');
+          var otherBtn = other.querySelector('[data-group-toggle]');
+          if(otherBtn) otherBtn.setAttribute('aria-expanded','false');
+          var otherCollapse = other.querySelector('.about-group-collapse');
+          if(otherCollapse){
+            otherCollapse.style.maxHeight = '0px';
+            collapsingOthers.push(otherCollapse);
+          }
+        });
+
+        item.classList.toggle('open', opening);
+        btn.setAttribute('aria-expanded', String(opening));
+        collapse.style.maxHeight = opening ? (collapse.scrollHeight+'px') : '0px';
+
+        if(opening){
+          /* scroll so the newly opened row's own header (the start of its now-visible
+             content) is visible within the sheet's scroll box. Measured via
+             getBoundingClientRect (not offsetTop) so it's correct regardless of which
+             element ends up being the nearest positioned ancestor. */
+          var scrolled = false;
+          var doScroll = function(){
+            if(scrolled) return;
+            scrolled = true;
+            var sbRect = sheetBody.getBoundingClientRect();
+            var itemRect = item.getBoundingClientRect();
+            var target = sheetBody.scrollTop + (itemRect.top - sbRect.top) - 8;
+            sheetBody.scrollTo({ top:Math.max(0,target), behavior: reduceMotion ? 'auto' : 'smooth' });
+          };
+          if(reduceMotion || !collapsingOthers.length){
+            /* nothing else is collapsing (item was the only thing changing height
+               above the fold), or motion is reduced and nothing will animate at all
+               -- either way item's position is already final, no need to wait. */
+            requestAnimationFrame(doScroll);
+          } else {
+            var pending = collapsingOthers.length;
+            collapsingOthers.forEach(function(el){
+              var onEnd = function(ev){
+                if(ev.target!==el || ev.propertyName!=='max-height') return;
+                el.removeEventListener('transitionend', onEnd);
+                pending--;
+                if(pending<=0) doScroll();
+              };
+              el.addEventListener('transitionend', onEnd);
+            });
+            /* safety net in case a transitionend somehow never fires (e.g. the
+               collapsing row had zero height to begin with, so no property actually
+               changed) -- matches .about-group-collapse's own .3s transition. */
+            setTimeout(doScroll, 350);
+          }
+        }
+      });
     });
     var wc = root.querySelector('[data-weather]');
     if(wc) wc.addEventListener('click', function(){ wc.classList.toggle('open'); });
@@ -1721,9 +2403,24 @@
     if(cta) cta.addEventListener('click', function(){ goHome(); });
   }
 
+  /* ---------- Stays grid ---------- */
+  function wireStays(){
+    var el = document.getElementById('screen');
+    el.querySelectorAll('.stay-card').forEach(function(b){
+      if(b.classList.contains('locked')) return; /* no sheet for a stay that hasn't unlocked yet */
+      b.addEventListener('click', function(){
+        state.sheetAbout = 'stay:'+b.getAttribute('data-stay');
+        render();
+      });
+    });
+  }
+
   function wire(){
     var el = document.getElementById('screen');
-    if(state.screen==='intro'){ wireIntro(); } else if(state.screen==='home'){ wireHome(); } else { wireCommon(el); }
+    if(state.screen==='intro'){ wireIntro(); }
+    else if(state.screen==='home'){ wireHome(); }
+    else if(state.screen==='stays'){ wireStays(); wireCommon(el); }
+    else { wireCommon(el); }
   }
 
   /* ---------- reload-latest button ---------- */
@@ -1738,6 +2435,16 @@
         location.replace(location.pathname + '?v=' + Date.now());
       }, 220);
     });
+  })();
+
+  /* ---------- bottom segmented control (Explorer / Stays) ----------
+     Persistent sibling of #screen, wired once (not inside wire(), which reruns on
+     every render()) -- same reasoning as wireRefresh() above. */
+  (function wireTabbar(){
+    var tabExplore = document.getElementById('tabExplore');
+    var tabStays = document.getElementById('tabStays');
+    if(tabExplore) tabExplore.addEventListener('click', function(){ goExplore(); });
+    if(tabStays) tabStays.addEventListener('click', function(){ goStays(); });
   })();
 
   render();
