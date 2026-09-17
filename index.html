@@ -853,7 +853,12 @@
      then two columns below it -- two smaller cards stacked in the left column, one
      tall card spanning both rows in the right column. Expressed with named grid
      areas rather than nth-child math so the shape stays legible and easy to re-tune. */
-  .stays-view{ padding:calc(env(safe-area-inset-top, 0px) + 24px) 20px calc(env(safe-area-inset-bottom, 0px) + 110px); }
+  /* top padding removed here -- .home-hero (rendered inside .stays-view, same as on
+     the home/Explorer screen) already reserves calc(safe-area-top + 24px) of its own
+     top padding, so stacking .stays-view's own top padding on top of that pushed the
+     whole Stays screen (hero + grid) down noticeably further than the Explorer
+     screen's hero sits. Horizontal/bottom padding unchanged. */
+  .stays-view{ padding:0 20px calc(env(safe-area-inset-bottom, 0px) + 110px); }
   /* round 24: the old .stays-head ("Stays" / "Where you're sleeping...") is gone --
      the user asked for the same top hero the Explorer screen uses (mark + "japan
      slowly" wordmark + date range, via the same heroMarkupHTML()/.home-hero the home
@@ -865,14 +870,13 @@
   .stays-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
-    /* round 24: was 150px 130px 130px (left1/left2 equal height) -- user asked for
-       the second (lower-left) stay card to read as smaller than the first. Row 2
-       shrunk from 130 to 105 (left2's own row); row 1 (left1's row) bumped slightly
-       to 145 so the size difference reads clearly rather than being marginal. The
-       tall right card spans both rows either way, so its own total height changes
-       slightly (262px vs the old 260px) as a side effect -- not asked for, but
-       negligible and not worth a more complex layout to avoid. */
-    grid-template-rows:150px 145px 105px;
+    /* round 25: reverted round 24's left1/left2 sizing -- left1 (Stay 2,
+       Kiso-Fukushima, a single-night stop) was reading as the larger of the two left
+       cards, while left2 (Stay 3, Gion, a 3-night stop) read as the smaller one --
+       backwards relative to how long each stay actually is. Swapped back so left1's
+       row is the smaller 105px and left2's row is the larger 145px. The tall right
+       card spans both rows either way, so its total height is unaffected. */
+    grid-template-rows:150px 105px 145px;
     grid-template-areas:"top top" "left1 right" "left2 right";
     gap:12px;
     /* round 24: "center the grid the same way we do for the cards" -- the home
