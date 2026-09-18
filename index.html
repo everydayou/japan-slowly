@@ -306,7 +306,7 @@
     border-radius:22px;
     cursor:pointer;
     border:0; padding:0; margin:0; font:inherit; color:inherit; text-align:left;
-    background:none;
+    background:#000;
     /* release-into-place snap after a drag (NOT the day open/close flip, which is a
        separate, protected animation elsewhere). Originally .5s with a curve that decelerated
        almost immediately, so nearly all the motion happened in the first sliver of the
@@ -334,7 +334,7 @@
      preserve-3d ancestor (the flip) doesn't get clipped reliably by overflow:hidden
      in Chromium -- clip-path is a compositor-level clip and isn't affected */
   .stack-card .hero{ position:absolute; inset:0; border-radius:inherit; overflow:hidden; clip-path:inset(0 round 22px); -webkit-clip-path:inset(0 round 22px); }
-  .stack-card.locked .hero{ filter:grayscale(1) blur(5px) brightness(.6) contrast(1.05); }
+  .stack-card.locked .hero{ filter:grayscale(1) blur(9px) brightness(.6) contrast(1.05); }
   .stack-card .shade{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 42%, rgba(0,0,0,.74) 100%); }
   .stack-card .content{ position:absolute; left:17px; right:17px; bottom:16px; color:#F3EEE1; opacity:0; transition:opacity .3s ease; }
   .stack-card.is-front .content{ opacity:1; }
@@ -901,6 +901,7 @@
   .stay-card{
     position:relative; overflow:hidden; border-radius:20px;
     border:0; padding:0; text-align:left; cursor:pointer;
+    background:#000;
     -webkit-tap-highlight-color:transparent;
     /* round 26: was 0 10px 22px -14px -- read as basically invisible against the
        grid's own background (the -14px spread was eating almost all of the 22px
@@ -936,7 +937,7 @@
   .stay-card[data-area="left2"]{ grid-area:left2; }
   .stay-card[data-area="right"]{ grid-area:right; }
   .stay-card .hero{ position:absolute; inset:0; }
-  .stay-card.locked .hero{ filter:grayscale(1) blur(4px) brightness(.6) contrast(1.05); }
+  .stay-card.locked .hero{ filter:grayscale(1) blur(8px) brightness(.6) contrast(1.05); }
   .stay-card .shade{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,.7) 100%); }
   .stay-card .content{ position:absolute; left:14px; right:14px; bottom:12px; color:#F3EEE1; }
   .stay-card .stay-label{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:15px; }
