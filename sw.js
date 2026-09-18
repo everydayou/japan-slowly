@@ -5,7 +5,7 @@
    the HTML/manifest are network-first, so they always refresh automatically
    whenever the phone has a connection; the version bump only matters for
    images/icons/fonts, which are cached cache-first for speed. */
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = 'japan-slowly-' + CACHE_VERSION;
 
 /* Best-effort install list. Each URL is fetched independently -- unlike
@@ -24,6 +24,7 @@ const PRECACHE_URLS = [
   './japan app icon - black.png',
   './japan app icon - white.png',
   './cards images/day card - 1.jpg',
+  './cards images/day card - 2.jpg',
   './cards images/day card - 3.jpg',
   './cards images/day card - 4.jpg',
   './cards images/day card - 5.jpg',
@@ -32,10 +33,24 @@ const PRECACHE_URLS = [
   './cards images/day card - 8.jpg',
   './cards images/day card - 9.jpg',
   './cards images/day card - 10.jpg',
+  './cards images/day-card---1b.jpg',
+  './cards images/day-card---2b.jpg',
+  './cards images/day-card---3b.jpg',
+  './cards images/day-card---4b.jpg',
+  './cards images/day-card---5b.jpg',
+  './cards images/day-card---6b.jpg',
+  './cards images/day-card---7b.jpg',
+  './cards images/day-card---8b.jpg',
+  './cards images/day-card---9b.jpg',
+  './cards images/day-card---10b.jpg',
   './cards images/stay 1.jpg',
   './cards images/stay 2.jpg',
   './cards images/stay 3.jpg',
   './cards images/stay 4.jpg',
+  './cards images/stay-1b.jpg',
+  './cards images/stay-2b.jpg',
+  './cards images/stay-3b.jpg',
+  './cards images/stay-4b.jpg',
   'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap'
 ];
 
