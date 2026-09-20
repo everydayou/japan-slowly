@@ -4,6 +4,12 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 43 — 2026-09-20 (PROJECT-CONTEXT split so a new chat reads the right thing)
+
+- Another chat that was given the GitHub link to `PROJECT-CONTEXT.txt` reported that only Days 1-3 were done. Cause: the file had grown to about 190 KB and still carried the old "Days 1 and 2 / Days 1-3 so far / Guide Mode does not exist" text; a fetch tool reads and summarises only part of a file that size. Fix: `PROJECT-CONTEXT.txt` is now about 10 KB and contains only the current state, fixed rules and a chapter-data cheat sheet; the full old file (design contract, history, superseded entries) moved unchanged to `DESIGN-CONTRACT.txt` with a header saying PROJECT-CONTEXT.txt wins on any conflict. README points to both.
+
+---
+
 ## ROUND 42 — 2026-09-20 (docs catch-up for a new chat)
 
 - `PROJECT-CONTEXT.txt`: added a "CURRENT STATE" block at the top of Quick Status (what exists, real locking, Guide Mode, weather, card rules, working method, decisions, open points) and marked the entries it replaced as SUPERSEDED or RESOLVED (TEST_MODE, "Guide Mode does not exist", Days 1-3 only, missing addresses, unlockDay guess, the untracked day 11 image, static weather). `README.md`: live link and status updated. No app code changed.
