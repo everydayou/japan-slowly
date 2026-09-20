@@ -33,6 +33,7 @@ const PRECACHE_URLS = [
   './cards images/day card - 8.jpg',
   './cards images/day card - 9.jpg',
   './cards images/day card - 10.jpg',
+  './cards images/day card - 11.jpg',
   './cards images/day-card---1b.jpg',
   './cards images/day-card---2b.jpg',
   './cards images/day-card---3b.jpg',

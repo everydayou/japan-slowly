@@ -601,7 +601,7 @@
   .dc-card:last-child{ margin-right:24px; }
   .dc-card-body{
     flex:1 1 0; min-height:0; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
-    display:flex; flex-direction:column; gap:8px; scrollbar-width:none;
+    display:flex; flex-direction:column; gap:20px; scrollbar-width:none;
   }
   .dc-card-body::-webkit-scrollbar{ display:none; }
   .dc-card-body > *{ flex:none; }
@@ -610,8 +610,8 @@
   .dc-pill{ align-self:flex-start; height:24px; padding:0 8px; border-radius:90px; display:inline-flex; align-items:center; font-weight:600; font-size:12px; letter-spacing:.04em; text-transform:uppercase; }
   .dc-pill.on{ background:var(--good); color:var(--good-ink); }
   .dc-pill.onway, .dc-pill.visited{ background:var(--frame); color:var(--ink-soft); }
-  .dc-title{ font-weight:600; font-size:20px; line-height:28px; letter-spacing:-.6px; color:var(--ink); }
-  .dc-badge{ margin-top:-8px; font-weight:600; font-size:12px; line-height:16px; letter-spacing:.02em; text-transform:uppercase; color:var(--accent); }
+  .dc-title{ font-weight:600; font-size:20px; line-height:28px; letter-spacing:-.6px; color:var(--ink); margin-top:-12px; }
+  .dc-badge{ margin-top:-12px; font-weight:600; font-size:12px; line-height:16px; letter-spacing:.02em; text-transform:uppercase; color:var(--accent); }
   .dc-tomorrow{ font-style:italic; }
   .dc-hint{ font-size:14px; line-height:20px; color:var(--ink-soft); }
   .dc-blurb{ font-size:14px; line-height:20px; color:var(--ink-soft); }
@@ -627,7 +627,7 @@
   .dc-info-label{ flex:1; }
   .dc-chev{ flex:none; color:var(--ink-soft); transition:transform .2s ease; }
   .dc-info.open .dc-chev{ transform:rotate(180deg); }
-  .dc-info-body{ padding:0 16px 16px; display:flex; flex-direction:column; gap:16px; }
+  .dc-info-body{ padding:0 16px 16px; display:flex; flex-direction:column; gap:20px; }
   .dc-field{ display:flex; flex-direction:column; gap:2px; text-align:left; }
   .dc-field-title{ font-weight:600; font-size:14px; line-height:20px; color:var(--ink); }
   .dc-field-body{ font-size:14px; line-height:20px; color:var(--ink-soft); }
@@ -636,8 +636,8 @@
   .dc-check input{ margin:2px 0 0; width:16px; height:16px; flex:none; accent-color:var(--accent); }
   .dc-check.done span{ text-decoration:line-through; color:var(--ink-faint); }
 
-  .dc-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
-  .dc-divider{ margin:4px 0; }
+  .dc-chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .dc-divider{ margin:0; }
   .dc-chip{
     height:32px; padding:0 12px; display:inline-flex; align-items:center; border:1px solid var(--chip-line); border-radius:90px;
     background:transparent; color:var(--ink); font:inherit; font-weight:600; font-size:14px; line-height:1; text-decoration:none;
@@ -1083,7 +1083,8 @@
     7: 'cards images/day card - 7.jpg',
     8: 'cards images/day card - 8.jpg',
     9: 'cards images/day card - 9.jpg',
-    10: 'cards images/day card - 10.jpg'
+    10: 'cards images/day card - 10.jpg',
+    11: 'cards images/day card - 11.jpg'
   };
   /* round 28: pre-made "locked" cover variants, supplied by the user directly (already
      desaturated/dimmed in their own editor) instead of a runtime CSS blur filter --
@@ -1160,29 +1161,37 @@
 
   /* ---------- trip data ---------- */
   var DAYS = [
-    {n:1, date:'FRI 25 SEP', unlock:'25 Sep', title:'Konnichi-fucking-wa',
+    {n:1, date:'FRI 25 SEP', unlock:'25 Sep', title:'konnichi-fucking-wa',
       teaser:'The long flight ends. The first night in Tokyo has barely begun.',
       status:'journal'},
-    {n:2, date:'SAT 26 SEP', unlock:'26 Sep', title:'Lost in Translation',
+    {n:2, date:'SAT 26 SEP', unlock:'26 Sep', title:'lost in translation',
       teaser:'Walk until the city changes its mind. Save some energy for after dark.',
       status:'active'},
-    {n:3, date:'SUN 27 SEP', unlock:'27 Sep', title:'Kamakura with a Local',
+    {n:3, date:'SUN 27 SEP', unlock:'27 Sep', title:'kamakura with a local',
       teaser:'Pack light and follow someone who knows the way.', status:'locked'},
-    {n:4, date:'MON 28 SEP', unlock:'28 Sep', title:'Into Edo',
+    {n:4, date:'MON 28 SEP', unlock:'28 Sep', title:'into edo',
       teaser:'The city disappears behind you. Wood, mountains and an older rhythm take over.', status:'locked'},
-    {n:5, date:'TUE 29 SEP', unlock:'29 Sep', title:'After the Mountains',
+    {n:5, date:'TUE 29 SEP', unlock:'29 Sep', title:'after the mountains',
       teaser:'A day of movement that ends somewhere best discovered after the crowds leave.', status:'locked'},
-    {n:6, date:'WED 30 SEP', unlock:'30 Sep', title:'Sacred Paths',
+    {n:6, date:'WED 30 SEP', unlock:'30 Sep', title:'sacred paths',
       teaser:'Start before the city is fully awake. Save something for sunset.', status:'locked'},
     {n:7, date:'THU 1 OCT', unlock:'1 Oct', title:'mnham-mnham',
       teaser:'Come hungry. The day gets louder as the light disappears.', status:'locked'},
-    {n:8, date:'FRI 2 OCT', unlock:'2 Oct', title:'Forest of Faces',
+    {n:8, date:'FRI 2 OCT', unlock:'2 Oct', title:'forest of faces',
       teaser:'Start early. Faces are waiting in the forest.', status:'locked'},
-    {n:9, date:'SAT 3 OCT', unlock:'3 Oct', title:'Tokyo in Layers',
+    {n:9, date:'SAT 3 OCT', unlock:'3 Oct', title:'tokyo in layers',
       teaser:'Early markets, quiet gardens and old streets. Tokyo has layers.', status:'locked'},
-    {n:10, date:'SUN 4 OCT', unlock:'4 Oct', title:'Tokyo Takeaways',
-      teaser:'One last look before the doors close.', status:'locked'}
+    {n:10, date:'SUN 4 OCT', unlock:'4 Oct', title:'tokyo takeaways',
+      teaser:'One last look before the doors close.', status:'locked'},
+    /* not a day: a quiet extra card that joins the deck once Day 10's last chapter is
+       reached (see copenhagenOpen). No date, no day counter, does not open. */
+    {n:11, extra:true, title:'copenhagen', teaser:'next trip? é só uma ideia...', status:'idea'}
   ];
+  function copenhagenOpen(){
+    var p = state.dayProgress[10], d = DAY_DATA[10];
+    return !!(p && d && p.done >= d.chapters.length-1);
+  }
+  function deckLast(){ return DAYS.length - 1 - (copenhagenOpen() ? 0 : 1); }
 
   /* ---- Stays tab data ----
      All 4 real accommodations, sourced from "Japan Day-by-Day Itinerary (Current).docx"
@@ -2565,6 +2574,13 @@
         "id": "namba",
         "name": "Namba, while you wait",
         "unlock": "Once you have your lunch slot, wander nearby. Tap “I’m here” when you are in the lanes around Namba.",
+        "timing": {
+          "title": "Timing",
+          "rows": [
+            ["10:50 to 11:00", "Lunch places are allocated at Wagyu Idaten."],
+            ["11:30 to 14:30", "Lunch is listed for this window. Be back at Idaten for your slot."]
+          ]
+        },
         "expect": "Until your lunch slot.",
         "blurb": "Wander the Hozenji lanes, the Namba arcades or the side streets. Only drift toward Kuromon if there is really enough time. Come back to Idaten when your slot comes up.",
         "groups": [
@@ -2632,6 +2648,7 @@
         "id": "kuromon",
         "name": "Kuromon and Namba",
         "unlock": "After lunch, walk to Kuromon Market. Once you are there, tap “I’m here”.",
+        "meta": "Around 14:30 the day moves on to coffee at Nakanoshima, so that is roughly how long you have after lunch.",
         "expect": "However long feels right.",
         "blurb": "Let the market lanes and arcades become the experience. Another bite only matters if something earns it. Toro or uni are references, not goals.",
         "groups": [
@@ -2958,6 +2975,14 @@
         "id": "saga-toriimoto",
         "name": "Down through Saga-Toriimoto",
         "unlock": "When you are done at Otagi, walk downhill through the old village. Once you are in Saga-Toriimoto, tap “I’m here”.",
+        "timing": {
+          "title": "Timing",
+          "rows": [
+            ["30 to 40 minutes", "Walk down through the village."],
+            ["11:15 to 11:30", "Back near Arashiyama."],
+            ["11:30 to 12:00", "Leave Arashiyama for Kyoto."]
+          ]
+        },
         "expect": "30 to 40 minutes. You are back near Arashiyama by about 11:15 to 11:30.",
         "blurb": "Old houses, a preserved street and small details. There is no route to follow, so let the village be the experience.",
         "groups": [
@@ -3421,7 +3446,7 @@
               "Departs 19:55 on 4 October."
             ],
             [
-              "Fernando and Tomás",
+              "Fernando and Tomas",
               "Depart 00:05 on 5 October."
             ]
           ]
@@ -4003,6 +4028,9 @@
     if(ch.bullets) parts.push(dcBullets(ch.bullets.title, ch.bullets.items.map(function(t){ return '<li>'+escH(t)+'</li>'; })));
     var maps = ch.maps || (ch.mapsUrl ? [['Directions', ch.mapsUrl]] : []);
     if(maps.length) parts.push('<div class="dc-chips">'+dcMapsChips(maps)+'</div>');
+    /* never let the Info container vanish once a card is unlocked: if the only thing in it was the
+       "To unlock" line, keep a time reminder instead (the same "how long" the card shows below) */
+    if(!parts.length && ch.expect) parts.push(dcField('Timing', escH(ch.expect)));
     if(!parts.length) return '';
     var collapsed = (p.tip[ch.id]!==undefined) ? !!p.tip[ch.id] : arrived;
     return '<div class="dc-info'+(collapsed?'':' open')+'">' +
@@ -4224,6 +4252,7 @@
     html += '<div class="stack-wrap" id="stackwrap">';
     DAYS.forEach(function(d, i){
       if(i===excludeIdx) return; /* that card is off being flipped elsewhere -- it doesn't belong in the deck yet */
+      if(d.extra && !copenhagenOpen()) return;
       var offset = i - state.stackIndex;
       var s = stackStyle(offset, i);
       var locked = d.status==='locked';
@@ -4289,6 +4318,10 @@
        cards no longer carry a status label at all. The old top-right "#02 / 10" frame-no
        badge is gone too: that position-in-trip info now lives after the bottom
        date instead ("SAT 26 SEP · Day 2/10"). */
+    if(d.extra){
+      return '<div class="hero" style="'+heroStyleForDay(d.n, false)+'"></div>' + grainDiv() + '<div class="shade"></div>' +
+        '<div class="content"><div class="day-title">'+d.title+'</div><div class="day-teaser">'+d.teaser+'</div></div>';
+    }
     return '<div class="hero" style="'+heroStyleForDay(d.n, locked)+'"></div>' + grainDiv() + '<div class="shade"></div>' +
       (locked ? '<div class="status-pill">Locked</div>' : '') +
       '<div class="content">' +
@@ -4329,7 +4362,7 @@
   }
 
   function setFocus(i){
-    i = Math.max(0, Math.min(DAYS.length-1, i));
+    i = Math.max(0, Math.min(deckLast(), i));
     if(i===state.stackIndex) return;
     state.stackIndex = i;
     applyStack();
@@ -5344,7 +5377,7 @@
         var commit = Math.abs(dx) > w*0.3 || Math.abs(dragState.vx) > 0.55;
         var dir = dx < 0 ? 1 : -1;
         var target = state.stackIndex + dir;
-        if(commit && target>=0 && target<=DAYS.length-1){
+        if(commit && target>=0 && target<=deckLast()){
           state.stackIndex = target;
         }
         applyStack();
@@ -5354,7 +5387,7 @@
       b.addEventListener('click', function(){
         if(dragState.moved){ dragState.moved = false; return; }
         var idx = parseInt(b.getAttribute('data-idx'),10);
-        if(idx===state.stackIndex){ openDayFlip(idx); } else { setFocus(idx); }
+        if(idx===state.stackIndex){ if(!DAYS[idx].extra) openDayFlip(idx); } else { setFocus(idx); }
       });
     });
   }

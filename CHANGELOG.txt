@@ -4,6 +4,15 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 29i — 2026-09-20 (review notes on Days 7 to 10, lowercase titles, Copenhagen card)
+
+- All day titles are lowercase (DAYS data). Chapter card sections have more vertical space (card gap 8 to 20px, Info body gap 16 to 20px).
+- Info container no longer vanishes after a card unlocks. Cause: once "To unlock" is hidden, a chapter with nothing else in Info rendered no container. Fixed in the data for Day 7 Namba (timing 10:50 to 11:00 / 11:30 to 14:30), Day 7 Kuromon (note about the 14:30 Nakanoshima coffee) and Day 8 Saga-Toriimoto (timing list), and with an engine fallback in `dcInfoHTML` (a "Timing" field from `expect`) that also covers Days 1 to 6 (Food around you, Omotesando, Shibuya, A day in Kamakura, Narai-juku, Komanoyu, Gion after dark, Open middle, To Kiyomizu-dera, Back to Gion). Checked by walking all 10 days: every chapter card now has Info in both states.
+- Day 10: "Tomás" is now "Tomas".
+- Day 11 "copenhagen" ("next trip? é só uma ideia..."): a card in the day deck (`DAYS` entry with `extra:true`, not a day). It has no date or day counter and does not open. It joins the deck once Day 10's last chapter is reached (`copenhagenOpen()`), with no announcement. Image `cards images/day card - 11.jpg` (Marco's file, now needed by the app) and added to `sw.js` precache.
+
+---
+
 ## ROUND 29h — 2026-09-20 (Days 9 and 10 research added)
 
 Researched from the web (japan-guide, GO TOKYO, Wikipedia, ginza.jp, Tsukiji Outer Market site, MUJI, others) and added About pills: Day 9 Tsukiji Outer Market, Kiyosumi Gardens, Fukagawa Edo Museum, Kappabashi, Sensō-ji; Day 10 Ginza, UNIQLO Ginza, MUJI Ginza. Small Notes added (opening hours and prices on Kiyosumi and Fukagawa, Sensō-ji main hall closes 17:00, Ginza avenue closed to cars from 12:00 on Sunday 4 Oct). Day 10 Haneda card now says just "the airport" with a Directions chip for Haneda Airport, plus Keikyu (about 15 minutes from Shinagawa) and "your airline decides your terminal".
