@@ -3451,18 +3451,28 @@
      Key = day number + '.' + chapter id. Only guide-only material from the itinerary doc and
      Master Spec: context, things to reconfirm, backups, food references, Directions for
      places travellers do not get a pin for. NEVER put codes, reservation numbers or card
-     digits here: this file is a public web page. */
+     digits here: this file is a public web page.
+     `items` = plain bullets (context); `checks` = tick boxes (things to do), saved per day in state.dayProgress[n].checks['g:<chapterId>']. */
   var GUIDE = {
-    '1.haneda':{items:[
-      'Your own arrival is at 13:50. Clear immigration, baggage and customs, activate the eSIM and set up Suica.',
-      'Collect all three Azusa tickets at the JR EAST Travel Service Center, Terminal 3, 2F arrivals lobby. The planning assumption is a 20:00 closing time, so verify it shortly before travel. Check that all three tickets include both the basic fare and the reserved seat.',
+    '1.haneda':{checks:[
+      'Your own arrival is at 13:50. Clear immigration, baggage and customs, activate the eSIM and set up Suica (mobile Suica on an iPhone with Apple Pay, or a Welcome Suica card at a JR East counter: no deposit, but unused balance is not refunded).',
+      'Tickets first. The JR EAST Travel Service Center is on the 2nd floor of Terminal 3, next to the Tokyo Monorail ticket gate, and JR East lists it as open 06:45 to 20:00 every day. With a 13:50 landing there is lots of margin. Check that all three Azusa tickets include both the basic fare and the reserved seat.',
       'Bring the booking confirmation, the pickup code, your passport and the physical payment card as backup.',
-      'Shinjuku errands (UNIQLO, MUJI, toiletries, snacks) stay in Shinjuku, not Ginza, so there is time to get back to Haneda.',
-      'The others land on Emirates EK312 at 22:20 in Terminal 3. Check its live status and aim to reach Haneda around 21:30 to 21:45. Leaving the airport around 23:15 to 23:45 is realistic.']},
-    '1.okubo':{items:[
+      'Your afternoon plan: tickets, then the stay (drop bags, check in), then Shinjuku shopping, then back to Haneda for the others. The route, timings and shopping stops are under the next chapter.',
+      'The others land on Emirates EK312 at 22:20 in Terminal 3. Check its live status and aim to reach Haneda around 21:30 to 21:45. Leaving the airport around 23:15 to 23:45 is realistic, which is close to the last trains (see the note under the last chapter).']},
+    '1.kita-shinjuku':{checks:[
+      'Getting there by train: Keikyu Airport Line from Terminal 3 to Shinagawa (about 13 minutes), then the JR Yamanote Line towards Shibuya, Shinjuku and Ikebukuro. It stops at Shin-Okubo directly, so there is no change at Shinjuku. Allow about 50 minutes and roughly 600 yen with an IC card. Or ride to Shinjuku and take the Chuo-Sobu Line one stop to Okubo.',
+      'Easier with luggage: the Airport Limousine bus from Terminal 3 (bus stop 3) runs direct to Shinjuku in about 45 minutes for about 1,400 yen. You still need the one stop to Okubo afterwards.',
+      'Timing to expect: out of the airport with the tickets around 15:15, at the stay around 16:30 to 17:00. Confirm with the host how you get in and whether you can check in on arrival or only drop the bags.',
+      'Shopping in Shinjuku (not Ginza): UNIQLO and MUJI first, since they usually close around 21:00 (check the day). Bic Camera East Exit is open until 22:00, Yodobashi Camera West Exit until 22:00, and Don Quijote Kabukicho is open 24 hours for toiletries and snacks.',
+      'Leave Shinjuku by about 20:15 at the latest. The trip back to Terminal 3 is about 50 minutes, and you want to be at Haneda around 21:30 to 21:45 for the 22:20 landing.',
+      'Buy the late food before you return, or on the way back from Haneda, so nobody has to look for it at midnight (see the last chapter).'],
+      maps:[['Directions: Haneda Terminal 3', mapsSearch('Haneda Airport Terminal 3')],['Directions: UNIQLO Shinjuku', mapsSearch('UNIQLO Shinjuku Tokyo')],['Directions: MUJI Shinjuku', mapsSearch('MUJI Shinjuku Tokyo')],['Directions: Don Quijote Kabukicho', mapsSearch('Don Quijote Shinjuku Kabukicho')]]},
+    '1.okubo':{checks:[
       'You will probably be back around or after midnight, when ordinary restaurants are closed. Save two or three late-night options around Kita-Shinjuku, Okubo or Shin-Okubo and confirm their Friday hours shortly before.',
       'Fallbacks: buy food at Haneda before leaving, use a convenience store, or try a late Matsuya, Sukiya or Yoshinoya after checking the nearest branch and its hours.',
-      'Lowest stress: pick up food on the way back from Haneda, so nobody has to search after arriving.']},
+      'Lowest stress: pick up food on the way back from Haneda, so nobody has to search after arriving.',
+      'Last trains: the Tokyo Monorail from Terminal 3 towards Hamamatsucho runs until about 00:10, and the Keikyu line towards Shinagawa until about midnight (times vary by date, check them on the day). If EK312 is late, the fallbacks are the Airport Limousine bus towards Shinjuku (listed until about 02:20, verify) or a taxi.']},
     '2.shibuya':{items:['Shibuya Sky is an optional backup if the group wants a viewpoint.']},
     '2.nightlife':{items:[
       'MITSUKI is at 1-22-12 Dogenzaka, close to karaoke. Choose the club once the final 26 September lineups are known.',
@@ -3614,6 +3624,7 @@
         if(sp.tip && typeof sp.tip==='object') Object.keys(sp.tip).forEach(function(id){ if(ids[id] && typeof sp.tip[id]==='boolean') tip[id] = sp.tip[id]; });
         if(sp.checks && typeof sp.checks==='object') Object.keys(sp.checks).forEach(function(id){
           if(ids[id] && Array.isArray(sp.checks[id])) checks[id] = sp.checks[id].slice(0, (ids[id].checklist ? ids[id].checklist.items.length : 0)).map(function(v){ return !!v; });
+          else if(id.indexOf('g:')===0 && ids[id.slice(2)] && Array.isArray(sp.checks[id])) checks[id] = sp.checks[id].slice(0, 30).map(function(v){ return !!v; }); /* Guide Mode tick boxes */
         });
         state.dayProgress[n] = { done:done, arrived:!!sp.arrived, tip:tip, checks:checks };
       });
@@ -4122,6 +4133,13 @@
     var g = GUIDE[dayN+'.'+chId];
     if(!g) return '';
     var h = '<div class="dc-guide"><div class="dc-guide-title">Guide</div>';
+    if(g.checks && g.checks.length){
+      var gt = dayProg(dayN).checks['g:'+chId] || [];
+      h += g.checks.map(function(text, idx){
+        var on = !!gt[idx];
+        return '<label class="dc-check'+(on?' done':'')+'"><input type="checkbox" data-dc-check="g:'+escH(chId)+'|'+idx+'"'+(on?' checked':'')+'><span>'+escH(text)+'</span></label>';
+      }).join('');
+    }
     if(g.items && g.items.length) h += '<ul class="dc-bullets">'+g.items.map(function(t){ return '<li>'+escH(t)+'</li>'; }).join('')+'</ul>';
     if(g.maps && g.maps.length) h += '<div class="dc-chips">'+dcMapsChips(g.maps)+'</div>';
     return h + '</div>';

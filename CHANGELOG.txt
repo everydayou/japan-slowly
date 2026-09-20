@@ -4,6 +4,14 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 35 — 2026-09-20 (Day 1 guide: Marco's solo afternoon)
+
+- Day 1 Guide now covers the early arrival plan: tickets first (JR EAST Travel Service Center T3 is open 06:45 to 20:00 daily per JR East, so the 20:00 assumption is confirmed), route to Kita-Shinjuku (Keikyu to Shinagawa + Yamanote direct to Shin-Okubo, or limousine bus), expected arrival at the stay around 16:30 to 17:00, Shinjuku shopping hours and stops, leave Shinjuku by about 20:15, and a last-trains note on the Okubo card. New `GUIDE['1.kita-shinjuku']` with Directions chips (Haneda T3, UNIQLO, MUJI, Don Quijote Kabukicho).
+- Day 1 guide entries are tick boxes, not bullets: GUIDE entries now accept `checks` (tasks, saved in `dayProgress[n].checks['g:<chapterId>']`, survive reload) alongside `items` (plain bullets). Other days still use bullets.
+- Not verified: Isshuku Noma's own check-in/luggage rules (ask the host), UNIQLO/MUJI Shinjuku closing times (typical ~21:00), limousine bus night service until ~02:20, and exact last trains on 25 Sep.
+
+---
+
 ## ROUND 34 — 2026-09-20 (gradient back, black container background gone, deck shadows)
 
 - Marco meant the black BACKGROUND of the card container, not the dark gradient. `.shade` gradient and the plain text are restored on all day and stay cards (the text-shadow workaround is removed). `background:#000` on `.stack-card` and `.stay-card` is now `transparent`.
