@@ -68,6 +68,9 @@
     --accent-soft:#ff3110;     /* lighter red — hover state (derived to keep the same L/S offset from --accent that the old palette had) */
     --reveal:#c08a2e;          /* warm gold, distinct 2nd accent (was rust) */
     --line:#efeff0;            /* was --color-border-field */
+    --chip-line:#d9d9dc;       /* visible hairline for chips / pills / dashed dividers on white or --frame */
+    --good:#16a34a;            /* "Exploring now" status pill */
+    --good-ink:#ffffff;
     --grain-opacity:.05;
     --stage-a:#ffffff;
     --stage-b:#f3f3f3;
@@ -90,6 +93,9 @@
       --accent-soft:#ff2809;   /* darker red — hover state */
       --reveal:#e3ac55;
       --line:#212121;
+      --chip-line:#34343a;
+      --good:#22c55e;
+      --good-ink:#06210f;
       --grain-opacity:.09;
       --stage-a:#18181b;
       --stage-b:#131315;
@@ -107,6 +113,9 @@
     --accent-soft:#ff2809;
     --reveal:#e3ac55;
     --line:#212121;
+    --chip-line:#34343a;
+    --good:#22c55e;
+    --good-ink:#06210f;
     --grain-opacity:.09;
     --stage-a:#18181b;
     --stage-b:#131315;
@@ -426,151 +435,11 @@
   .lockednote{ margin:16px 24px 0; font-size:16px; color:var(--ink-faint); line-height:1.5; }
   .lockednote .mono{ color:var(--ink-soft); }
 
-  /* ---- prep strip ---- */
-  /* light grey background only, per the Figma design -- this component hasn't been
-     otherwise designed yet, so nothing else about it changes here. --frame is the
-     existing "sunken/inset surface" token (was already defined, just unused until
-     now), so this reuses the token system rather than inventing a one-off grey.
-     margin-top:0 (was 16px) -- combined with .backhero-text's own 16px bottom
-     padding, that used to add up to a 32px gap above this card; the user wants an
-     exact 16px, so the padding alone now supplies it. On the journal-day path
-     (.journalflag sits between the header and this card), .journalflag's own
-     margin-bottom supplies the same 16px instead -- see its rule below -- so that
-     path's spacing is untouched by this change. */
-  .prep{ margin:0 24px 0; border:1px solid var(--line); border-radius:16px; background:var(--frame); }
-  .prep-row{ display:grid; grid-template-columns:repeat(3,1fr); }
-  .prep-cell{ padding:11px 10px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
-  .prep-cell:nth-child(3n){ border-right:0; }
-  /* the last row's cells don't need a border-bottom -- it read as a stray separator
-     sitting just above the container's own bottom edge/radius, not a real row divider. */
-  .prep-row:last-child .prep-cell{ border-bottom:0; }
-  .prep-label{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:12px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; }
-  .prep-value{ font-size:14px; margin-top:3px; color:var(--ink); line-height:1.3; }
-  .weather-cell{ grid-column:1 / -1; border-right:0; padding:0; cursor:pointer; }
-  .weather-top{ display:flex; align-items:center; justify-content:space-between; padding:11px 12px; }
-  .weather-left{ display:flex; align-items:center; gap:9px; }
-  .weather-temp{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:16px; font-variant-numeric:tabular-nums; }
-  .weather-cond{ font-size:14px; color:var(--ink-soft); }
-  .weather-caret{ font-size:10px; color:var(--ink-faint); transition:transform .2s; }
-  .weather-cell.open .weather-caret{ transform:rotate(180deg); }
-  .hourly{ display:grid; grid-template-columns:repeat(6,1fr); gap:2px; padding:0 10px; max-height:0; overflow:hidden; transition:max-height .28s ease, padding .28s ease; border-top:1px solid var(--line); }
-  .weather-cell.open .hourly{ max-height:120px; padding:10px 10px 12px; }
-  .hr-tick{ text-align:center; display:flex; flex-direction:column; align-items:center; gap:3px; }
-  .hr-tick .t{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:12px; color:var(--ink-faint); text-transform:uppercase; }
-  .hr-tick .v{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-size:14px; font-variant-numeric:tabular-nums; }
-
-  .lastupdate{ margin:10px 24px 0; font-size:14px; color:var(--ink-faint); font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; display:flex; align-items:center; gap:6px; }
-  .lastupdate .dot{ width:5px; height:5px; border-radius:50%; background:#5C8A5C; flex:none; }
-
-  /* ---- chapters ---- */
-  /* each chapter is its own floating card now (own background/border/radius/shadow,
-     with a real gap between them), not rows joined by shared top/bottom borders in
-     one continuous block -- per the Figma design. Gap/padding values below are exact,
-     taken from the design's own dev-mode spacing export (16px between cards, 12px
-     vertical / 16px horizontal card padding, radius/rounded-lg -> 16px to match the
-     rest of the app's card-ish surfaces, e.g. .prep).
-
-     The timeline (dot + dashed connector) lives OUTSIDE the card now, in its own
-     48px-wide column to the left -- moved out in a follow-up fix after the first pass
-     accidentally left it nested inside the card (as it always had been, pre-redesign).
-     .chaprow is the per-chapter flex row (timeline + card); .chapters no longer owns
-     the vertical rhythm directly (that's each row's own margin-bottom now), because
-     the connecting dashed line needs to bleed past its own row's bottom edge into the
-     gap to reach the next dot, which a shared flex `gap` can't do. */
   /* round 24: full-screen Stays detail view (openStayFlip()/closeStayFlip()) -- reuses
      the same .about-item/.about-group rows the bottom-sheet About panel already used
      for stay content (stayAboutHTML()), just laid out as plain flowing page content
      instead of inside a scrollable sheet-body. */
   .stay-detail-body{ margin:28px 24px 8px; display:flex; flex-direction:column; gap:18px; }
-  .chapters{ margin:40px 24px 8px; display:flex; flex-direction:column; }
-  .chapters-label{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:12px; letter-spacing:.1em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:10px; }
-  .chaprow{ display:flex; align-items:stretch; margin-bottom:16px; }
-  .chaprow.last{ margin-bottom:0; }
-  /* width:32px (was 48px) so the card sits a clean 16px from the dot's center instead
-     of 32px -- the dot's own `left` below is now a fixed 16px (not a 50%-based calc)
-     so shrinking this column doesn't also drag the dot itself further left; only the
-     card moves closer. */
-  .timeline{ position:relative; flex:none; width:32px; }
-  /* z-index so the dot always paints over the dashed line, not the other way round --
-     the line's start/end deliberately reach all the way to each dot's CENTER (see
-     .tl-line below), relying on this stacking to hide the overlap cleanly rather than
-     needing to stop exactly at the dot's edge (which would be fragile to any future
-     change in dot size). */
-  /* background:var(--bg) (not transparent) on the outline states so the dashed line
-     passing behind the dot's own circle is fully hidden by it, not visible through it
-     -- var(--bg) because the timeline column sits on the page background, not a card.
-     box-shadow adds a 4px solid halo in that same background color around every dot,
-     on top of the line-hiding fill above -- so the dashed line visibly stops short of
-     each dot with a gap, instead of appearing to run directly into it. A box-shadow
-     (not a wider border) keeps the dot's own visual size/border-radius unchanged. */
-  /* top:18px + width:9px puts the dot's own center 22.5px below the card's top edge,
-     matching the measured vertical center of .ctitle's line box (12px card padding-top
-     + a few px of line-height leading above the 16px glyph) -- was 24px, which sat the
-     dot about 6px too low relative to the title text. left:16px is a fixed value (not
-     a 50%-based calc) so it stays put regardless of .timeline's own width. */
-  .tl-dot{
-    position:absolute; top:18px; left:16px; transform:translateX(-50%); z-index:1;
-    width:9px; height:9px; border-radius:50%;
-    border:1.5px solid var(--ink-faint); background:var(--bg);
-    box-shadow:0 0 0 4px var(--bg);
-  }
-  .tl-dot.revealed{ background:var(--accent); border-color:var(--accent); }
-  /* "on the way" is an outline, same treatment as the default/hidden dot, just in the
-     accent red instead of --ink-faint grey -- was a half-filled gold conic-gradient
-     before; simplified to outline-only per the user's request. */
-  .tl-dot.ontheway{ border-color:var(--accent); }
-  /* spans from THIS row's dot center to the NEXT row's dot center (bottom:-34px =
-     .chaprow's 16px margin-bottom + the next dot's own 18px top offset), so it reaches
-     the next dot fully regardless of how tall this card's content makes the row -- no
-     JS measurement needed. Was previously only bleeding -16px (just the margin, not
-     the next dot's offset on top of it), which left a visible gap before the next dot;
-     now it deliberately overshoots to the dot's center on both ends and relies on the
-     dot's z-index (above) to paint over the overlap. The last row has no next dot to
-     reach, so it stops at its own bottom instead. left:16px matches .tl-dot's fixed
-     left value; margin-left:-1px centers the 2px border-left strip exactly on that
-     16px line (a border is painted starting AT the box's left edge, not straddling it,
-     so without this the dash sits ~2px right of the dot's true center instead of
-     running through it). */
-  .tl-line{ position:absolute; top:18px; left:16px; bottom:-34px; margin-left:-1px; border-left:2px dashed var(--ink-faint); opacity:.45; }
-  .chaprow.last .tl-line{ bottom:0; }
-  .chapter{
-    flex:1; min-width:0; position:relative; overflow:hidden;
-    background:var(--bg-elevated); border:1px solid var(--line); border-radius:16px;
-    padding:12px 16px;
-    box-shadow:0 2px 10px rgba(0,0,0,.05);
-  }
-  /* locked/not-yet-revealed chapters (ch.state==='hidden') get no shadow -- a flat
-     card, to read as visually inert/inactive compared to the revealed and on-the-way
-     cards, which keep the shadow. */
-  .chapter.hidden{ box-shadow:none; }
-  .ctitlerow{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
-  .ctitle{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:500; font-size:16px; }
-  .ctitle.dim{ font-style:italic; color:var(--ink-faint); font-weight:400; }
-  .ctag{ flex:none; font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:12px; letter-spacing:.05em; color:var(--ink-faint); border:1px solid var(--line); padding:2px 6px; border-radius:5px; }
-  .cblurb{ font-size:16px; color:var(--ink-soft); margin-top:3px; line-height:1.42; }
-  .cmeta{ font-size:14px; color:var(--ink-faint); margin-top:5px; font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; }
-
-  .herebtn{
-    margin-top:9px; display:inline-flex; align-items:center; gap:6px;
-    background:var(--accent); color:var(--bg); border:0; border-radius:20px;
-    font:inherit; font-size:16px; font-weight:500; padding:8px 16px; cursor:pointer;
-  }
-  .herebtn:hover{ background:var(--accent-soft); }
-  .fallbacklink{ margin-top:8px; background:none; border:0; padding:0; font:inherit; font-size:14px; color:var(--ink-faint); text-decoration:underline; text-underline-offset:2px; cursor:pointer; display:block; }
-  .fallbacklink:hover{ color:var(--ink-soft); }
-
-  .confirmrow{ margin-top:9px; display:flex; flex-direction:column; gap:8px; background:var(--bg-elevated); border:1px solid var(--line); border-radius:12px; padding:10px 12px; }
-  .confirmtext{ font-size:14px; color:var(--ink-soft); }
-  .confirmbtns{ display:flex; gap:8px; }
-  .confirmyes{ background:var(--accent); color:var(--bg); border:0; border-radius:16px; font:inherit; font-size:14px; font-weight:500; padding:7px 14px; cursor:pointer; }
-  .confirmyes:hover{ background:var(--accent-soft); }
-  .confirmno{ background:none; border:1px solid var(--line); color:var(--ink-faint); border-radius:16px; font:inherit; font-size:14px; padding:7px 14px; cursor:pointer; }
-  .confirmno:hover{ color:var(--ink-soft); }
-
-  /* no leading icon (the design shows plain text, unlike the old chevron+text toggle
-     affordance -- makes sense now that this opens a sheet, not an accordion). Size/
-     weight set explicitly (14px/500) rather than the earlier pixel-measured guess. */
-  .abouttoggle{ margin-top:8px; background:none; border:0; padding:0; font:inherit; font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:500; font-size:14px; color:var(--accent); cursor:pointer; display:inline-flex; align-items:center; gap:4px; }
 
   /* ---- bottom sheet ----
      replaces the old inline expand/collapse "about" panel (accordion, max-height
@@ -682,35 +551,120 @@
   .about-group-collapse .about-group-rows{ padding-bottom:14px; }
   @media (prefers-reduced-motion: reduce){ .sheet-backdrop, .sheet-panel, .about-group-collapse, .about-group-caret{ transition:none; } }
 
-  @keyframes sweep{
-    0%{ transform:translateX(-100%); }
-    100%{ transform:translateX(200%); }
-  }
-  .chapter.justrevealed::before{
-    content:''; position:absolute; inset:0; width:60%;
-    background:linear-gradient(100deg, transparent, rgba(184,90,52,.22), transparent);
-    animation:sweep .9s ease;
-    pointer-events:none;
-  }
-  @media (prefers-reduced-motion: reduce){ .chapter.justrevealed::before{ animation:none; display:none; } }
-
-  /* ---- tomorrow stub ---- */
-  /* background matches .prep (the weather/day-details block up top) -- both are
-     var(--frame), the same "inset/sunken surface" token, so the two bookend cards
-     of the day-detail view read as a consistent pair. Was unstyled (page background
-     showing through) in the dashed/not-ready state and --bg-elevated in the solid/
-     ready state; both now share --frame, differing only in border-style. */
-  .tomorrow{ margin:6px 24px 26px; border:1px dashed var(--line); border-radius:14px; padding:13px 14px; background:var(--frame); }
-  .tomorrow.ready{ border-style:solid; }
-  .tomorrow-label{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:12px; letter-spacing:.1em; color:var(--ink-faint); text-transform:uppercase; }
-  .tomorrow-text{ font-size:16px; color:var(--ink-soft); margin-top:6px; line-height:1.45; }
-  .tomorrow.ready .tomorrow-text{ color:var(--ink); }
-
   /* margin-bottom:16px (was 0) preserves the previous gap down to .prep now that
      .prep's own margin-top has been zeroed out (see the .prep rule above) -- keeps
      the journal-day path's spacing unchanged while the non-journal path picks up
      the new, smaller 16px total gap from .backhero-text's padding alone. */
   .journalflag{ margin:6px 24px 16px; font-size:14px; color:var(--ink-faint); font-style:italic; }
+
+  /* ---- day cards (chapter engine) ----
+     Layout/spacing/type follow the Figma "day card detail" frames (402 wide: 24px side
+     margins, header, essential-info pill, CHAPTERS label + dots, one 24px-radius white card
+     with 16px padding whose CTA is pinned to the bottom); colours are this app's own tokens.
+     The card fills the remaining screen height and scrolls INSIDE (.dc-card-body) so the
+     button never leaves the bottom. All classes are dc-prefixed on purpose (the old
+     .chapter/.chaprow/.confirm* rules were removed with the vertical chapter list). */
+  .view.view-daycards{ overflow:hidden; padding-bottom:0; background:var(--frame); }
+  .view-daycards > *{ flex:none; }
+  .view-daycards .backhero-text{ padding:16px 24px 0; }
+  .view-daycards .day-date{ font-weight:600; font-size:12px; line-height:16px; letter-spacing:.02em; }
+  .view-daycards .day-title{ font-weight:600; font-size:24px; line-height:32px; letter-spacing:-.6px; margin-top:4px; }
+  .view-daycards .day-teaser{ font-size:14px; line-height:20px; margin-top:0; }
+  .view-daycards .journalflag{ margin:10px 24px 0; }
+  .dc-essential-wrap{ padding:12px 24px 0; }
+  .dc-pillbtn{
+    height:32px; padding:0 12px; border:1px solid var(--chip-line); border-radius:90px; background:transparent;
+    color:var(--ink); font:inherit; font-weight:600; font-size:14px; line-height:1; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .dc-pillbtn:active{ background:var(--bg-elevated); }
+  .dc-chapters-label{ margin:24px 24px 0; font-weight:600; font-size:12px; line-height:16px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); }
+  .dc-dots{ display:flex; align-items:center; gap:8px; margin:8px 24px 0; height:8px; }
+  .dc-dot{ position:relative; width:8px; height:8px; padding:0; border:0; border-radius:50%; background:var(--ink-faint); opacity:.45; cursor:pointer; flex:none; -webkit-tap-highlight-color:transparent; }
+  .dc-dot::before{ content:''; position:absolute; inset:-8px; }
+  .dc-dot.on{ background:var(--accent); opacity:1; }
+  .view-daycards > .dc-carousel{
+    flex:1 1 0; min-height:0; margin-top:8px; padding-top:8px;
+    padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 16px);
+    display:flex; gap:12px; overflow-x:auto; overflow-y:hidden;
+    scroll-snap-type:x mandatory; scroll-padding:0 24px; overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch; scrollbar-width:none;
+  }
+  .dc-carousel::-webkit-scrollbar{ display:none; }
+  .dc-card{
+    flex:0 0 calc(100% - 48px); scroll-snap-align:start; scroll-snap-stop:always;
+    display:flex; flex-direction:column; min-height:0; padding:16px;
+    background:var(--bg-elevated); border-radius:24px;
+    box-shadow:0 2px 12px rgba(0,0,0,.05), 0 12px 16px rgba(0,0,0,.05);
+  }
+  .dc-card:first-child{ margin-left:24px; }
+  .dc-card:last-child{ margin-right:24px; }
+  .dc-card-body{
+    flex:1 1 0; min-height:0; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+    display:flex; flex-direction:column; gap:8px; scrollbar-width:none;
+  }
+  .dc-card-body::-webkit-scrollbar{ display:none; }
+  .dc-card-body > *{ flex:none; }
+  .dc-card-foot{ flex:none; padding-top:16px; display:flex; flex-direction:column; align-items:center; gap:12px; }
+
+  .dc-pill{ align-self:flex-start; height:24px; padding:0 8px; border-radius:90px; display:inline-flex; align-items:center; font-weight:600; font-size:12px; letter-spacing:.04em; text-transform:uppercase; }
+  .dc-pill.on{ background:var(--good); color:var(--good-ink); }
+  .dc-pill.onway, .dc-pill.visited{ background:var(--frame); color:var(--ink-soft); }
+  .dc-title{ font-weight:600; font-size:20px; line-height:28px; letter-spacing:-.6px; color:var(--ink); }
+  .dc-badge{ margin-top:-8px; font-weight:600; font-size:12px; line-height:16px; letter-spacing:.02em; text-transform:uppercase; color:var(--accent); }
+  .dc-hint{ font-style:italic; font-size:14px; line-height:20px; color:var(--ink-soft); }
+  .dc-blurb{ font-size:14px; line-height:20px; color:var(--ink-soft); }
+  .dc-divider{ border-top:1px dashed var(--chip-line); margin:12px 0; }
+
+  .dc-info{ background:var(--frame); border-radius:16px; }
+  .dc-info-head{
+    width:100%; display:flex; align-items:center; gap:4px; padding:16px; background:none; border:0;
+    font:inherit; font-weight:600; font-size:14px; line-height:20px; color:var(--ink); text-align:left; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .dc-info-ico{ flex:none; color:var(--ink); }
+  .dc-info-label{ flex:1; }
+  .dc-chev{ flex:none; color:var(--ink-soft); transition:transform .2s ease; }
+  .dc-info.open .dc-chev{ transform:rotate(180deg); }
+  .dc-info-body{ padding:0 16px 16px; display:flex; flex-direction:column; gap:16px; }
+  .dc-field{ display:flex; flex-direction:column; gap:2px; text-align:left; }
+  .dc-field-title{ font-weight:600; font-size:14px; line-height:20px; color:var(--ink); }
+  .dc-field-body{ font-size:14px; line-height:20px; color:var(--ink-soft); }
+  .dc-bullets{ margin:0; padding-left:18px; display:flex; flex-direction:column; gap:4px; font-size:14px; line-height:20px; color:var(--ink-soft); }
+  .dc-check{ display:flex; align-items:flex-start; gap:10px; font-size:14px; line-height:20px; color:var(--ink-soft); cursor:pointer; padding:2px 0; }
+  .dc-check input{ margin:2px 0 0; width:16px; height:16px; flex:none; accent-color:var(--accent); }
+  .dc-check.done span{ text-decoration:line-through; color:var(--ink-faint); }
+
+  .dc-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+  .dc-chip{
+    height:32px; padding:0 12px; display:inline-flex; align-items:center; border:1px solid var(--chip-line); border-radius:90px;
+    background:transparent; color:var(--ink); font:inherit; font-weight:600; font-size:14px; line-height:1; text-decoration:none;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .dc-chip:active{ background:var(--frame); }
+  .dc-btn{
+    height:48px; padding:0 20px; border:0; border-radius:24px; background:var(--ink); color:var(--bg-elevated);
+    font:inherit; font-weight:600; font-size:14px; line-height:20px; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .dc-btn:active{ transform:scale(.97); }
+  .dc-btn.small{ height:40px; padding:0 16px; border-radius:20px; }
+  .dc-btn.ghost{ background:transparent; color:var(--ink); border:1px solid var(--chip-line); }
+  .dc-confirm{ display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .dc-confirm-text{ font-size:14px; line-height:20px; color:var(--ink-soft); }
+  .dc-confirm-btns{ display:flex; gap:8px; }
+  .dc-btn.provisional{ background:transparent; color:var(--ink-soft); border:1.5px dashed var(--ink-faint); font-weight:500; }
+  .dc-gatenote{ display:flex; align-items:center; gap:8px; font-size:14px; line-height:20px; font-weight:600; color:var(--ink); }
+  .dc-gatenote svg{ width:16px; height:16px; flex:none; color:var(--ink-soft); }
+  .dc-lastnote{ font-size:14px; line-height:20px; font-style:italic; color:var(--ink-faint); }
+
+  /* essential-info + place sheets reuse the About sheet; these are just their extras */
+  .dc-kicon{ display:inline-flex; vertical-align:-2px; margin-right:6px; }
+  .dc-kicon svg{ width:13px; height:13px; display:block; }
+  .dc-hourly{ flex:none; display:flex; gap:14px; overflow-x:auto; margin-top:-6px; }
+  .dc-hourly > div{ flex:none; text-align:center; font-size:14px; color:var(--ink-soft); }
+  .dc-hourly .t{ display:block; font-size:12px; color:var(--ink-faint); margin-bottom:2px; }
+  .dc-hourly .g{ display:block; font-weight:600; font-variant-numeric:tabular-nums; }
+  .dc-lastupdate{ font-size:14px; color:var(--ink-faint); }
 
   /* ---- reload-latest button (top-right, all screens) ---- */
   .refresh-fab{
@@ -1204,11 +1158,11 @@
 
   /* ---------- trip data ---------- */
   var DAYS = [
-    {n:1, date:'FRI 25 SEP', unlock:'25 Sep', title:'Konnichiwa',
-      teaser:'The first step is not the adventure yet. Land, orient, gather the essentials — and wait for the others.',
+    {n:1, date:'FRI 25 SEP', unlock:'25 Sep', title:'Konnichi-fucking-wa',
+      teaser:'Landing, the first tickets, and a first taste of the city before dark.',
       status:'journal'},
     {n:2, date:'SAT 26 SEP', unlock:'26 Sep', title:'Lost in Translation',
-      teaser:'Colour by day. Neon after dark. Three wigs are involved.',
+      teaser:'Harajuku to Shibuya on foot, a booked karaoke room, then one more stop the guide picks.',
       status:'active'},
     {n:3, date:'SUN 27 SEP', unlock:'27 Sep', title:'Kamakura with a Local',
       teaser:'Today, someone else holds the map.', status:'locked'},
@@ -1309,202 +1263,280 @@
     return !!d && d.status==='locked';
   }
 
+  /* ---------- day chapter content (rebuilt, "chapter engine" format) ----------
+     Days 1-3, rebuilt from the Master Spec + the itinerary doc + research packs A/B after
+     the original conversation copy was lost. Every day is one object in DAY_DATA (below);
+     `chapters` are shown one at a time as swipeable cards (see dayDetailScreen()).
+
+     Chapter fields (all optional except id/name):
+       id, name           stable id (Stay 1 reads DAY1's `kita-shinjuku` about) + card title
+       startArrived       true = card opens already in its "Exploring now" state (no "I'm here")
+       timeNote / expect  ONE red line under the title: timeNote = a real deadline, expect = a duration
+       hint               short italic line, always visible (never inside Info)
+       meta               "Note:" line inside the Info box
+       booking / timing   {title, rows:[[lead, text], ...]} bulleted inside Info ("lead: text" / "lead text")
+       checklist          {title, items:[text, ...]} tickable, ticks are saved
+       (Info only renders when at least one of meta/booking/timing/checklist exists; it never
+        auto-collapses after arrival when the chapter has timing or booking)
+       blurb              fuller line, shown after arrival
+       groups             [{name, rows}] -> one chip per place, each opens a sheet
+       about, aboutLabel  flat [label, text] rows -> a single chip (label = aboutLabel || name)
+       mapsUrl            opt-in "Directions" chip (only for one real, pinnable destination)
+       readyLabel         override for the "Ready for what's next" button
+     No em dashes in copy. No reservation numbers / codes / card digits, ever. */
+  /* TESTING MODE: every day that has card data can be opened, every chapter starts with its
+     content locked, and time/location gates carry a clearly marked test-only skip button.
+     The real time and location unlock logic replaces this later (see dcCardHTML `gate`). */
+  var TEST_MODE = true;
+  function mapsSearch(q){ return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q); }
+  function mapsTransit(q){ return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(q)+'&travelmode=transit'; }
+
   var DAY1 = {
     weather:{lo:19,hi:24,cond:'Clear, mild', hourly:[['13:00','24°'],['16:00','23°'],['19:00','21°'],['22:00','19°'],['01:00','18°'],['04:00','17°']]},
     energy:'Low–medium', walking:'Low–medium', outside:'Mixed indoor/outdoor',
-    dress:'Layers for a long-haul arrival', bring:'Passport · Suica · booking details', first:'Start on arrival',
+    dress:'Layers for a long-haul arrival', bring:'Passport · booking details', first:'Start on arrival',
     chapters:[
-      {id:'haneda', name:'Haneda Airport', tag:'TIME', state:'revealed',
-        blurb:'Immigration, baggage and customs, then eSIM activation and Suica set-up before the city begins.',
-        meta:'Fixed — flight lands 13:50',
-        about:[['Why it matters','Haneda sits far closer to central Tokyo than Narita, which is exactly why it doubles as tonight’s reunion point.'],
-               ['Look for','The JR EAST Travel Service Center, Terminal 3 arrivals lobby — three Azusa tickets are waiting for pickup here.'],
-               ['A little history','Terminal 3’s Edo Koji strip recreates an Edo-period shopping street, a taste of old Japan before you’ve even left the airport.']]},
-      {id:'kita-shinjuku', name:'Kita-Shinjuku', tag:'SEQ', state:'revealed',
-        blurb:'Drop the bags at Isshuku Noma and notice the neighbourhood rather than trying to sightsee.',
-        about:[['Why it matters','This is the trip’s first lived-in Tokyo context rather than a sightseeing target. It gives the group a useful contrast: one of the world’s most intense urban centres is only a short walk away, yet the accommodation sits in a much quieter residential fabric.'],
-               ['A little context','The itinerary uses Kita-Shinjuku mainly as a base. For the app, the useful context is not a long history lesson but orientation: this is the northern residential side of the greater Shinjuku area, with smaller streets, local housing and everyday shops rather than landmark tourism.'],
-               ['Look for','Notice the scale change from Shinjuku: narrower streets, low-rise homes and apartments, bicycles, convenience stores and local restaurants. The contrast itself is the point.'],
-               ['How to experience it','Do not create a checklist here. Treat the first walk from the accommodation as “ordinary Tokyo” — the place where the group learns how bins, vending machines, konbini, crossings and residential quiet actually feel.'],
-               ['Etiquette / sensitivity','Keep voices low late at night, especially when returning after karaoke or clubbing. Residential lanes are not nightlife spaces even when the centre of Shinjuku is nearby.'],
-               ['One memorable detail','A good first Tokyo reveal is the speed of the urban transition: within a short walk, the city can move from near-silence to rail infrastructure, giant department stores and neon.']]},
-      {id:'shinjuku-shop', name:'Shinjuku', tag:'SEQ', state:'revealed',
-        blurb:'Practical shopping for anything missing from the flight — UNIQLO, MUJI, toiletries, snacks.',
-        about:[['Why it matters','Shinjuku is both practical infrastructure and a defining Tokyo experience: transport, department stores, skyscrapers, shopping and nightlife all collide around one enormous station complex.'],
-               ['A little context','Modern Shinjuku grew into one of Tokyo’s major commercial and transport centres after rail development shifted activity westward from the older city core. Today the station area has distinct faces: the office-tower district to the west, major retail to the east and nightlife around Kabukicho.'],
-               ['Look for','Instead of “seeing Shinjuku,” notice the transitions: elevated rail lines, department stores integrated into the station, dense signage, the west-side towers and the more chaotic east-side streets.'],
-               ['How to experience it','Use it as a living orientation challenge rather than an attraction. On arrival day, let shopping and navigation be the experience.'],
-               ['Etiquette / sensitivity','Station flows are fast. Stop at the side before checking the phone or regrouping; do not block gates or stair landings.'],
-               ['One memorable detail','Shinjuku Station is famous for its sheer complexity. The useful story is not a record-number statistic but the feeling that “the station is a district” — exits can place you in completely different urban environments.']]},
-      {id:'return-haneda', name:'Return to Haneda', tag:'TIME', state:'revealed',
-        blurb:'EK312 lands at 22:20 — the reunion point for all three travellers.', meta:'Aim to arrive 21:30–21:45'},
-      {id:'late-food', name:'Late food', tag:'SEQ', state:'revealed',
-        blurb:'Okubo and Shin-Okubo, on the way back from Haneda — this stretch of Tokyo runs late, so there’s always something open for a post-midnight meal.',
+      {id:'haneda', name:'Touchdown at Haneda', startArrived:true,
+        timeNote:'Landing at 13:50',
+        hint:'First stop before anything else: collect the tickets you’ll need this week.',
+        meta:'Immigration, baggage and customs first, then the ticket counter.',
+        booking:{title:'Ticket counter', rows:[
+          ['JR EAST Travel Service Center','Terminal 3, 2F arrivals lobby'],
+          ['Open','06:45 to 20:00 daily (check shortly before you travel)']]},
+        checklist:{title:'Before you leave the airport', items:[
+          'Collect the group’s Azusa tickets at the JR EAST counter',
+          'Check that all three travellers get both the basic-fare and reserved-seat tickets',
+          'Have your booking confirmation and passport ready',
+          'Bring the payment card used for booking as backup']}
+      },
+      {id:'kita-shinjuku', name:'To Kita-Shinjuku',
+        hint:'No train booked for this leg, just an ordinary ride into the city.',
+        blurb:'Small streets, low buildings, vending machines: the ordinary Tokyo you’ll come back to each night.',
+        mapsUrl:'https://maps.app.goo.gl/BSZBwUuaq2x4u5C99',
+        aboutLabel:'Kita-Shinjuku',
         about:[
-          {group:'Okubo', tag:'LATE-FOOD FALLBACK', rows:[
-            ['Why it matters','Okubo broadens the group’s first impression of Tokyo beyond “Japanese-only” imagery. The area is markedly multicultural and sits close enough to the accommodation to be a realistic late-food fallback.'],
-            ['A little context','The Okubo / Shin-Okubo area developed into one of Tokyo’s best-known multicultural neighbourhoods, with especially strong Korean communities and businesses as well as shops and restaurants serving other Asian and Muslim communities.'],
-            ['Look for','Watch for the shift in food signage, grocery stores, restaurants and languages. Compared with Shinjuku’s department-store scale, Okubo feels more street-level and community-driven.'],
-            ['How to experience it','If the group passes through late on arrival night, keep it practical and spontaneous — one of Tokyo’s most multicultural pockets, and a useful place for food after normal restaurant hours.'],
-            ['Etiquette / sensitivity','Late-night residential streets still require normal quiet. Do not treat local community businesses as a theme-park “ethnic district.”'],
-            ['One memorable detail','One of Tokyo’s charms is that a one-stop train ride can change the city’s cultural texture completely; Okubo is a strong early example.']
-          ]},
-          {group:'Shin-Okubo', tag:'KOREATOWN', rows:[
-            ['Why it matters','Shin-Okubo is the more immediately recognisable “Koreatown” face of the wider Okubo area, with dense Korean food, beauty, music and retail around the station.'],
-            ['A little context','The neighbourhood’s Korean commercial identity expanded strongly from the late 20th century and became especially visible through food, K-pop and beauty culture. Official Tokyo tourism material describes the wider area as Japan’s largest Koreatown while also highlighting its broader multicultural character.'],
-            ['Look for','Korean restaurant queues, cosmetics, supermarkets, music merchandise and crowded pedestrian streets around the station. The visual density differs from nearby residential Kita-Shinjuku.'],
-            ['How to experience it','Use it only if it naturally serves the evening — it’s not a planned sightseeing block, just context around the base and an example of contemporary Tokyo’s cultural diversity.'],
-            ['Etiquette / sensitivity','Busy pavements can become very congested. Queue neatly, keep bags tight and avoid stopping in the middle of pedestrian flow.'],
-            ['One memorable detail','The area is a useful counterpoint to the trip’s later preserved-town imagery: contemporary Japan also absorbs and remixes regional pop culture at high speed.']
-          ]}
+          ['Why it matters','This is your first lived-in Tokyo rather than a sightseeing stop. One of the world’s most intense city centres is a short walk away, yet the base sits in a much quieter residential neighbourhood.'],
+          ['A little context','Kita-Shinjuku is the northern, residential side of the greater Shinjuku area: smaller streets, local housing and everyday shops rather than landmarks. It works as a base, not a history lesson.'],
+          ['Look for','Notice the change in scale from Shinjuku: narrower streets, low-rise homes and apartments, bicycles, convenience stores and local restaurants. The contrast is the point.'],
+          ['How to experience it','Treat the first walk from the apartment as ordinary Tokyo. This is where you learn how bins, vending machines, konbini, crossings and residential quiet actually feel.'],
+          ['Etiquette','Keep your voice low late at night, especially when coming back after karaoke or clubbing. Residential lanes are not nightlife spaces, even with central Shinjuku close by.'],
+          ['One memorable detail','The speed of the change: within a short walk, the city can go from near silence to rail infrastructure, giant department stores and neon.']]
+      },
+      {id:'shinjuku', name:'Shinjuku',
+        hint:'One of the world’s busiest stations, and the city’s front door.',
+        blurb:'On arrival day, let shopping and navigation be the experience. UNIQLO, MUJI, toiletries and snacks cover most of what a long flight leaves behind.',
+        about:[
+          ['Why it matters','Shinjuku is both practical infrastructure and one of Tokyo’s defining experiences. Transport, department stores, skyscrapers, shopping and nightlife all collide around one enormous station complex.'],
+          ['A little context','Modern Shinjuku grew into a major commercial and transport centre after rail development pulled activity westward from the older city core. The station area now has distinct faces: the office-tower district to the west, major retail to the east and nightlife around Kabukicho.'],
+          ['Look for','Instead of “seeing Shinjuku,” notice the transitions: elevated rail lines, department stores built into the station, dense signage, the west-side towers and the more chaotic east-side streets.'],
+          ['How to experience it','Treat it as an orientation challenge, not an attraction. On arrival day, let shopping and finding your way be the experience.'],
+          ['Etiquette','Station flows are fast. Step to the side before checking your phone or regrouping, and do not block gates or stair landings.'],
+          ['One memorable detail','The station is famous for its sheer complexity. The best way to think of it: the station is a district, and different exits can drop you into completely different environments.']]
+      },
+      {id:'okubo', name:'Okubo & Shin-Okubo',
+        hint:'A different side of Tokyo, a few minutes away.',
+        blurb:'One stop can change the city’s texture completely. Good for dinner after a long travel day.',
+        checklist:{title:'Good to know', items:[
+          'Keep your voice low on the way back, it’s a residential night',
+          'Queue neatly if a restaurant has a line']},
+        groups:[
+          {name:'Okubo', rows:[
+            ['Why it matters','Okubo widens your first impression of Tokyo beyond “Japanese-only” imagery. It is one of the city’s most multicultural pockets, close enough to the base to be an easy dinner or late-food option.'],
+            ['A little context','The Okubo and Shin-Okubo area grew into one of Tokyo’s best-known multicultural neighbourhoods, with especially strong Korean communities and businesses, plus shops and restaurants serving other Asian and Muslim communities.'],
+            ['Look for','The shift in food signage, grocery stores, restaurants and languages. Compared with Shinjuku’s department-store scale, Okubo feels more street-level and community-driven.'],
+            ['How to experience it','Keep it practical and spontaneous. No venue is fixed, so pick whatever looks good and is open. It is a useful place for food after normal restaurant hours.'],
+            ['Etiquette','Late-night residential streets still need normal quiet. These are working community businesses, not a themed “ethnic district.”'],
+            ['One memorable detail','One of Tokyo’s charms is that a one-stop train ride can change the city’s cultural texture completely. Okubo is an early example.']]},
+          {name:'Shin-Okubo', rows:[
+            ['Why it matters','Shin-Okubo is the more recognisable Koreatown face of the wider area, with dense Korean food, beauty, music and retail around the station.'],
+            ['A little context','The neighbourhood’s Korean commercial identity expanded strongly from the late 20th century and became especially visible through food, K-pop and beauty culture. Official Tokyo tourism material describes the wider area as Japan’s largest Koreatown, while also highlighting its broader multicultural character.'],
+            ['Look for','Korean restaurant queues, cosmetics, supermarkets, music merchandise and crowded pedestrian streets around the station. The density is very different from nearby residential Kita-Shinjuku.'],
+            ['How to experience it','Use it if it naturally fits the evening. It is not a sightseeing block, just an example of contemporary Tokyo’s cultural diversity.'],
+            ['Etiquette','Busy pavements can get very congested. Queue neatly, keep bags tight and avoid stopping in the middle of pedestrian flow.'],
+            ['One memorable detail','Contemporary Japan absorbs and remixes regional pop culture at high speed, and this is where you can see it on the street.']]}
         ]}
     ],
-    tomorrow:'No fixed early start tomorrow — the day can begin slowly after the late pickup.',
-    tomorrowReady:true
+    tomorrow:'No fixed early start tomorrow. The day can begin slowly after the late pickup.'
   };
 
   var DAY2 = {
     weather:{lo:20,hi:26,cond:'Partly cloudy', hourly:[['12:00','25°'],['15:00','26°'],['18:00','23°'],['21:00','21°'],['00:00','19°'],['03:00','18°']]},
     energy:'Medium–high', walking:'High', outside:'Mostly urban / outdoors',
-    dress:'Comfortable shoes + physical passport', bring:'Wigs (already packed)', first:'Start flexible',
+    dress:'Comfortable shoes + physical passport', bring:'Suica · a small bag', first:'Start flexible',
     chapters:[
-      {id:'harajuku', name:'Harajuku', tag:'DATE', state:'revealed',
-        blurb:'Takeshita Street into the surrounding lanes, drifting toward Omotesando. The wigs are already bought — no shopping task attached.',
-        about:[
-          {group:'Harajuku', rows:[
-            ['Why it matters','Harajuku is one of Tokyo’s clearest examples of youth culture becoming part of the city’s international identity. It works perfectly as the colourful opening to the “Lost in Translation” day.'],
-            ['A little context','The area was once much quieter and historically lay on routes outside the old city centre. In the postwar decades it became associated with new youth scenes, independent fashion and eventually the “kawaii” aesthetics exported worldwide.'],
-            ['Look for','The contrast is more interesting than any single landmark: intensely commercial Takeshita Street, fashion-focused side streets, tiny independent shops and then the more polished Omotesando edge.'],
-            ['How to experience it','Let Harajuku read as multiple layers rather than one aesthetic — tourist spectacle, fashion retail and smaller backstreet culture — while moving naturally south.'],
-            ['Etiquette / sensitivity','Ask before photographing people at close range, especially anyone whose outfit attracted attention. Street fashion is not automatic consent for portrait photography.'],
-            ['One memorable detail','Harajuku’s cultural significance comes from repeated reinvention: styles that began as subcultures in side streets have repeatedly become global fashion references.'],
-            ['Practical note','Saturdays are busy here — the route stays loose rather than turning the wigs into a shopping task.']]},
-          {group:'Takeshita Street', rows:[
+      {id:'harajuku', name:'Harajuku', startArrived:true,
+        hint:'Youth fashion, backstreets, and Tokyo’s most reinvented neighbourhood.',
+        blurb:'Start on Takeshita Street, then drift through the surrounding lanes toward Omotesando. Let Harajuku read as layers: tourist spectacle on Takeshita Street, fashion retail along the edges, and a quieter backstreet culture underneath both.',
+        groups:[
+          {name:'Takeshita Street', rows:[
             ['Why it matters','Takeshita Street is the most concentrated, theatrical version of Harajuku: youth fashion, sweets, cosmetics, character goods and crowds packed into a short pedestrian street.'],
             ['A little context','Its modern identity is tied to Harajuku’s rise as a youth-fashion district. The street became particularly associated with inexpensive trend-driven retail, making it a gateway into styles that were often more experimental than Tokyo’s department-store fashion.'],
             ['Look for','Layered shop signs, compact storefronts, crepe stands, themed sweets and the compressed perspective of the street itself. The crowd is part of the visual experience.'],
-            ['How to experience it','Walk it once rather than trying to “complete” it. If it feels too crowded, the interesting move is to peel off into the side streets and compare the atmosphere.'],
-            ['Etiquette / sensitivity','Keep moving with pedestrian flow and avoid stopping suddenly for photos. Food is better consumed beside the shop rather than while weaving through the crowd.'],
+            ['How to experience it','Walk it once rather than trying to “complete” it. If it feels too crowded, peel off into the side streets and compare the atmosphere.'],
+            ['Etiquette','Keep moving with the pedestrian flow and avoid stopping suddenly for photos. Food is better eaten beside the shop than while weaving through the crowd.'],
             ['One memorable detail','Its role is almost the opposite of a grand boulevard: a narrow side street became globally famous because youth culture, not monuments, made it important.'],
-            ['Practical note','Expect peak Saturday density — no timed visit is needed.']]},
-          {group:'Cat Street', rows:[
-            ['Why it matters','Cat Street is useful less as a “sight” than as the connective tissue between Harajuku and Shibuya: calmer than Takeshita, with boutiques, cafés and a more relaxed pedestrian rhythm.'],
+            ['Good to know','Expect peak Saturday density. No timed visit is needed.']]},
+          {name:'Cat Street', rows:[
+            ['Why it matters','Cat Street is less a “sight” than the connective tissue between Harajuku and Shibuya: calmer than Takeshita, with boutiques, cafés and a more relaxed pedestrian rhythm.'],
             ['A little context','The street became closely associated with the broader Ura-Harajuku fashion scene and helped spread the area’s reputation for streetwear and independent retail. Its importance is cultural rather than monumental.'],
             ['Look for','Low-rise storefronts, fashion labels, side alleys, small cafés and the change in pace compared with the huge Omotesando axis nearby.'],
-            ['How to experience it','Use it as an optional drift route, not a list of shops — the quieter fashion bridge toward Shibuya.'],
-            ['Etiquette / sensitivity','Normal urban etiquette applies; some shop fronts and residential side lanes are private space even when visually appealing.'],
-            ['One memorable detail','One of Harajuku’s defining patterns is that the smaller backstreets often produced trends before the major flagship stores adopted them.'],
-            ['Practical note','The itinerary doesn’t require a specific entrance or exit — there’s freedom to wander.']]},
-          {group:'Ura-Harajuku', rows:[
-            ['Why it matters','Ura-Harajuku — literally the “back” side of Harajuku — provides the quieter, more exploratory counterpoint to the tourist-heavy main streets.'],
+            ['How to experience it','Treat it as an optional drift route rather than a list of shops. It is the quieter fashion bridge toward Shibuya.'],
+            ['Etiquette','Normal urban etiquette applies. Some shop fronts and residential side lanes are private space even when they look inviting.'],
+            ['One memorable detail','One of Harajuku’s defining patterns is that the smaller backstreets often produced trends before the major flagship stores adopted them.']]},
+          {name:'Ura-Harajuku', rows:[
+            ['Why it matters','Ura-Harajuku, literally the “back” side of Harajuku, is the quieter, more exploratory counterpart to the tourist-heavy main streets.'],
             ['A little context','The term became associated with the backstreets where independent Japanese streetwear brands and youth-oriented shops developed strong followings. Its influence helped shape the global perception of Japanese street fashion from the 1990s onward.'],
-            ['Look for','Narrower lanes, smaller storefronts, mixed residential/commercial buildings and brands that feel less like giant flagships.'],
-            ['How to experience it','This is exactly where the route should avoid turn-by-turn micromanagement — a clue such as “leave the obvious street behind” fits the discovery concept better than naming every lane.'],
-            ['Etiquette / sensitivity','Some lanes are residential. Keep photography and volume respectful.'],
-            ['One memorable detail','The “backstreet” label itself is the memorable idea: much of Harajuku’s global cultural influence grew away from its biggest roads.'],
-            ['Practical note','Treat boundaries loosely — Ura-Harajuku is a cultural area label, not a single attraction pin.']]},
-          {group:'AFURI Harajuku', rows:[
-            ['Why it matters','AFURI gives the day an easy food anchor without interrupting the flow. Its yuzu ramen is light, aromatic and distinctive enough to feel specific to the trip rather than just “eat ramen.”'],
+            ['Look for','Narrower lanes, smaller storefronts, mixed residential and commercial buildings, and brands that feel less like giant flagships.'],
+            ['How to experience it','Leave the obvious street behind and follow whichever lane looks quieter. No route needed.'],
+            ['Etiquette','Some lanes are residential. Keep photography and volume respectful.'],
+            ['One memorable detail','The “backstreet” label is the memorable idea: much of Harajuku’s global cultural influence grew away from its biggest roads.']]},
+          {name:'AFURI Harajuku', rows:[
+            ['Why it matters','AFURI is an easy food anchor that fits the flow of the day. Its yuzu ramen is light, aromatic and distinctive enough to feel specific to this trip.'],
             ['A little context','AFURI says its name comes from Mt. Afuri in Kanagawa. The brand became known for clear chicken-based ramen with citrusy yuzu, especially yuzu shio and yuzu shoyu styles.'],
-            ['Look for','The visual interest is restrained: open kitchen energy, simple bowls and the yuzu aroma/clarity rather than a heavy tonkotsu style.'],
-            ['How to experience it','Keep it simple: why yuzu changes the bowl, why this is a lighter style — then let lunch be lunch.'],
-            ['Etiquette / sensitivity','Ramen shops often move quickly. Decide before reaching the counter if possible, keep bags compact and do not linger long after finishing when there is a queue.'],
-            ['One memorable detail','The mountain reference in the name makes the brand feel more Japanese than its modern minimalist interiors initially suggest.']]}
+            ['Look for','Restrained visuals: open kitchen energy, simple bowls, and a clear yuzu aroma rather than a heavy tonkotsu style.'],
+            ['How to experience it','Keep it simple. Notice how the yuzu changes the bowl and why this is a lighter style, then let lunch be lunch.'],
+            ['Etiquette','Ramen shops often move quickly. Decide before you reach the counter if you can, keep bags compact and do not linger after finishing when there is a queue.'],
+            ['One memorable detail','The mountain reference in the name makes the brand feel more Japanese than its modern minimalist interiors first suggest.']]}
         ]},
-      {id:'omotesando', name:'Omotesando', tag:'SEQ', state:'revealed',
-        blurb:'Flagship stores and leafy side streets, working south through Ura-Harajuku toward Shibuya.',
-        about:[
-          {group:'Omotesando', rows:[
-            ['Why it matters','Omotesando is the polished architectural counterweight to Harajuku. The day works because the atmosphere changes without a hard break: playful youth fashion becomes flagship design and contemporary architecture.'],
-            ['A little context','The area developed around the broad approach toward Meiji Shrine and later became one of Tokyo’s best-known luxury and design corridors. Today it is as notable for architecture as for retail.'],
-            ['Look for','Zelkova trees, wide pavements, luxury façades, carefully designed flagship buildings and glimpses into quieter side streets.'],
-            ['How to experience it','Do not make “shopping” the goal. Walk the avenue as an outdoor architecture gallery and let individual buildings catch attention naturally.'],
-            ['Etiquette / sensitivity','Flagship stores are operating businesses; photography policies vary indoors.'],
-            ['One memorable detail','Few Tokyo streets demonstrate the city’s design economy as clearly: internationally known architects have used retail buildings here as full-scale urban statements.'],
-            ['Practical note','This segment stays a southward drift toward Shibuya, as the itinerary specifies.']]},
-          {group:'Omotesando Avenue', rows:[
+      {id:'omotesando', name:'Omotesando',
+        hint:'The polished counterweight to Harajuku, one street over.',
+        blurb:'Flagship stores and leafy side streets. Work south through Ura-Harajuku toward Shibuya, and let Cat Street form part of the transition rather than a destination of its own.',
+        groups:[
+          {name:'Omotesando Avenue', rows:[
             ['Why it matters','The avenue is the spine that makes Omotesando legible. It offers a rare broad, tree-lined perspective in central Tokyo and turns the walk itself into part of the destination.'],
-            ['A little context','The road’s identity is tied to its role as the main approach toward Meiji Shrine; the name “Omotesando” literally refers to a front approach. Its modern luxury character came much later.'],
-            ['Look for','The zelkova canopy, seasonal light, sloping perspective, carefully composed storefronts and how side streets immediately become smaller and quieter.'],
-            ['How to experience it','Walk one side, cross when something interesting pulls you over, and avoid treating the avenue like a straight transit corridor — the contrast between boulevard and backstreet is the experience.'],
-            ['Etiquette / sensitivity','At busy crossings, move with the signal and avoid stopping at curb ramps for photos.'],
-            ['One memorable detail','The street feels luxurious today, but its name still encodes an older function: it was an approach route rather than a shopping brand.']]},
-          {group:'Tokyu Plaza Omotesando “Omokado”', rows:[
-            ['Why it matters','The kaleidoscopic mirrored escalator entrance is an ideal low-effort visual reveal: instantly recognisable, highly photogenic and directly on the day’s walking line.'],
-            ['A little context','The building opened in 2012 as Tokyu Plaza Omotesando Harajuku. In 2024, when the neighbouring “Harakado” complex opened, the older facility was renamed Tokyu Plaza Omotesando “Omokado.”'],
-            ['Look for','The faceted mirrors around the escalator multiply people, sky and street into a shifting geometric tunnel. Upstairs, the rooftop greenery provides a calmer counterpoint.'],
-            ['How to experience it','This is a “look up” moment rather than a separate attraction — take the photo if it appeals, then continue south.'],
-            ['Etiquette / sensitivity','Keep escalator flow clear while photographing; do not stop at the landing.'],
-            ['One memorable detail','The 2024 paired names “Omokado” and “Harakado” are a playful way to distinguish the two Tokyu Plaza buildings facing the same Harajuku/Omotesando crossroads.']]}
+            ['A little context','The road’s identity is tied to its role as the main approach to Meiji Shrine. The name “Omotesando” literally refers to a front approach. Its modern luxury character came much later.'],
+            ['Look for','The zelkova canopy, seasonal light, the sloping perspective, carefully composed storefronts and how side streets immediately become smaller and quieter.'],
+            ['How to experience it','Walk one side, cross when something pulls you over, and avoid treating the avenue as a straight transit corridor. The contrast between boulevard and backstreet is the experience.'],
+            ['Etiquette','At busy crossings, move with the signal and avoid stopping at curb ramps for photos. Flagship stores are working businesses, and photography policies vary indoors.'],
+            ['One memorable detail','The street feels luxurious today, but its name still encodes an older function: it was an approach route, not a shopping brand.']]},
+          {name:'Tokyu Plaza “Omokado”', rows:[
+            ['Why it matters','The kaleidoscopic mirrored escalator entrance is a quick visual payoff: instantly recognisable, photogenic and right on the day’s walking line.'],
+            ['A little context','The building opened in 2012 as Tokyu Plaza Omotesando Harajuku. In 2024, when the neighbouring “Harakado” complex opened, the older building was renamed Tokyu Plaza Omotesando “Omokado.”'],
+            ['Look for','The faceted mirrors around the escalator multiply people, sky and street into a shifting geometric tunnel. Upstairs, the rooftop greenery is a calmer counterpoint.'],
+            ['How to experience it','A “look up” moment rather than a separate attraction. Take the photo if it appeals, then continue south.'],
+            ['Etiquette','Keep the escalator flow clear while photographing, and do not stop at the landing.'],
+            ['One memorable detail','The paired names “Omokado” and “Harakado” are a playful way to tell apart the two Tokyu Plaza buildings facing the same Harajuku and Omotesando crossroads.']]}
         ]},
-      {id:'shibuya', name:'Shibuya', tag:'LOC', state:'ontheway',
-        onway:'Head toward Shibuya Crossing — about 15 minutes on foot from Omotesando.',
-        blurb:'Crossing, Center-gai, Hachiko and neon — let them appear as you move. Wigs go on before karaoke.',
-        about:[
-          {group:'Shibuya Crossing', tag:'Priority A', rows:[
-            ['Why it matters','It is less important as a “sight” than as a compressed image of Tokyo: huge pedestrian volume, dense rail infrastructure, screens, fashion and nightlife all meeting at one junction. The crossing became a global shorthand for the city’s energy precisely because it looks chaotic while functioning with remarkable order.'],
+      {id:'shibuya', name:'Shibuya',
+        timeNote:'Leave by 19:30 for the 20:00 karaoke room',
+        hint:'The city’s main stage today: crowds and screens by afternoon, steeper nightlife streets after dark.',
+        blurb:'Let the crossing, Center-gai, Hachiko and Dogenzaka appear as you move, rather than following a fixed route. Nonbei Yokocho, beside the tracks, may feel most atmospheric later in the evening.',
+        groups:[
+          {name:'Shibuya Crossing', rows:[
+            ['Why it matters','It is less a “sight” than a compressed image of Tokyo: huge pedestrian volume, dense rail infrastructure, screens, fashion and nightlife all meeting at one junction. The crossing became a global shorthand for the city’s energy precisely because it looks chaotic while working with remarkable order.'],
             ['A little history','Shibuya grew around one of Tokyo’s major rail hubs and evolved into a trend-setting district for youth culture, fashion, music and art. The crossing outside the station now sits at the threshold between the station, Center-gai, Dogenzaka and the commercial towers that define contemporary Shibuya.'],
-            ['Look for','Watch the light cycle rather than rushing through once: traffic stops in every direction and pedestrians flood diagonally as well as straight across. Look upward at the giant façades and screens, then back toward the station to understand why this junction works almost like an outdoor stage.'],
-            ['How to experience it','Cross once at street level, then — if the route naturally allows — see it again from above. The contrast between being inside the crowd and seeing the geometry from above is the point.'],
-            ['Etiquette / sensitivity','Do not stop abruptly in the middle of the crossing for staged photos; keep moving with the flow and stay aware of other pedestrians.'],
-            ['One memorable story','The most memorable thing is not the maximum headcount but the “organized chaos”: official Tokyo tourism describes the intersection as five crossings releasing at once, with people converging from several directions and somehow avoiding one another.']]},
-          {group:'Hachiko', tag:'Priority A', rows:[
-            ['Why it matters','The bronze dog beside Shibuya Station is a small monument with an outsized place in Japanese popular memory. Knowing the story transforms it from a crowded selfie point into a symbol of loyalty and of Shibuya itself.'],
-            ['A little history','Hachiko was an Akita who met his owner at Shibuya Station. After his owner died suddenly in the 1920s, Hachiko continued returning to wait for him for roughly nine more years. The story spread nationally and Hachiko became an enduring symbol of faithfulness.'],
-            ['Look for','The statue is physically modest compared with the crossing around it. Notice how it functions socially: it remains one of Tokyo’s best-known rendezvous points, with people constantly waiting nearby.'],
-            ['How to experience it','Treat it as a two-minute story rather than a major stop. Read the story while standing there, look at the crowd using it as a meeting point, then continue into the crossing.'],
-            ['Etiquette / sensitivity','The area is extremely busy. Keep the group together without blocking the meeting area for long photographs.'],
-            ['One memorable story','The emotional power comes from repetition: after his owner never came home, Hachiko returned to the station day after day for years. That repeated act is why the story survived far beyond the dog’s lifetime.']]},
-          {group:'Nonbei Yokocho', tag:'Priority A', rows:[
-            ['Why it matters','Nonbei Yokocho shows a completely different scale of Tokyo from the crossing only metres away: tiny bars, narrow alleys, close conversation and Showa-era atmosphere pressed against the railway.'],
-            ['A little history','Tokyo’s yokocho culture developed strongly in the post-war years as compact clusters for inexpensive food and drink. Nonbei Yokocho dates to the early 1950s and retains the intimate proportions associated with that period. Official Tokyo tourism lists 39 small bars and eateries there.'],
-            ['Look for','Red lanterns, the width of the passageways, bars with only a handful of seats and the contrast between the alley and Shibuya’s giant commercial architecture.'],
-            ['How to experience it','Go for one drink or small bite, not to “complete” the alley. The experience is the closeness: sitting beside locals in a room that may only hold four or five people.'],
-            ['Etiquette / sensitivity','Space is limited. Some bars are not set up for large groups or English service. Order something if you enter, avoid using the alley only as a photo set, and do not linger when people are waiting for seats.'],
-            ['One memorable story','Its survival beside one of the world’s most futuristic-looking intersections is the story: within a few steps, Shibuya can jump from giant screens and thousands of pedestrians to a bar where almost everyone inside can hear the same conversation.']]},
-          {group:'Center-gai', rows:[
+            ['Look for','Watch the light cycle rather than rushing through once: traffic stops in every direction and pedestrians flood diagonally as well as straight across. Look up at the giant façades and screens, then back toward the station to see why this junction works almost like an outdoor stage.'],
+            ['How to experience it','Cross once at street level, then, if the route naturally allows, see it again from above. The contrast between being inside the crowd and seeing the geometry from above is the point.'],
+            ['Etiquette','Do not stop abruptly in the middle of the crossing for staged photos. Keep moving with the flow and stay aware of other pedestrians.'],
+            ['One memorable detail','Not the maximum headcount but the “organized chaos”: official Tokyo tourism describes the intersection as five crossings releasing at once, with people converging from several directions and somehow avoiding one another.']]},
+          {name:'Hachiko', rows:[
+            ['Why it matters','The bronze dog beside Shibuya Station is a small monument with an outsized place in Japanese popular memory. Knowing the story turns it from a crowded selfie point into a symbol of loyalty, and of Shibuya itself.'],
+            ['A little history','Hachiko was an Akita who met his owner at Shibuya Station. After his owner died suddenly in the 1920s, Hachiko kept returning to wait for him for roughly nine more years. The story spread nationally and Hachiko became an enduring symbol of faithfulness.'],
+            ['Look for','The statue is physically modest compared with the crossing around it. Notice how it works socially: it remains one of Tokyo’s best-known meeting points, with people constantly waiting nearby.'],
+            ['How to experience it','Treat it as a two-minute story rather than a major stop. Read the story while standing there, watch the crowd using it as a meeting point, then continue into the crossing.'],
+            ['Etiquette','The area is extremely busy. Keep the group together without blocking the meeting area for long photographs.'],
+            ['One memorable detail','The emotional power comes from repetition: after his owner never came home, Hachiko returned to the station day after day for years. That repeated act is why the story survived far beyond the dog’s lifetime.']]},
+          {name:'Nonbei Yokocho', rows:[
+            ['Why it matters','Nonbei Yokocho is a completely different scale of Tokyo from the crossing only metres away: tiny bars, narrow alleys, close conversation and Showa-era atmosphere pressed against the railway.'],
+            ['A little history','Tokyo’s yokocho culture developed strongly in the post-war years as compact clusters for inexpensive food and drink. Nonbei Yokocho dates to the early 1950s and keeps the intimate proportions of that period. Official Tokyo tourism lists 39 small bars and eateries there.'],
+            ['Look for','Red lanterns, the width of the passageways, bars with only a handful of seats, and the contrast between the alley and Shibuya’s giant commercial architecture.'],
+            ['How to experience it','Go for one drink or a small bite, not to “complete” the alley. The experience is the closeness: sitting beside locals in a room that may only hold four or five people.'],
+            ['Etiquette','Space is limited. Some bars are not set up for large groups or English service. Order something if you go in, do not use the alley only as a photo set, and do not linger when people are waiting for seats.'],
+            ['One memorable detail','Its survival beside one of the world’s most futuristic-looking intersections is the story: within a few steps, Shibuya jumps from giant screens and thousands of pedestrians to a bar where almost everyone can hear the same conversation.']]},
+          {name:'Center-gai', rows:[
             ['Why it matters','Center-gai is one of the clearest street-level expressions of Shibuya’s youth culture: narrow, busy, retail-heavy and very different from the polished towers around the station.'],
-            ['A little context','The pedestrian street became closely associated with youth fashion, music and nightlife as Shibuya developed into a major teen/young-adult cultural centre.'],
+            ['A little context','The pedestrian street became closely associated with youth fashion, music and nightlife as Shibuya grew into a major teen and young-adult cultural centre.'],
             ['Look for','Dense signage, fast-changing retail, arcades, casual food and the way crowds funnel from the crossing into much narrower streets.'],
-            ['How to experience it','Walk through once as texture. It does not need its own stop or “achievement”; it is part of the cinematic movement from the crossing into Shibuya’s interior.'],
-            ['Etiquette / sensitivity','Keep moving with pedestrian traffic; step into a side space before checking navigation.'],
-            ['One memorable detail','The shift from the enormous open crossing to Center-gai’s compressed lane happens in under a minute — a good example of Tokyo’s rapid spatial changes.']]},
-          {group:'Dogenzaka', rows:[
-            ['Why it matters','Dogenzaka is the night-facing side of Shibuya and the practical bridge between karaoke, tiny bars and several club options. It gives the evening a darker, steeper and more intimate visual language.'],
+            ['How to experience it','Walk through once as texture. It does not need its own stop or an “achievement.” It is part of the cinematic move from the crossing into Shibuya’s interior.'],
+            ['Etiquette','Keep moving with pedestrian traffic, and step into a side space before checking navigation.'],
+            ['One memorable detail','The shift from the enormous open crossing to Center-gai’s compressed lane happens in under a minute, a good example of how fast Tokyo changes scale.']]},
+          {name:'Dogenzaka', rows:[
+            ['Why it matters','Dogenzaka is the night-facing side of Shibuya and the practical bridge between tiny bars and several club options. It gives the evening a darker, steeper and more intimate visual language.'],
             ['A little context','The slope west of Shibuya Station has long been associated with entertainment and nightlife. Today the area mixes restaurants, clubs, bars, hotels and newer redevelopment around the older street pattern.'],
             ['Look for','The literal incline, vertical signage, basement entrances and the transition away from the giant station screens.'],
-            ['How to experience it','Use Dogenzaka as an atmospheric corridor. Explorer copy should say enough to heighten awareness — “the city goes underground here” — without naming the next club too early.'],
-            ['Etiquette / sensitivity','Nightlife districts are still normal public streets. Be discreet around hotels and avoid photographing strangers at close range.'],
-            ['One memorable detail','Many of Shibuya’s best-known music spaces are not visible from far away; basement doors and narrow staircases are part of the city’s club culture.']]},
-          {group:'SHIBUYA SKY', rows:[
-            ['Why it matters','This is the optional “zoom out” moment: after street-level overload, the city becomes a legible grid from 229 metres above Shibuya.'],
-            ['A little context','SHIBUYA SKY opened as part of Shibuya Scramble Square and represents the district’s recent high-rise redevelopment. Its defining feature is the open-air rooftop rather than an enclosed classic observatory.'],
-            ['Look for','The crossing from above, layered rail lines, the Shinjuku skyline and — in clear conditions — much wider views across Tokyo. The exposed rooftop makes weather part of the experience.'],
-            ['How to experience it','Keep it genuinely optional. If the day is flowing well at street level, do not interrupt it just to “tick” an observation deck. If used, sunset/early night is the obvious cinematic slot, but those times sell out first.'],
-            ['Etiquette / sensitivity','Large bags and loose items are restricted on the rooftop for safety; follow storage instructions and staff guidance.'],
-            ['One memorable detail','The most famous Shibuya image is usually from ground level inside the crossing. SHIBUYA SKY deliberately reverses that perspective and makes the crossing look almost small.'],
-            ['Practical note','Timed entry, and sunset slots sell out first — only worth it if the day allows.']]}
+            ['How to experience it','Use Dogenzaka as an atmospheric corridor. This is where the city starts to go underground.'],
+            ['Etiquette','Nightlife districts are still normal public streets. Be discreet around hotels and avoid photographing strangers at close range.'],
+            ['One memorable detail','Many of Shibuya’s best-known music spaces are not visible from far away. Basement doors and narrow staircases are part of the city’s club culture.']]}
         ]},
-      {id:'pasela', name:'Pasela Shibuya', tag:'TIME', state:'hidden', targetTime:'20:00',
-        onway:'A few minutes from Shibuya Crossing.',
-        blurb:'Private-room karaoke, booked for 20:00 — the three of you, in character.',
-        about:[['Why it matters','Karaoke-box culture — a private room instead of a public stage — is a Japanese invention that changed how the world sings karaoke.'],
-               ['Look for','Song-request tablets, drink-call buttons, wigs finally earning their keep.'],
-               ['A little history','The private-room format took off across Japan in the 1980s and spread worldwide from there.']]},
-      {id:'nightlife', name:'Shibuya nightlife', tag:'MAN', state:'hidden',
-        onway:'Your guide will open this once tonight’s lineup is confirmed.',
-        blurb:'MITSUKI is the default — a small underground room leaning house and electro, close to karaoke.',
+      {id:'pasela', name:'Pasela Shibuya',
+        timeNote:'Room booked for 20:00',
+        gate:{time:'20:00'},
+        hint:'Private-room karaoke, a short walk from Hachiko.',
+        blurb:'A private room instead of a public stage: your own song queue, your own drinks, just the three of you.',
+        booking:{title:'Booking', rows:[
+          ['Venue','Karaoke Pasela Shibuya / Modi Shibuya'],
+          ['Time','20:00, booked for 2 hours'],
+          ['Party','3 people, booked under Marco Silva'],
+          ['Confirmation','PF2JN6']]},
+        mapsUrl:'https://maps.app.goo.gl/95ztW87nAAdX3As66',
+        aboutLabel:'Pasela',
         about:[
-          ['Why it matters','MITSUKI best matches the desired scale: small, underground and intimate rather than a giant nightclub. It can feel like discovering a basement scene instead of attending a tourist nightlife attraction.'],
+          ['Why it matters','This is the fixed centrepiece of the evening: three travellers and a private karaoke room in Shibuya.'],
+          ['A little context','Private karaoke boxes are a distinctly Japanese social format. Instead of singing to a public bar, groups rent a room, order food and drinks, and control their own queue of songs. Pasela is known for themed, resort-style rooms and an extensive song catalogue.'],
+          ['Look for','The contrast between public Shibuya chaos and the private room. The interior leans into an escapist, resort-like style.'],
+                    ['Etiquette','Respect the booked time and the room rules. Do not photograph other guests in corridors without permission.'],
+          ['One memorable detail','Part of karaoke’s social power in Japan is the privacy: the point is not performing for strangers but creating a temporary private world with your own group.']]
+      },
+      {id:'nightlife', name:'MITSUKI',
+        hint:'One more stop tonight, one floor below Shibuya.',
+        blurb:'A small underground room between a DJ bar and a club, leaning toward house, electro and underground electronic music.',
+        meta:'Lineup and entry rules are event-specific, so recheck a day or two before. Last trains run around midnight, so plan on a taxi home.',
+        checklist:{title:'Before you go', items:[
+          'Carry your physical passport as photo ID',
+          'No sandals or very sporty clothing']},
+        mapsUrl:mapsSearch('MITSUKI 1-22-12 Dogenzaka Shibuya'),
+        about:[
+          ['Why it matters','MITSUKI fits the scale you want: small, underground and intimate rather than a giant nightclub. It can feel like discovering a basement scene instead of visiting a tourist nightlife attraction.'],
           ['A little context','The venue positions itself as an underground music space on upper Dogenzaka. Its identity is built more around programming and atmosphere than around spectacle.'],
-          ['Look for','A discreet entrance, descent into a basement room, close proximity between DJ and crowd and a compact sound-led environment.'],
-          ['How to experience it','This should be a late reveal. Do not show the club name in the morning — Explorer Mode can simply reveal “one floor below Shibuya” when the choice is made.'],
-          ['Etiquette / sensitivity','Carry physical photo ID. Avoid sandals or extremely sporty clothing. Follow the specific event’s entry/photography policy.'],
-          ['One memorable detail','Small Tokyo clubs often hide behind minimal street presence; the feeling of finding the door is part of the experience.']]}
+          ['Look for','A discreet entrance, a descent into a basement room, close proximity between DJ and crowd, and a compact, sound-led space.'],
+          ['Etiquette','Carry physical photo ID. Avoid sandals or extremely sporty clothing. Follow the specific event’s entry and photography policy.'],
+          ['One memorable detail','Small Tokyo clubs often hide behind minimal street presence. The feeling of finding the door is part of the experience.']]
+      }
     ],
-    tomorrow:'Kamakura meeting time is still the driver — wake-up and leave time will be set once your friend confirms. Destination withheld.',
-    tomorrowGateChapter:'pasela'
+    tomorrow:'Be in Kamakura by 11:00. Leave the apartment by 09:30.'
   };
+
+  var DAY3 = {
+    weather:{lo:20,hi:26,cond:'Partly cloudy', hourly:[['09:00','22°'],['12:00','26°'],['15:00','26°'],['18:00','23°'],['21:00','21°']]},
+    energy:'Medium–high', walking:'Potentially high', outside:'Mostly outdoors',
+    dress:'Comfortable walking shoes, trails may be uneven', bring:'Suica · water · comfortable shoes', first:'Leave by 09:30',
+    chapters:[
+      {id:'to-kamakura', name:'To Kamakura', startArrived:true,
+        timeNote:'Leave by 09:30',
+        hint:'Ordinary local trains today, no reservation needed. Meeting a friend who knows the city.',
+        meta:'JR trains with Suica, no advance ticket or seat reservation. Your friend meets you at Engaku-ji at 11:00.',
+        timing:{title:'Getting there for 11:00', rows:[
+          ['09:30','Leave the apartment. It is a 10 to 12 minute walk to Shinjuku Station.'],
+          ['09:45','Take the JR Shonan-Shinjuku Line towards Zushi. Check the exact departure on Google Maps that morning.'],
+          ['10:40','Arrive at Kita-Kamakura, about 55 minutes later. Engaku-ji is a one-minute walk from the station.'],
+          ['11:00','Meet your friend at Engaku-ji.']]},
+        maps:[['Directions: Kita-Kamakura Station', mapsTransit('Kita-Kamakura Station')], ['Directions: Engaku-ji', mapsSearch('Engaku-ji Kamakura')]]
+      },
+      {id:'kamakura', name:'A day in Kamakura',
+        hint:'A former samurai capital, hills, sea, and Zen, all pressed into one compact coastal city.',
+        blurb:'No fixed stops today. Enjoy the time there and let the day find its own pace.',
+        checklist:{title:'Good to know', items:[
+          'Temples and shrines are active religious sites, so follow local signs',
+          'Treat a wooded trail as a hike, not a shortcut']},
+        aboutLabel:'Kamakura',
+        about:[
+          ['Why it matters','Kamakura is not simply “temples near Tokyo.” It was the political centre of Japan’s first warrior government and one of the places where samurai culture took shape. That context explains why Zen temples, martial traditions and the city’s wooded geography feel so intertwined.'],
+          ['A little history','Minamoto no Yoritomo established his power base here in the late 12th century and was appointed shogun in 1192. The Kamakura shogunate lasted until 1333. Trade with China brought cultural influences, and Zen Buddhism became especially important among the warrior class. After political power moved elsewhere, Kamakura stayed a place of temples, pilgrimage and, later, seaside leisure.'],
+          ['Look for','The hills that squeeze the historic centre, wooded temple precincts sitting close to residential streets, and a city that opens toward the sea.'],
+          ['Etiquette','Temples and shrines are active religious sites. Follow local signs on photography and quiet behaviour. On wooded trails, treat the route as a hike rather than an urban shortcut.'],
+          ['One memorable detail','Kamakura’s historical importance is far bigger than its size today: for roughly a century and a half, political power shifted away from the imperial court in Kyoto to a warrior government based in this compact coastal city.']]
+      },
+      {id:'back-to-tokyo', name:'Back to Tokyo', startArrived:true,
+        hint:'Ordinary trains back, whenever the day naturally winds down.',
+        meta:'Take the JR Shonan-Shinjuku Line towards Shinjuku from Kita-Kamakura or Kamakura. Direct services run roughly twice an hour, otherwise change at Ofuna. Check the live route when your friend is ready to finish the day.',
+        maps:[['Directions: Kita-Kamakura Station', mapsTransit('Kita-Kamakura Station')], ['Directions: Shinjuku Station', mapsTransit('Shinjuku Station')]]
+      }
+    ],
+    tomorrow:'Azusa 13 leaves Shinjuku at 10:00. Aim to be at the station around 09:30.'
+  };
+
+  var DAY_DATA = {1:DAY1, 2:DAY2, 3:DAY3};
+  if(TEST_MODE) DAYS.forEach(function(d){ if(DAY_DATA[d.n]) d.status = 'active'; });
 
   /* ---------- progress persistence (round 21) ----------
      Previously EVERYTHING was from-scratch on every reload -- which chapters had been
@@ -1515,15 +1547,14 @@
      be allowed to wipe out revealed chapters or arrival confirmations.
      Only PROGRESS is persisted, not the raw `state` object wholesale -- deliberately
      narrow, for two reasons: (1) a handful of `state` fields are transient UI-only
-     (`animating`, `confirmId`, `sheetAbout`, `weatherOpen`) and should always start
+     (`animating`, `confirming`, `sheetAbout`, `scrollToEnd`) and should always start
      fresh, never resume mid-animation or with a stale sheet/confirm-row still "open";
-     (2) `state.day2` is a full deep-clone of DAY2's static content, and blindly
-     persisting/restoring that wholesale would let a stale saved copy silently shadow
-     any future content edit to DAY2 itself. Instead, only each chapter's mutable
-     `id`+`state` (hidden/revealed/ontheway) is saved, and it's re-applied onto a FRESH
-     `JSON.parse(JSON.stringify(DAY2))` clone by id -- so a chapter added/removed/
-     reworked in DAY2 later is picked up correctly either way, only the reveal
-     progress itself survives.
+     (2) chapter CONTENT (DAY1..DAY3) must never be saved, or a stale copy would
+     silently shadow any later content edit. Only `state.dayProgress` (per day: current
+     chapter index, arrived flag, Info open/closed choices and ticked checklist items,
+     all keyed by chapter id) is saved, and it is sanitised against the live content on
+     load (unknown ids / out-of-range indexes are dropped), so a chapter added, removed
+     or reordered later is picked up correctly and only the progress itself survives.
      Versioned key (`_v1`): bump this if `state`'s or a chapter's saved shape ever
      changes incompatibly, so an old/mismatched saved blob is cleanly ignored instead
      of crashing or half-applying. Wrapped in try/catch throughout -- private
@@ -1532,9 +1563,7 @@
   var STORAGE_KEY = 'japanSlowlyProgress_v1';
   function saveProgress(){
     try{
-      var chapterStates = {};
-      state.day2.chapters.forEach(function(c){ chapterStates[c.id] = c.state; });
-      var payload = { screen:state.screen, openDay:state.openDay, openStay:state.openStay, stackIndex:state.stackIndex, day2ChapterStates:chapterStates };
+      var payload = { screen:state.screen, openDay:state.openDay, openStay:state.openStay, stackIndex:state.stackIndex, dayProgress:state.dayProgress };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     }catch(e){ /* private browsing / quota / disabled -- just don't persist */ }
   }
@@ -1555,14 +1584,22 @@
      above) can override screen/openDay/stackIndex/chapter-reveal-state below -- a
      returning visitor resumes exactly where they left off instead of always restarting
      at the intro splash with every chapter re-hidden. */
-  var state = { screen:'intro', openDay:null, openStay:null, day2:JSON.parse(JSON.stringify(DAY2)), weatherOpen:{}, stackIndex:1, confirmId:null, animating:false, sheetAbout:null };
+  var state = { screen:'intro', openDay:null, openStay:null, dayProgress:{}, stackIndex:1, confirming:null, scrollToEnd:false, animating:false, sheetAbout:null };
   (function applySavedProgress(){
     var saved = loadProgress();
     if(!saved) return;
-    if(saved.day2ChapterStates){
-      state.day2.chapters.forEach(function(c){
-        var savedState = saved.day2ChapterStates[c.id];
-        if(savedState==='hidden' || savedState==='ontheway' || savedState==='revealed') c.state = savedState;
+    if(saved.dayProgress && typeof saved.dayProgress==='object'){
+      Object.keys(DAY_DATA).forEach(function(n){
+        var sp = saved.dayProgress[n], d = DAY_DATA[n];
+        if(!sp || typeof sp!=='object') return;
+        var ids = {}; d.chapters.forEach(function(c){ ids[c.id] = c; });
+        var done = (typeof sp.done==='number' && sp.done>=0 && sp.done<d.chapters.length) ? Math.floor(sp.done) : 0;
+        var tip = {}, checks = {};
+        if(sp.tip && typeof sp.tip==='object') Object.keys(sp.tip).forEach(function(id){ if(ids[id] && typeof sp.tip[id]==='boolean') tip[id] = sp.tip[id]; });
+        if(sp.checks && typeof sp.checks==='object') Object.keys(sp.checks).forEach(function(id){
+          if(ids[id] && Array.isArray(sp.checks[id])) checks[id] = sp.checks[id].slice(0, (ids[id].checklist ? ids[id].checklist.items.length : 0)).map(function(v){ return !!v; });
+        });
+        state.dayProgress[n] = { done:done, arrived:!!sp.arrived, tip:tip, checks:checks };
       });
     }
     if(typeof saved.stackIndex==='number') state.stackIndex = saved.stackIndex;
@@ -1618,41 +1655,6 @@
   var chevronRightNav = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5l7 7-7 7"/></svg>';
   var closeIcon = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
-  function prepBlock(d){
-    var w = d.weather;
-    return '' +
-    '<div class="prep">' +
-      '<div class="prep-row" style="grid-template-columns:1fr;">' +
-        '<div class="weather-cell" data-weather>' +
-          '<div class="weather-top">' +
-            '<div class="weather-left">'+iconFor(w.cond)+
-              '<div><div class="weather-temp">'+w.lo+'° &ndash; '+w.hi+'°</div><div class="weather-cond">'+w.cond+'</div></div>' +
-            '</div>' +
-            '<div class="weather-caret">'+chevronDown+'</div>' +
-          '</div>' +
-          '<div class="hourly">' + w.hourly.map(function(h){
-            return '<div class="hr-tick"><div class="t">'+h[0]+'</div><div class="v">'+h[1]+'</div></div>';
-          }).join('') + '</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="prep-row">' +
-        '<div class="prep-cell"><div class="prep-label">Energy</div><div class="prep-value">'+d.energy+'</div></div>' +
-        '<div class="prep-cell"><div class="prep-label">Walking</div><div class="prep-value">'+d.walking+'</div></div>' +
-        '<div class="prep-cell"><div class="prep-label">Outside</div><div class="prep-value">'+d.outside+'</div></div>' +
-        '<div class="prep-cell"><div class="prep-label">Dress</div><div class="prep-value">'+d.dress+'</div></div>' +
-        '<div class="prep-cell"><div class="prep-label">Bring</div><div class="prep-value">'+d.bring+'</div></div>' +
-        '<div class="prep-cell"><div class="prep-label">First move</div><div class="prep-value">'+d.first+'</div></div>' +
-      '</div>' +
-    '</div>';
-  }
-
-  /* just the trigger now -- the content itself renders in the bottom sheet
-     (sheetHTML()) instead of an inline expand/collapse panel. */
-  function aboutBlock(ch){
-    if(!ch.about) return '';
-    return '<button class="abouttoggle" data-about="'+ch.id+'">About this place</button>';
-  }
-
   function aboutRowHTML(row){
     return '<div class="about-item"><div class="k">'+row[0]+'</div><div class="v">'+row[1]+'</div></div>';
   }
@@ -1702,13 +1704,6 @@
   /* finds the chapter data for whichever day is currently open, so the sheet can look
      up its content purely from state.sheetAbout (an id) without the caller having to
      thread the chapter object through. Only ever meaningful while state.screen==='day'. */
-  function currentDayData(){
-    if(state.screen!=='day') return null;
-    var day = DAYS.filter(function(d){return d.n===state.openDay;})[0];
-    if(!day) return null;
-    return day.n===1 ? DAY1 : day.n===2 ? state.day2 : null;
-  }
-
   /* shared bottom-sheet shell (backdrop/panel/handle/header/body) -- factored out so
      the Stays detail sheet can reuse the exact same markup, drag-to-dismiss and
      transition wiring as the day-chapter About sheet instead of duplicating it. */
@@ -1784,11 +1779,18 @@
      'stay:'-prefixed branch here is gone; sheetShell()/stayAboutHTML() are still shared
      with stayDetailScreen() though, just called directly rather than through this id. */
   function sheetHTML(){
-    if(!state.sheetAbout) return '';
-    var dayData = currentDayData();
-    var ch = dayData ? dayData.chapters.filter(function(c){return c.id===state.sheetAbout;})[0] : null;
-    if(!ch || !ch.about) return '';
-    return sheetShell(ch.name, aboutItemsHTML(ch.about, ch.id));
+    if(!state.sheetAbout || state.screen!=='day') return '';
+    var day = DAYS.filter(function(d){ return d.n===state.openDay; })[0];
+    var dd = dayDataFor(day);
+    if(!dd) return '';
+    var key = state.sheetAbout;
+    if(key==='essential') return sheetShell('Today’s essential info', essentialSheetBody(dd));
+    var parts = key.split('|');
+    var ch = dd.chapters.filter(function(c){ return c.id===parts[0]; })[0];
+    if(!ch) return '';
+    if(parts[1]==='a' && ch.about) return sheetShell(ch.aboutLabel || ch.name, ch.about.map(dcRowHTML).join(''));
+    var g = (ch.groups && parts[1] && parts[1].charAt(0)==='g') ? ch.groups[parseInt(parts[1].slice(1),10)] : null;
+    return g ? sheetShell(g.name, g.rows.map(dcRowHTML).join('')) : '';
   }
 
   /* runs the entrance transition after render() has mounted a freshly-opened sheet --
@@ -1968,78 +1970,258 @@
     panel.addEventListener('pointercancel', onUp);
   }
 
-  function confirmRow(id){
-    return '<div class="confirmrow"><div class="confirmtext">Confirm you’ve arrived?</div>' +
-      '<div class="confirmbtns"><button class="confirmyes" data-confirm-yes="'+id+'">Yes, unlock</button>' +
-      '<button class="confirmno" data-confirm-no="'+id+'">Not yet</button></div></div>';
-  }
+  /* ---------- day cards: the "chapter engine" ----------
+     A day with content (DAY_DATA[n], see above) renders as: header, a "Today's essential
+     info" pill (opens a sheet), a row of dots (one per chapter reached so far) and ONE
+     swipeable card per chapter. Only the chapters reached so far exist as cards, so what
+     is still ahead stays a surprise (spoiler protection is UI-only: all copy ships in this
+     file for offline use, so it is not a secret against someone reading the source).
 
-  function chapterBlock(ch, dayKey){
-    var cls = 'chapter '+ch.state;
-    var inner = '';
-    var confirming = state.confirmId===ch.id;
-    if(ch.state==='revealed'){
-      inner = '<div class="ctitlerow"><div class="ctitle">'+ch.name+'</div><div class="ctag">'+ch.tag+'</div></div>' +
-        '<div class="cblurb">'+ch.blurb+'</div>' +
-        (ch.meta ? '<div class="cmeta">'+ch.meta+'</div>' : '') +
-        aboutBlock(ch);
-    } else if(ch.state==='ontheway'){
-      inner = '<div class="ctitlerow"><div class="ctitle dim">Somewhere ahead</div><div class="ctag">'+ch.tag+'</div></div>' +
-        '<div class="cblurb">'+ch.onway+'</div>' +
-        (ch.tag==='LOC' ? (confirming ? confirmRow(ch.id) : '<button class="herebtn" data-here="'+ch.id+'">We’re here</button>') : '') +
-        (ch.tag==='TIME' ? '<div class="cmeta">Unlocks at '+ch.targetTime+'</div>' + (confirming ? confirmRow(ch.id) : '<button class="fallbacklink" data-here="'+ch.id+'">Running early? Unlock now</button>') : '') +
-        (ch.tag==='MAN' ? '<div class="cmeta" style="font-style:italic;">Manual reveal only — no traveller action opens this one.</div>' : '');
-    } else {
-      inner = '<div class="ctitlerow"><div class="ctitle dim">Hidden</div><div class="ctag">'+ch.tag+'</div></div>' +
-        '<div class="cblurb" style="color:var(--ink-faint);">A clue, or nothing at all — yet.</div>';
+     Per-day progress lives in state.dayProgress[n] = {done, arrived, tip, checks}:
+       done     index of the current chapter (cards 0..done exist; earlier ones are "visited")
+       arrived  whether the CURRENT chapter has had its "I'm here" (chapters with startArrived
+                begin arrived); everything place-specific (blurb, place chips) waits for this
+       tip      {chapterId: bool} explicit Info-box open/closed choices (absent = default rule)
+       checks   {chapterId: [bool]} ticked checklist items
+     Journal days (status 'journal') show every chapter as visited. Locked days show no cards.
+     Guide Mode is intentionally not built yet; content that differs per role would hang off
+     the same chapter objects (e.g. a `directionsGuideOnly` flag) when it is added. */
+  function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function dayDataFor(day){ return (day && day.status!=='locked') ? (DAY_DATA[day.n] || null) : null; }
+  function dcStartsArrived(ch){ return !TEST_MODE && !!(ch && ch.startArrived); }
+  function dayProg(n){
+    var d = DAY_DATA[n];
+    var p = state.dayProgress[n];
+    if(!p){
+      p = state.dayProgress[n] = { done:0, arrived: dcStartsArrived(d && d.chapters[0]), tip:{}, checks:{} };
     }
-    return '<div class="'+cls+'" data-chapter="'+ch.id+'" data-daykey="'+dayKey+'">'+inner+'</div>';
+    return p;
   }
 
-  /* wraps a chapter's card with its timeline column (dot + dashed connector) --
-     kept as a separate function from chapterBlock() because the timeline is a sibling
-     of the card, not something inside it (see the .chapters CSS comment for why). */
-  function chapterRowHTML(ch, dayKey, isLast){
-    return '<div class="chaprow'+(isLast?' last':'')+'">' +
-      '<div class="timeline"><div class="tl-dot '+ch.state+'"></div><div class="tl-line"></div></div>' +
-      chapterBlock(ch, dayKey) +
+  var DC_IC = {
+    target:'<path d="M8 1.8a6.2 6.2 0 1 0 0 12.4A6.2 6.2 0 0 0 8 1.8Z"/><circle cx="8" cy="8" r="2.6"/>',
+    clock:'<circle cx="8" cy="8" r="6"/><path d="M8 4.6V8.2l2.4 1.5"/>',
+    eye:'<path d="M1.4 8C3 4.9 5.2 3.4 8 3.4s5 1.5 6.6 4.6C13 11.1 10.8 12.6 8 12.6S3 11.1 1.4 8Z"/><circle cx="8" cy="8" r="1.7"/>',
+    compass:'<circle cx="8" cy="8" r="6"/><path d="M10.2 5.8 8.8 8.8 5.8 10.2 7.2 7.2Z"/>',
+    shield:'<path d="M8 1.8 12.8 3.5v4c0 3.2-2.1 5.6-4.8 6.1-2.7-.5-4.8-2.9-4.8-6.1v-4Z"/><path d="M5.8 8 7.2 9.4 10.2 6.3"/>',
+    star:'<path d="M8 1.6 9 6l4.4 2L9 10l-1 4.4L7 10 2.6 8 7 6Z"/>',
+    bulb:'<path d="M8 1.8a3.9 3.9 0 0 0-2.2 7.1c.5.3.8.9.8 1.5v.4h2.8v-.4c0-.6.3-1.2.8-1.5A3.9 3.9 0 0 0 8 1.8Z"/><path d="M6.6 13.4h2.8M7.1 14.6h1.8"/>',
+    cloud:'<path d="M5.6 11.6h6.1a2.5 2.5 0 0 0 .3-5A4 4 0 0 0 4.2 7.4a2.3 2.3 0 0 0 1.4 4.2Z"/>',
+    bolt:'<path d="M8.8 1.6 3.8 9h3l-.9 5.4L12.2 7H9.3Z"/>',
+    feet:'<ellipse cx="5.6" cy="5.2" rx="1.4" ry="2" transform="rotate(-18 5.6 5.2)"/><ellipse cx="10.4" cy="10.8" rx="1.4" ry="2" transform="rotate(18 10.4 10.8)"/>',
+    leaf:'<path d="M13 3C7.5 3 3 7.5 3 13c6 0 10-4.5 10-10Z"/><path d="M3.6 13 9 7.6"/>',
+    shirt:'<path d="M5.6 2 8 3.2 10.4 2 13 4.1 11 6V14H5V6L3 4.1Z"/>',
+    bag:'<rect x="3" y="5.6" width="10" height="8.4" rx="1.3"/><path d="M6.1 5.6V4.4a1.9 1.9 0 0 1 3.8 0v1.2"/>',
+    flag:'<path d="M4 14.2V2"/><path d="M4 2.8 12.2 4.6 4 7Z"/>'
+  };
+  var DC_LABEL_ICON = {
+    'Why it matters':'target', 'A little context':'clock', 'A little history':'clock', 'Look for':'eye',
+    'How to experience it':'compass', 'Etiquette':'shield', 'One memorable detail':'star', 'Good to know':'bulb',
+    'Weather':'cloud', 'Energy':'bolt', 'Walking':'feet', 'Outside':'leaf', 'Dress':'shirt', 'Bring':'bag', 'First move':'flag'
+  };
+  function dcIconSvg(key){ return '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+DC_IC[key]+'</svg>'; }
+  function dcRowHTML(row){
+    var ik = DC_LABEL_ICON[row[0]];
+    return '<div class="about-item"><div class="k">'+(ik ? '<span class="dc-kicon">'+dcIconSvg(ik)+'</span>' : '')+escH(row[0])+'</div><div class="v">'+escH(row[1])+'</div></div>';
+  }
+
+  var DC_STARS = '<svg class="dc-info-ico" viewBox="0 0 20 20" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M8 3l1.5 4.2L13.7 8.7 9.5 10.2 8 14.4 6.5 10.2 2.3 8.7l4.2-1.5L8 3Z"/><path d="M15 11l.8 2.2 2.2.8-2.2.8L15 17l-.8-2.2L12 14l2.2-.8L15 11Z"/></svg>';
+  var DC_CHEV = '<svg class="dc-chev" viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7.5 10 12l4.5-4.5"/></svg>';
+
+  function essentialSheetBody(d){
+    var w = d.weather;
+    var html = dcRowHTML(['Weather', w.lo+'–'+w.hi+'°, '+w.cond]);
+    html += '<div class="dc-hourly">' + w.hourly.map(function(h){
+      return '<div><span class="t">'+escH(h[0])+'</span><span class="g">'+escH(h[1])+'</span></div>';
+    }).join('') + '</div>';
+    [['Energy',d.energy],['Walking',d.walking],['Outside',d.outside],['Dress',d.dress],['Bring',d.bring],['First move',d.first]].forEach(function(r){
+      html += dcRowHTML(r);
+    });
+    html += '<div class="dc-lastupdate">Last update: '+formatLastUpdate(appLoadedAt)+'</div>';
+    return html;
+  }
+
+  function dcField(title, bodyHtml){
+    return '<div class="dc-field"><div class="dc-field-title">'+escH(title)+'</div><div class="dc-field-body">'+bodyHtml+'</div></div>';
+  }
+  function dcBullets(title, items){
+    return '<div class="dc-field"><div class="dc-field-title">'+escH(title)+'</div><ul class="dc-bullets">'+items.join('')+'</ul></div>';
+  }
+  function dcChecklist(ch, p){
+    var ticks = p.checks[ch.id] || [];
+    return '<div class="dc-field"><div class="dc-field-title">'+escH(ch.checklist.title)+'</div>' +
+      ch.checklist.items.map(function(text, idx){
+        var on = !!ticks[idx];
+        return '<label class="dc-check'+(on?' done':'')+'"><input type="checkbox" data-dc-check="'+escH(ch.id)+'|'+idx+'"'+(on?' checked':'')+'><span>'+escH(text)+'</span></label>';
+      }).join('') + '</div>';
+  }
+
+  /* Info holds practical logistics only (note / booking / timing / checklist) and does not
+     render at all when a chapter has none of those. Default state: open until you have
+     arrived; after arrival it folds away, EXCEPT when the chapter carries timing or booking
+     (live logistics stay visible). An explicit tap on the header (p.tip) always wins. */
+  function dcInfoHTML(ch, p, arrived){
+    var parts = [];
+    if(ch.meta) parts.push(dcField('Note:', escH(ch.meta)));
+    if(ch.booking) parts.push(dcBullets(ch.booking.title, ch.booking.rows.map(function(r){ return '<li>'+escH(r[0])+': '+escH(r[1])+'</li>'; })));
+    if(ch.timing) parts.push(dcBullets(ch.timing.title, ch.timing.rows.map(function(r){ return '<li>'+escH(r[0])+' '+escH(r[1])+'</li>'; })));
+    if(ch.checklist) parts.push(dcChecklist(ch, p));
+    if(!parts.length) return '';
+    var collapsed = (p.tip[ch.id]!==undefined) ? !!p.tip[ch.id] : (arrived && !(ch.timing || ch.booking));
+    return '<div class="dc-info'+(collapsed?'':' open')+'">' +
+      '<button class="dc-info-head" data-dc-tip="'+escH(ch.id)+'" aria-expanded="'+(collapsed?'false':'true')+'">' +
+        DC_STARS + '<span class="dc-info-label">Info</span>' + DC_CHEV +
+      '</button>' +
+      (collapsed ? '' : '<div class="dc-info-body">'+parts.join('')+'</div>') +
     '</div>';
+  }
+
+  function dcConfirmHTML(kind){
+    var text = kind==='here' ? 'Confirm you’ve arrived?' : 'Ready to move on?';
+    return '<div class="dc-confirm"><div class="dc-confirm-text">'+text+'</div>' +
+      '<div class="dc-confirm-btns"><button class="dc-btn small" data-dc-yes="'+kind+'">Yes</button>' +
+      '<button class="dc-btn ghost small" data-dc-cancel>Not yet</button></div></div>';
+  }
+
+  function dcCardHTML(ch, i, ctx){
+    var p = ctx.p;
+    var visited = i < ctx.done;
+    var cur = (i === ctx.done);
+    var arrived = visited ? true : p.arrived;
+    var isLast = (i === ctx.len-1);
+    /* gate = a time-locked (fixed) chapter: shows a countdown-style "not yet" state until its
+       time, then the full content. TEST_MODE: only the skip button opens it for now. */
+    var gated = !!ch.gate && !arrived;
+    var pill = visited ? '<span class="dc-pill visited">Visited</span>'
+      : (gated ? '<span class="dc-pill onway">Not yet</span>'
+      : (arrived ? '<span class="dc-pill on">Exploring now</span>' : '<span class="dc-pill onway">On the way</span>'));
+
+    var body = pill + '<div class="dc-title">'+escH(ch.name)+'</div>';
+    var badge = (!visited) ? (ch.timeNote || ch.expect) : '';
+    if(badge) body += '<div class="dc-badge">'+escH(badge)+'</div>';
+    if(ch.hint) body += '<div class="dc-hint">'+escH(ch.hint)+'</div>';
+    if(gated) body += '<div class="dc-gatenote">'+dcIconSvg('clock')+'<span>Opens at '+escH(ch.gate.time)+'</span></div>';
+
+    var info = gated ? '' : dcInfoHTML(ch, p, arrived);
+    var chips = '';
+    if(arrived){
+      if(ch.groups){
+        chips += ch.groups.map(function(g, gi){ return '<button class="dc-chip" data-dc-open="'+escH(ch.id)+'|g'+gi+'">'+escH(g.name)+'</button>'; }).join('');
+      } else if(ch.about){
+        chips += '<button class="dc-chip" data-dc-open="'+escH(ch.id)+'|a">'+escH(ch.aboutLabel || ch.name)+'</button>';
+      }
+    }
+    var maps = ch.maps || (ch.mapsUrl ? [['Directions', ch.mapsUrl]] : []);
+    maps.forEach(function(m){ chips += '<a class="dc-chip" href="'+escH(m[1])+'" target="_blank" rel="noopener">'+escH(m[0])+'</a>'; });
+    var blurb = (arrived && ch.blurb) ? '<div class="dc-blurb">'+escH(ch.blurb)+'</div>' : '';
+    var tomorrow = (isLast && arrived && ctx.data.tomorrow) ? dcField('Tomorrow', escH(ctx.data.tomorrow)) : '';
+    var chipsRow = chips ? '<div class="dc-chips">'+chips+'</div>' : '';
+
+    body += info;
+    if(info && (blurb || chipsRow || tomorrow)) body += '<div class="dc-divider"></div>';
+    body += blurb + chipsRow + tomorrow;
+
+    var foot = '';
+    if(cur){
+      if(gated) foot = '<button class="dc-btn provisional" data-dc-skip>Test only: skip the wait</button>';
+      else if(state.confirming==='here' && !arrived) foot = dcConfirmHTML('here');
+      else if(state.confirming==='ready' && arrived && !isLast) foot = dcConfirmHTML('ready');
+      else if(!arrived) foot = '<button class="dc-btn" data-dc-ask="here">I’m here</button>';
+      else if(isLast) foot = '<div class="dc-lastnote">That’s the last chapter for today.</div>';
+      else foot = '<button class="dc-btn" data-dc-ask="ready">'+escH(ch.readyLabel || 'Ready for what’s next')+'</button>';
+    }
+    return '<div class="dc-card" data-dc-card="'+escH(ch.id)+'"><div class="dc-card-body">'+body+'</div>' + (foot ? '<div class="dc-card-foot">'+foot+'</div>' : '') + '</div>';
+  }
+
+  function dcCardsHTML(day, data){
+    var journal = day.status==='journal';
+    var p = dayProg(day.n);
+    var len = data.chapters.length;
+    var done = journal ? len : Math.min(p.done, len-1);
+    var count = journal ? len : done+1;
+    var ctx = { p:p, done:done, len:len, data:data };
+    var dots = '<div class="dc-dots" role="tablist" aria-label="Chapters reached so far">';
+    var cards = '';
+    for(var i=0;i<count;i++){
+      dots += '<button class="dc-dot'+(i===count-1?' on':'')+'" data-dc-dot="'+i+'" aria-label="Chapter '+(i+1)+': '+escH(data.chapters[i].name)+'"></button>';
+      cards += dcCardHTML(data.chapters[i], i, ctx);
+    }
+    dots += '</div>';
+    return '<div class="dc-chapters-label">Chapters</div>' + dots + '<div class="dc-carousel">' + cards + '</div>';
+  }
+
+  /* moves the carousel to the newest card and syncs the dots -- used on first mount and
+     by openDayFlip() (whose static preview has no handlers wired yet). */
+  function dcSyncDots(root){
+    var car = root.querySelector('.dc-carousel');
+    if(!car) return;
+    var cards = car.querySelectorAll('.dc-card');
+    var step = cards.length>1 ? (cards[1].offsetLeft - cards[0].offsetLeft) : 0;
+    var idx = step>0 ? Math.round(car.scrollLeft/step) : 0;
+    root.querySelectorAll('.dc-dot').forEach(function(d, k){ d.classList.toggle('on', k===idx); });
+  }
+  function dcMount(root){
+    var car = root.querySelector('.dc-carousel');
+    if(!car) return;
+    car.scrollLeft = car.scrollWidth;
+    dcSyncDots(root);
   }
 
   function dayDetailScreen(day, dayData, dayKey){
     var isJournal = day.status==='journal';
-
     var html = '<button class="close-fab" data-back aria-label="Close">'+closeIcon+'</button>';
     html += '<div class="dayhead">' +
-      (dayKey==='day2' ? '<button class="resetbtn" data-reset>Reset demo</button>' : '') +
+      ((dayData && !isJournal) ? '<button class="resetbtn" data-dc-reset>Test · reset this day</button>' : '') +
       '</div>';
 
     var dayLocked = day.status==='locked';
-    html += '<div class="backhero-text"><div class="day-date">'+day.date+' &middot; Day '+day.n+' of 10</div>' +
+    html += '<div class="backhero-text"><div class="day-date">'+day.date+' &middot; Day '+day.n+'/10</div>' +
       (dayLocked ? '<div class="day-title hidden-title">Title withheld</div>' : '<div class="day-title">'+day.title+'</div>') +
       '<div class="day-teaser">'+day.teaser+'</div></div>';
 
-    if(isJournal){
-      html += '<div class="journalflag">Past day &middot; kept as trip journal &middot; fully unlocked</div>';
-    }
-
     if(dayData){
-      html += prepBlock(dayData);
-      html += '<div class="lastupdate"><span class="dot"></span>Last update: '+formatLastUpdate(appLoadedAt)+'</div>';
-      html += '<div class="chapters"><div class="chapters-label">Chapters</div>';
-      html += dayData.chapters.map(function(c, idx){ return chapterRowHTML(c, dayKey, idx===dayData.chapters.length-1); }).join('');
-      html += '</div>';
-
-      var tready = dayData.tomorrowReady || (dayData.tomorrowGateChapter && dayData.chapters.filter(function(c){return c.id===dayData.tomorrowGateChapter && c.state==='revealed';}).length);
-      html += '<div class="tomorrow '+(tready?'ready':'')+'">' +
-        '<div class="tomorrow-label">Tomorrow</div>' +
-        '<div class="tomorrow-text">'+(tready ? dayData.tomorrow : 'Unlocks near the end of the day.')+'</div>' +
-      '</div>';
+      html += '<div class="dc-essential-wrap"><button class="dc-pillbtn" data-dc-essential>Today’s essential info</button></div>';
+      if(isJournal) html += '<div class="journalflag">Past day &middot; kept as trip journal &middot; fully unlocked</div>';
+      html += dcCardsHTML(day, dayData);
     } else {
-      html += '<div class="lockednote">This day hasn’t opened yet. <span class="mono">Unlocks '+day.unlock+' at 00:01</span> — the app won’t push a notice, it’ll just be waiting next time you look.</div>';
+      html += '<div class="lockednote">This day hasn’t opened yet. <span class="mono">Unlocks '+day.unlock+' at 00:01</span>. The app won’t push a notice, it’ll just be waiting next time you look.</div>';
     }
-
     return html;
+  }
+
+  /* ---- actions ---- */
+  function dcActive(){
+    if(state.screen!=='day') return null;
+    var day = DAYS.filter(function(d){ return d.n===state.openDay; })[0];
+    var data = dayDataFor(day);
+    if(!day || !data || day.status==='journal') return null;
+    var p = dayProg(day.n);
+    p.done = Math.min(p.done, data.chapters.length-1);
+    return { day:day, data:data, p:p, ch:data.chapters[p.done], isLast:(p.done===data.chapters.length-1) };
+  }
+  function dcArrive(){
+    var a = dcActive(); if(!a) return;
+    a.p.arrived = true;
+    delete a.p.tip[a.ch.id]; /* let the default rule fold Info away now that you are there */
+    state.confirming = null;
+    render();
+  }
+  function dcSkip(){
+    var a = dcActive(); if(!a) return;
+    a.p.arrived = true; /* TEST_MODE stand-in for "the clock reached the gate time" */
+    delete a.p.tip[a.ch.id];
+    state.confirming = null;
+    render();
+  }
+  function dcAdvance(){
+    var a = dcActive(); if(!a || a.isLast) return;
+    a.p.done++;
+    var next = a.data.chapters[a.p.done];
+    a.p.arrived = dcStartsArrived(next);
+    delete a.p.tip[next.id];
+    state.confirming = null;
+    state.scrollToEnd = true;
+    render();
   }
 
   /* a fixed (not re-randomized on every render) little tilt per day, so the deck reads as
@@ -2383,9 +2565,16 @@
     var screenKey = state.screen + ':' + state.openDay + ':' + state.openStay;
     var prevView = el.querySelector('.view');
     var keepScroll = (prevView && prevView.dataset.screenKey === screenKey) ? prevView.scrollTop : null;
+    /* day cards: a same-screen re-render (confirm row, Info toggle, sheet...) must not
+       throw the carousel back to card 0 or reset each card's own inner scroll. */
+    var prevCar = (keepScroll!==null && prevView) ? prevView.querySelector('.dc-carousel') : null;
+    var carLeft = prevCar ? prevCar.scrollLeft : null;
+    var bodyTops = prevCar ? Array.prototype.map.call(prevCar.querySelectorAll('.dc-card-body'), function(n){ return n.scrollTop; }) : null;
 
     var isDetailScreen = (state.screen==='day' || state.screen==='stayDetail');
-    var html = '<div class="view'+(isDetailScreen ? ' view-day' : '')+'" data-screen-key="'+screenKey+'">';
+    var dayForView = state.screen==='day' ? DAYS.filter(function(d){return d.n===state.openDay;})[0] : null;
+    var hasCards = !!dayDataFor(dayForView);
+    var html = '<div class="view'+(isDetailScreen ? ' view-day' : '')+(hasCards ? ' view-daycards' : '')+'" data-screen-key="'+screenKey+'">';
     if(state.screen==='intro'){
       html += introScreen();
     } else if(state.screen==='home'){
@@ -2397,9 +2586,7 @@
       html += st ? stayDetailScreen(st) : '';
     } else {
       var day = DAYS.filter(function(d){return d.n===state.openDay;})[0];
-      var dayData = day.n===1 ? DAY1 : day.n===2 ? state.day2 : null;
-      var dayKey = day.n===1 ? 'day1' : day.n===2 ? 'day2' : null;
-      html += dayDetailScreen(day, dayData, dayKey);
+      html += dayDetailScreen(day, dayDataFor(day), 'day'+day.n);
     }
     html += '</div>';
     /* the sheet is a sibling of .view, not a child -- it needs to cover the full
@@ -2410,6 +2597,21 @@
     if(keepScroll !== null){
       var newView = el.querySelector('.view');
       if(newView) newView.scrollTop = keepScroll;
+    }
+    var newCar = el.querySelector('.dc-carousel');
+    if(newCar){
+      if(carLeft!==null){
+        newCar.scrollLeft = carLeft;
+        newCar.querySelectorAll('.dc-card-body').forEach(function(n, k){ if(bodyTops && bodyTops[k]) n.scrollTop = bodyTops[k]; });
+        if(state.scrollToEnd){
+          state.scrollToEnd = false;
+          requestAnimationFrame(function(){ newCar.scrollTo({ left:newCar.scrollWidth, behavior: reduceMotion ? 'auto' : 'smooth' }); });
+        }
+        dcSyncDots(el);
+      } else {
+        state.scrollToEnd = false;
+        dcMount(el);
+      }
     }
     if(state.sheetAbout){ openSheetTransition(); wireSheetDrag(); }
     /* show the reload button on the intro screen and the home reel, but not on a
@@ -2441,26 +2643,12 @@
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function revealChapter(id){
-    var ch = state.day2.chapters.filter(function(c){return c.id===id;})[0];
-    if(!ch || ch.state==='revealed') return;
-    ch.state = 'revealed';
-    var idx = state.day2.chapters.indexOf(ch);
-    var next = state.day2.chapters[idx+1];
-    if(next && next.state==='hidden'){ next.state = 'ontheway'; }
-    render();
-    if(!reduceMotion){
-      var row = document.querySelector('[data-chapter="'+id+'"]');
-      if(row){ row.classList.add('justrevealed'); setTimeout(function(){ row.classList.remove('justrevealed'); }, 950); }
-    }
-  }
-
   /* ---------- open: flip the front card over while it grows to fill the screen ---------- */
   function openDayFlip(idx){
     if(state.animating) return;
     var day = DAYS[idx];
     if(reduceMotion){
-      state.screen='day'; state.openDay=day.n; state.confirmId=null; state.sheetAbout=null; render();
+      state.screen='day'; state.openDay=day.n; state.confirming=null; state.sheetAbout=null; render();
       return;
     }
     var screenEl = document.getElementById('screen');
@@ -2468,10 +2656,12 @@
     if(!cardEl){ state.screen='day'; state.openDay=day.n; state.sheetAbout=null; render(); return; }
 
     state.animating = true;
-    var dayData = day.n===1 ? DAY1 : day.n===2 ? state.day2 : null;
-    var dayKey = day.n===1 ? 'day1' : day.n===2 ? 'day2' : null;
+    var dayData = dayDataFor(day);
     var backEl = cardEl.querySelector('.flip-back');
-    backEl.innerHTML = dayDetailScreen(day, dayData, dayKey);
+    /* wrapped in the same .view shell render() will build, so the layout does not jump when
+       render() swaps the real thing in at the end of the animation */
+    backEl.innerHTML = '<div class="view view-day'+(dayData ? ' view-daycards' : '')+'">' + dayDetailScreen(day, dayData, 'day'+day.n) + '</div>';
+    dcMount(backEl);
 
     /* openDayFlip only ever opens the current front card (see the click handler in
        wireHome), which is supposed to be sitting at its settled resting transform --
@@ -2556,12 +2746,12 @@
   /* ---------- close: the true reverse of open -- unflip back to the photo while shrinking
      in place to the exact spot the card sits in the stack ---------- */
   function closeDayFlip(){
-    if(reduceMotion){ state.screen='home'; state.confirmId=null; state.sheetAbout=null; render(); return; }
+    if(reduceMotion){ state.screen='home'; state.confirming=null; state.sheetAbout=null; render(); return; }
     var screenEl = document.getElementById('screen');
     var viewEl = screenEl.querySelector('.view');
     var target = state.closeTargetRect;
     var day = DAYS[state.closeIdx];
-    if(!viewEl || !target || !day || state.animating){ state.screen='home'; state.confirmId=null; state.sheetAbout=null; render(); return; }
+    if(!viewEl || !target || !day || state.animating){ state.screen='home'; state.confirming=null; state.sheetAbout=null; render(); return; }
     state.animating = true;
 
     var parentRect = screenEl.getBoundingClientRect();
@@ -2677,7 +2867,7 @@
     finishClose = function(){
       if(closeFinished) return;
       closeFinished = true;
-      state.screen='home'; state.confirmId=null; state.animating=false; state.sheetAbout=null;
+      state.screen='home'; state.confirming=null; state.animating=false; state.sheetAbout=null;
 
       /* rather than the usual render() -- which throws away every element in #screen and
          builds fresh ones from scratch -- fold `wrapper` directly into the deck as its real
@@ -2696,7 +2886,7 @@
 
       var flipBackEl = wrapper.querySelector('.flip-back');
       /* the old detail view's DOM is done with -- its state (revealed chapters, etc.) lives
-         in `state.day2`, not here, so this is safe to drop; openDayFlip rebuilds it fresh
+         in `state.dayProgress`, not here, so this is safe to drop; openDayFlip rebuilds it fresh
          from that state next time this day is opened, exactly like every other card. */
       if(flipBackEl) flipBackEl.innerHTML = '';
 
@@ -3005,25 +3195,60 @@
     if(back) back.addEventListener('click', function(){ closeDayFlip(); });
     var stayBack = root.querySelector('[data-stay-back]');
     if(stayBack) stayBack.addEventListener('click', function(){ closeStayFlip(); });
-    var reset = root.querySelector('[data-reset]');
-    if(reset) reset.addEventListener('click', function(){ state.day2 = JSON.parse(JSON.stringify(DAY2)); state.confirmId=null; render(); });
-
-    root.querySelectorAll('[data-here]').forEach(function(b){
-      b.addEventListener('click', function(){ state.confirmId = b.getAttribute('data-here'); render(); });
+    /* ---- day cards (see the "day cards: the chapter engine" comment) ---- */
+    var dcReset = root.querySelector('[data-dc-reset]');
+    if(dcReset) dcReset.addEventListener('click', function(){ delete state.dayProgress[state.openDay]; state.confirming=null; state.scrollToEnd=false; render(); });
+    root.querySelectorAll('[data-dc-ask]').forEach(function(b){
+      b.addEventListener('click', function(){ state.confirming = b.getAttribute('data-dc-ask'); render(); });
     });
-    root.querySelectorAll('[data-confirm-yes]').forEach(function(b){
-      b.addEventListener('click', function(){ var id=b.getAttribute('data-confirm-yes'); state.confirmId=null; revealChapter(id); });
+    root.querySelectorAll('[data-dc-cancel]').forEach(function(b){
+      b.addEventListener('click', function(){ state.confirming = null; render(); });
     });
-    root.querySelectorAll('[data-confirm-no]').forEach(function(b){
-      b.addEventListener('click', function(){ state.confirmId=null; render(); });
+    root.querySelectorAll('[data-dc-yes]').forEach(function(b){
+      b.addEventListener('click', function(){ if(b.getAttribute('data-dc-yes')==='here') dcArrive(); else dcAdvance(); });
     });
-
-    root.querySelectorAll('[data-about]').forEach(function(b){
+    root.querySelectorAll('[data-dc-skip]').forEach(function(b){ b.addEventListener('click', dcSkip); });
+    root.querySelectorAll('[data-dc-tip]').forEach(function(b){
       b.addEventListener('click', function(){
-        state.sheetAbout = b.getAttribute('data-about');
+        var day = DAYS.filter(function(d){ return d.n===state.openDay; })[0];
+        var data = dayDataFor(day); if(!data) return;
+        var id = b.getAttribute('data-dc-tip');
+        var p = dayProg(day.n);
+        p.tip[id] = (b.getAttribute('aria-expanded')==='true'); /* open now -> collapse it; collapsed now -> open it */
         render();
       });
     });
+    root.querySelectorAll('[data-dc-check]').forEach(function(inp){
+      inp.addEventListener('change', function(){
+        var parts = inp.getAttribute('data-dc-check').split('|');
+        var p = dayProg(state.openDay);
+        var arr = p.checks[parts[0]] || (p.checks[parts[0]] = []);
+        arr[parseInt(parts[1],10)] = inp.checked;
+        render();
+      });
+    });
+    root.querySelectorAll('[data-dc-open]').forEach(function(b){
+      b.addEventListener('click', function(){ state.sheetAbout = b.getAttribute('data-dc-open'); render(); });
+    });
+    root.querySelectorAll('[data-dc-essential]').forEach(function(b){
+      b.addEventListener('click', function(){ state.sheetAbout = 'essential'; render(); });
+    });
+    root.querySelectorAll('[data-dc-dot]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var car = root.querySelector('.dc-carousel'); if(!car) return;
+        var cards = car.querySelectorAll('.dc-card');
+        var card = cards[parseInt(b.getAttribute('data-dc-dot'),10)]; if(!card) return;
+        car.scrollTo({ left: card.offsetLeft - 24, behavior: reduceMotion ? 'auto' : 'smooth' });
+      });
+    });
+    var dcCar = root.querySelector('.dc-carousel');
+    if(dcCar){
+      var dcRaf = false;
+      dcCar.addEventListener('scroll', function(){
+        if(dcRaf) return; dcRaf = true;
+        requestAnimationFrame(function(){ dcRaf = false; dcSyncDots(root); });
+      }, { passive:true });
+    }
     root.querySelectorAll('[data-sheet-close]').forEach(function(b){
       b.addEventListener('click', function(){ closeSheet(); });
     });
@@ -3110,8 +3335,6 @@
         }
       });
     });
-    var wc = root.querySelector('[data-weather]');
-    if(wc) wc.addEventListener('click', function(){ wc.classList.toggle('open'); });
   }
 
   /* ---------- drag-to-browse + tap-to-flip-open on the home stack ---------- */

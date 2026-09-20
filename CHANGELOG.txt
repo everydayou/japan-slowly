@@ -4,6 +4,34 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 29b — 2026-09-20 (testing mode, Pasela gate, log corrections)
+
+Marco wants to walk every card of Days 1-3 before real unlock logic is written.
+
+- `TEST_MODE = true`: Days 1-3 all open (status forced to `active`), every chapter starts locked ("On the way"), the "I'm here" and "Ready for what's next" confirms step through. `dcStartsArrived()` ignores `startArrived` in test mode.
+- Time gate: chapter field `gate:{time:'20:00'}` (Pasela). Before unlock the card shows a "Not yet" pill, "Opens at 20:00", the hint and the Directions chip; no Info or About. A dashed "Test only: skip the wait" button unlocks it (`dcSkip`). Real clock logic comes later.
+- "Test · reset this day" button in every day view (per day only).
+- Log-doc corrections: wigs removed everywhere, Shibuya Sky/Dogenzaka karaoke references removed, eSIM/Suica removed from the Haneda card, Pasela booking rows (Karaoke Pasela Shibuya / Modi Shibuya, 20:00 for 2 hours, 3 people under Marco Silva) plus Marco's Pasela pin, Kita-Shinjuku directions now use Marco's apartment pin, Day 3 rebuilt around the 11:00 Engaku-ji meeting (Getting there for 11:00 schedule, leave by 09:30, Kita-Kamakura and Engaku-ji Directions chips, Back to Tokyo Directions to Kita-Kamakura and Shinjuku), Kamakura blurb and About no longer predict what will be done, last card shows only "That's the last chapter for today.".
+- New chapter field `maps:[[label,url],...]` for several Directions chips (`mapsUrl` still works for one).
+- Pasela booking rows also carry the confirmation number (added at Marco's explicit request, despite the public repo).
+- Not done on purpose: Guide Mode, Days 4-10.
+
+---
+
+## ROUND 29 — 2026-09-20
+
+Ported the new day-card mechanic into the real app and rebuilt Days 1-3.
+
+**Source material:** a test-bed artifact (engine), the Master Spec (rules and approved copy), Figma frames (layout, spacing, type) and the itinerary doc plus research packs A/B (content). The final copy for Days 1-3 from the earlier chat was lost, so it was rebuilt.
+
+**UI:** the day screen is now header, "Today's essential info" pill (opens a sheet with weather, energy, walking, outside, dress, bring, first move), CHAPTERS dots and one swipeable card per chapter reached so far. Cards fill the screen, scroll inside, and pin their button at the bottom. Status pill (On the way / Exploring now / Visited), one red time line (`timeNote` or `expect`), italic hint, collapsible Info box (note, booking, timing, ticklist), dashed divider, blurb, place chips (each opens a sheet), Directions chip, and "I'm here" / "Ready for what's next" with a Yes / Not yet confirm row. Colours are the app's own tokens; two small new tokens were added (`--chip-line`, `--good`/`--good-ink`), with dark-mode values.
+
+**Data and state:** `DAY1`/`DAY2`/`DAY3` in the new chapter shape, joined in `DAY_DATA`. Progress lives in `state.dayProgress` and is saved with the existing `_v1` key (sanitised on load). Only the `explore` chapter kind is ported. The old vertical list, `prepBlock`, `revealChapter` and their CSS were deleted; Stay 1's sheet still reads DAY1's `kita-shinjuku` chapter by id.
+
+**Content:** Day 1 renamed "Konnichi-fucking-wa" with the four Master Spec chapters. Day 2 has Harajuku, Omotesando, Shibuya, Pasela, MITSUKI (normal chapters, no planner/guide reveal). Day 3 has To Kamakura, A day in Kamakura, Back to Tokyo, with the itinerary's train steps, fare and duration, and a "Tomorrow" note (Azusa 13 at 10:00, be at the station about 09:30). About text was rewritten from the packs in traveller voice: the pack copy contained builder instructions (for example "Explorer Mode can simply reveal...") that had leaked into the old app. Em dashes removed, SHIBUYA SKY dropped, no reservation or payment details. Haneda no longer has an About sheet (it had claims not found in the packs).
+
+**Tested:** Playwright walkthrough of Day 1 (journal), Day 2 (all five chapters, confirm rows, checklist tick, reload persistence, dot navigation, sheets), Day 3 (temporary unlocked copy), dark mode, 375x667, open/close flip, Stay 1 sheet. No device test yet.
+
 ## ROUND 28 — 2026-09-18
 *Written up 2026-09-20 from git history (commit e729716) and the code comments — not from the original session's notes.*
 
