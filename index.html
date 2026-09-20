@@ -439,7 +439,10 @@
      the same .about-item/.about-group rows the bottom-sheet About panel already used
      for stay content (stayAboutHTML()), just laid out as plain flowing page content
      instead of inside a scrollable sheet-body. */
-  .stay-detail-body{ margin:28px 24px 8px; display:flex; flex-direction:column; gap:18px; }
+  .stay-slide{ z-index:60; transform:translateY(100%); transition:transform .42s cubic-bezier(.22,1,.36,1); box-shadow:0 -10px 32px rgba(0,0,0,.14); }
+  .stay-slide.open{ transform:none; }
+  .stay-slide > .dc-carousel{ margin-top:16px; }
+  @media (prefers-reduced-motion: reduce){ .stay-slide{ transition:none; } }
 
   /* ---- bottom sheet ----
      replaces the old inline expand/collapse "about" panel (accordion, max-height
@@ -1216,10 +1219,12 @@
   var STAYS = [
     {id:'s1', label:'Stay 1', areaName:'Kita-Shinjuku', range:'Days 1–3', unlockDay:1, mood:1, hotel:'Isshuku Noma',
       address:'4 Chome-14-7 Kita-Shinjuku, Room 101, Shinjuku City, Tokyo'},
-    {id:'s2', label:'Stay 2', areaName:'Kiso-Fukushima', range:'Day 4', unlockDay:4, mood:4, hotel:'Komanoyu'},
+    {id:'s2', label:'Stay 2', areaName:'Kiso-Fukushima', range:'Day 4', unlockDay:4, mood:4, hotel:'Komanoyu',
+      address:'47-2 Fukushima, Kiso, Nagano'},
     {id:'s3', label:'Stay 3', areaName:'Gion, Kyoto', range:'Days 5–7', unlockDay:5, mood:6, hotel:'Kabin Gion',
       address:'18-12 Yamatocho, Higashiyama Ward, Kyoto'},
-    {id:'s4', label:'Stay 4', areaName:'Takanawa', range:'Days 8–10', unlockDay:8, mood:9, hotel:'ARIA Takanawa'}
+    {id:'s4', label:'Stay 4', areaName:'Takanawa', range:'Days 8–10', unlockDay:8, mood:9, hotel:'ARIA Takanawa',
+      address:'1-27-9 Takanawa, HJ PLACE TAKANAWA, Tokyo'}
   ];
   function stayLocked(st){
     var d = DAYS.filter(function(x){ return x.n===st.unlockDay; })[0];
@@ -3443,53 +3448,44 @@
   function chOf(day, id){ return day.chapters.filter(function(c){ return c.id===id; })[0]; }
   var TAKANAWA_ABOUT = [["Why it matters", "Takanawa is your base for the last stretch of the trip. It sits close to Shinagawa Station, so the Shinkansen, the Yamanote line and the Keikyu line to Haneda are all near."], ["A little history", "In the Edo period, stone walls were built along the Takanawa seashore, and parts of them can still be visited. Today the area holds embassies, museums, the Prince hotels and Sengaku-ji temple."], ["Look for", "Sengaku-ji, the temple with the graves of the Forty-seven ronin, a famous story of loyalty from the early 18th century. Takanawa Gateway Station, designed by Kengo Kuma and opened in 2020, is one stop north of Shinagawa."], ["How to experience it", "You do not need a plan here. Use Takanawa as a calm base: an evening walk, a coffee and an early night before the market morning."], ["Etiquette", "Sengaku-ji is an active temple and a burial ground, so keep your voice low and follow the signs."], ["Good to know", "Shinagawa Station has the Shinkansen and the Keikyu line, which reaches Haneda in about 15 minutes."]];
   var STAY_CARDS = {
-    s1:[
-      {id:'stay', pill:'Your stay', name:'Isshuku Noma',
-        fields:[['Address','4 Chome-14-7 Kita-Shinjuku, Room 101, Shinjuku City, Tokyo.'],
-          ['Your nights','Days 1 to 3, 25 to 27 September. Check-out is on the morning of Day 4.'],
-          ['Leaving on Day 4','Leave the apartment by 09:25 and be at Shinjuku Station by 09:45 for the Azusa 13 at 10:00.']],
-        maps:[['Directions', mapsSearch('4 Chome-14-7 Kita-Shinjuku Shinjuku City Tokyo')]]},
-      {id:'area', pill:'Around the stay', name:'Kita-Shinjuku',
-        blurb:'Quiet streets on the edge of Shinjuku. Okubo Station is a 10 to 15 minute walk, with food and shops around it.',
-        chips:[{label:'Kita-Shinjuku', rows:chOf(DAY1,'kita-shinjuku').about}]}
-    ],
-    s2:[
-      {id:'stay', pill:'Your stay', name:'Komanoyu',
-        fields:[['Getting there','The ryokan’s own shuttle collects you from JR Kiso-Fukushima Station at 17:30. Your train from Narai arrives at 17:07.'],
-          ['Your night','Day 4, 28 September. One night only.'],
-          ['Leaving on Day 5','The shuttle back to Kiso-Fukushima Station leaves at 10:00, so have your bags ready. The Shinano 6 leaves the station at 10:30.']],
-        lists:[{title:'Meals', items:['Dinner: served 18:00 to 19:00','Breakfast: served 07:00 to 08:00']}]},
-      {id:'ryokan', pill:'The ryokan', name:'Komanoyu',
-        blurb:'A 19th-century inn with its own hot spring. The evening is slow on purpose.',
-        lists:[chOf(DAY4,'komanoyu').bulletsUnlocked],
-        chips:[{label:'Komanoyu', rows:chOf(DAY4,'komanoyu').about}]},
-      {id:'town', pill:'The town', name:'Kiso-Fukushima',
-        blurb:'You pass through in the evening, and the shuttle takes you up into the hills. A little context helps.',
-        chips:[{label:'Kiso-Fukushima', rows:chOf(DAY4,'to-komanoyu').about}]}
-    ],
-    s3:[
-      {id:'stay', pill:'Your stay', name:'Kabin Gion',
-        fields:[['Address','18-12 Yamatocho, Higashiyama Ward, Kyoto.'],
-          ['Arriving on Day 5','Take a taxi from Kyoto Station, about 10 to 15 minutes. Check-in is from 15:00. If the room is not ready, leave your bags and head out.'],
-          ['Your nights','Days 5 to 7, 29 September to 1 October. Check-out is on the morning of Day 8.'],
-          ['Leaving on Day 8','Check out and leave your luggage at Kabin Gion for the day. Collect it after lunch and be at Kyoto Station by 15:15.']],
-        maps:[['Directions', mapsSearch('Kabin Gion 18-12 Yamatocho Higashiyama Ward Kyoto')]]},
-      {id:'area', pill:'Around the stay', name:'Gion',
-        blurb:'The old streets of Gion are within walking distance. Gion-Shijo Station, on the Keihan line, is your way to Fushimi Inari.',
-        chips:[{label:'Gion', rows:chOf(DAY5,'gion').groups[1].rows},
-          {label:'Hanamikoji', rows:chOf(DAY5,'gion').groups[2].rows},
-          {label:'Yasaka Shrine', rows:chOf(DAY5,'yasaka-shrine').about}]}
-    ],
-    s4:[
-      {id:'stay', pill:'Your stay', name:'ARIA Takanawa',
-        fields:[['Getting there','Your Nozomi 32 arrives at Shinagawa at 18:08. From there it is about 15 minutes to ARIA Takanawa.'],
-          ['Your nights','2 and 3 October. Tonight is open, and tomorrow starts early. Check-out is on the morning of Day 10.'],
-          ['Leaving on Day 10','Check out in the morning and leave all your luggage with ARIA Takanawa. Collect it around 15:00 to 15:30, then leave for Haneda around 16:00 to 16:30.']],
-        maps:[['Directions', 'https://maps.app.goo.gl/fqdxqihf1QPTjcqa7']]},
-      {id:'area', pill:'Around the stay', name:'Takanawa',
-        blurb:'Close to Shinagawa Station, so luggage and timing stay easy on the last morning.',
-        chips:[{label:'Takanawa', rows:TAKANAWA_ABOUT}]}
-    ]
+    s1:{
+      address:'4 Chome-14-7 Kita-Shinjuku, Room 101, Shinjuku City, Tokyo.',
+      maps:[['Directions', mapsSearch('4 Chome-14-7 Kita-Shinjuku Shinjuku City Tokyo')]],
+      chips:[{label:'Kita-Shinjuku', rows:chOf(DAY1,'kita-shinjuku').about}],
+      fields:[['Your nights','Days 1 to 3, 25 to 27 September. Check-out is on the morning of Day 4.'],
+        ['Leaving on Day 4','Leave the apartment by 09:25 and be at Shinjuku Station by 09:45 for the Azusa 13 at 10:00.'],
+        ['Getting around','Okubo Station is a 10 to 15 minute walk, with food and shops around it.']]
+    },
+    s2:{
+      address:'47-2 Fukushima, Kiso, Nagano.',
+      maps:[['Directions', mapsSearch('Nukumorino-yado Komanoyu 47-2 Fukushima Kiso Nagano')]],
+      chips:[{label:'Komanoyu', rows:chOf(DAY4,'komanoyu').about},
+        {label:'Kiso-Fukushima', rows:chOf(DAY4,'to-komanoyu').about}],
+      fields:[['Getting there','The ryokan’s own shuttle collects you from JR Kiso-Fukushima Station at 17:30. Your train from Narai arrives at 17:07.'],
+        ['Your night','Day 4, 28 September. One night only.'],
+        ['Leaving on Day 5','The shuttle back to Kiso-Fukushima Station leaves at 10:00, so have your bags ready. The Shinano 6 leaves the station at 10:30.']],
+      lists:[{title:'Meals', items:['Dinner: served 18:00 to 19:00','Breakfast: served 07:00 to 08:00']},
+        chOf(DAY4,'komanoyu').bulletsUnlocked]
+    },
+    s3:{
+      address:'18-12 Yamatocho, Higashiyama Ward, Kyoto.',
+      maps:[['Directions', mapsSearch('Kabin Gion 18-12 Yamatocho Higashiyama Ward Kyoto')]],
+      chips:[{label:'Gion', rows:chOf(DAY5,'gion').groups[1].rows},
+        {label:'Hanamikoji', rows:chOf(DAY5,'gion').groups[2].rows},
+        {label:'Yasaka Shrine', rows:chOf(DAY5,'yasaka-shrine').about}],
+      fields:[['Arriving on Day 5','Take a taxi from Kyoto Station, about 10 to 15 minutes. Check-in is from 15:00. If the room is not ready, leave your bags and head out.'],
+        ['Your nights','Days 5 to 7, 29 September to 1 October. Check-out is on the morning of Day 8.'],
+        ['Leaving on Day 8','Check out and leave your luggage at Kabin Gion for the day. Collect it after lunch and be at Kyoto Station by 15:15.'],
+        ['Getting around','The old streets of Gion are within walking distance. Gion-Shijo Station, on the Keihan line, is your way to Fushimi Inari.']]
+    },
+    s4:{
+      address:'1-27-9 Takanawa, HJ PLACE TAKANAWA, Tokyo.',
+      maps:[['Directions', 'https://maps.app.goo.gl/fqdxqihf1QPTjcqa7']],
+      chips:[{label:'Takanawa', rows:TAKANAWA_ABOUT}],
+      fields:[['Getting there','Your Nozomi 32 arrives at Shinagawa at 18:08. From there it is about 15 minutes to ARIA Takanawa.'],
+        ['Your nights','2 and 3 October. Tonight is open, and tomorrow starts early. Check-out is on the morning of Day 10.'],
+        ['Leaving on Day 10','Check out in the morning and leave all your luggage with ARIA Takanawa. Collect it around 15:00 to 15:30, then leave for Haneda around 16:00 to 16:30.']]
+    }
   };
 
   if(TEST_MODE) DAYS.forEach(function(d){ if(DAY_DATA[d.n]) d.status = 'active'; });
@@ -3678,37 +3674,31 @@
     '</div>';
   }
 
-  /* Stay cards (round 30): a stay opens as swipeable cards, same look as a day's chapter
-     cards but with nothing to unlock. Content is in STAY_CARDS (below DAY_DATA). Card fields:
-       pill, name        small label + card title
-       blurb             one short paragraph
-       fields            [[title, text], ...]
-       lists             [{title, items}]  bulleted
-       chips             [{label, rows}]   each opens a bottom sheet (About rows, same as a chapter's)
-       maps              [[label, url]]    Directions chips */
-  function stayCardHTML(card){
-    var body = '<span class="dc-pill onway">'+escH(card.pill)+'</span><div class="dc-title">'+escH(card.name)+'</div>';
-    if(card.blurb) body += '<div class="dc-blurb">'+escH(card.blurb)+'</div>';
-    (card.fields||[]).forEach(function(f){ body += dcField(f[0], escH(f[1])); });
-    (card.lists||[]).forEach(function(l){ body += dcBullets(l.title, l.items.map(function(t){ return '<li>'+escH(t)+'</li>'; })); });
-    var chips = '';
-    (card.chips||[]).forEach(function(c, ci){ chips += '<button class="dc-chip" data-dc-open="'+escH(card.id)+'|c'+ci+'">'+escH(c.label)+'</button>'; });
-    if(card.maps) chips += dcMapsChips(card.maps);
-    if(chips) body += '<div class="dc-chips">'+chips+'</div>';
-    return '<div class="dc-card" data-dc-card="'+escH(card.id)+'"><div class="dc-card-body">'+body+'</div></div>';
+  /* Stay detail (round 31): slides up from the bottom over the Stays grid and slides back
+     down on close (no flip/zoom). One card per stay: hotel name, address, Directions pill,
+     About pills, then the details. Content is in STAY_CARDS (below DAY_DATA):
+       address, maps [[label,url]], chips [{label, rows}] (each opens the About sheet),
+       fields [[title,text]], lists [{title, items}] */
+  function stayCardHTML(st){
+    var c = STAY_CARDS[st.id] || {};
+    var body = '<span class="dc-pill onway">Your stay</span><div class="dc-title">'+escH(st.hotel)+'</div>';
+    if(c.address) body += '<div class="dc-blurb">'+escH(c.address)+'</div>';
+    if(c.maps) body += '<div class="dc-chips">'+dcMapsChips(c.maps)+'</div>';
+    if(c.chips && c.chips.length) body += '<div class="dc-chips">' + c.chips.map(function(ch, ci){ return '<button class="dc-chip" data-dc-open="stay|c'+ci+'">'+escH(ch.label)+'</button>'; }).join('') + '</div>';
+    var below = '';
+    (c.fields||[]).forEach(function(f){ below += dcField(f[0], escH(f[1])); });
+    (c.lists||[]).forEach(function(l){ below += dcBullets(l.title, l.items.map(function(t){ return '<li>'+escH(t)+'</li>'; })); });
+    if(below) body += '<div class="dc-divider"></div>' + below;
+    return '<div class="dc-card" data-dc-card="stay"><div class="dc-card-body">'+body+'</div></div>';
   }
-  function stayDetailScreen(st){
-    var cards = STAY_CARDS[st.id] || [];
-    var html = '<button class="close-fab" data-stay-back aria-label="Close">'+closeIcon+'</button>';
-    html += '<div class="dayhead"></div>';
-    html += '<div class="backhero-text"><div class="day-date">'+st.range+'</div>' +
-      '<div class="day-title">'+(st.areaName || st.label)+'</div>' +
-      '<div class="day-teaser">'+escH(st.hotel)+'</div></div>';
-    var dots = '<div class="dc-dots" role="tablist" aria-label="Stay cards">';
-    cards.forEach(function(c, i){ dots += '<button class="dc-dot'+(i===0?' on':'')+'" data-dc-dot="'+i+'" aria-label="Card '+(i+1)+': '+escH(c.name)+'"></button>'; });
-    dots += '</div>';
-    return html + '<div class="dc-chapters-label">Your stay</div>' + dots +
-      '<div class="dc-carousel">' + cards.map(stayCardHTML).join('') + '</div>';
+  function staySlideHTML(st){
+    return '<div class="view view-day view-daycards stay-slide'+(state.staySlideNew ? '' : ' open')+'">' +
+      '<button class="close-fab" data-stay-back aria-label="Close">'+closeIcon+'</button>' +
+      '<div class="dayhead"></div>' +
+      '<div class="backhero-text"><div class="day-date">'+st.range+'</div>' +
+      '<div class="day-title">'+(st.areaName || st.label)+'</div></div>' +
+      '<div class="dc-carousel">' + stayCardHTML(st) + '</div>' +
+    '</div>';
   }
 
   /* the bottom-sheet modal itself -- rendered as a sibling of .view (see render()),
@@ -3722,9 +3712,9 @@
   function sheetHTML(){
     if(state.sheetAbout && state.screen==='stayDetail'){
       var sst = STAYS.filter(function(x){ return x.id===state.openStay; })[0];
+      var sc = sst ? STAY_CARDS[sst.id] : null;
       var sp = state.sheetAbout.split('|');
-      var scard = sst ? (STAY_CARDS[sst.id] || []).filter(function(c){ return c.id===sp[0]; })[0] : null;
-      var schip = (scard && scard.chips && sp[1]) ? scard.chips[parseInt(sp[1].slice(1),10)] : null;
+      var schip = (sc && sc.chips && sp[1]) ? sc.chips[parseInt(sp[1].slice(1),10)] : null;
       return schip ? sheetShell(schip.label, schip.rows.map(dcRowHTML).join('')) : '';
     }
     if(!state.sheetAbout || state.screen!=='day') return '';
@@ -4542,7 +4532,7 @@
        represents and only restore the old scrollTop when re-rendering the exact same
        one; a genuine navigation to a different screen/day (which tags differently)
        still correctly starts at the top. */
-    var screenKey = state.screen + ':' + state.openDay + ':' + state.openStay;
+    var screenKey = (state.screen==='stayDetail' ? 'stays' : state.screen) + ':' + state.openDay + ':' + (state.screen==='stayDetail' ? null : state.openStay);
     var prevView = el.querySelector('.view');
     var keepScroll = (prevView && prevView.dataset.screenKey === screenKey) ? prevView.scrollTop : null;
     /* day cards: a same-screen re-render (confirm row, Info toggle, sheet...) must not
@@ -4551,29 +4541,38 @@
     var carLeft = prevCar ? prevCar.scrollLeft : null;
     var bodyTops = prevCar ? Array.prototype.map.call(prevCar.querySelectorAll('.dc-card-body'), function(n){ return n.scrollTop; }) : null;
 
-    var isDetailScreen = (state.screen==='day' || state.screen==='stayDetail');
+    var isDetailScreen = (state.screen==='day');
     var dayForView = state.screen==='day' ? DAYS.filter(function(d){return d.n===state.openDay;})[0] : null;
-    var hasCards = !!dayDataFor(dayForView) || state.screen==='stayDetail';
+    var hasCards = !!dayDataFor(dayForView);
     var html = '<div class="view'+(isDetailScreen ? ' view-day' : '')+(hasCards ? ' view-daycards' : '')+'" data-screen-key="'+screenKey+'">';
     if(state.screen==='intro'){
       html += introScreen();
     } else if(state.screen==='home'){
       html += homeScreen();
-    } else if(state.screen==='stays'){
+    } else if(state.screen==='stays' || state.screen==='stayDetail'){
       html += staysScreen();
-    } else if(state.screen==='stayDetail'){
-      var st = STAYS.filter(function(s){return s.id===state.openStay;})[0];
-      html += st ? stayDetailScreen(st) : '';
     } else {
       var day = DAYS.filter(function(d){return d.n===state.openDay;})[0];
       html += dayDetailScreen(day, dayDataFor(day), 'day'+day.n);
     }
     html += '</div>';
+    if(state.screen==='stayDetail'){
+      var openSt = STAYS.filter(function(x){ return x.id===state.openStay; })[0];
+      if(openSt) html += staySlideHTML(openSt);
+    }
     /* the sheet is a sibling of .view, not a child -- it needs to cover the full
        screen and must never be clipped by .view's own overflow:scroll box. */
     html += sheetHTML();
     el.innerHTML = html;
     wire();
+    if(state.screen==='stayDetail' && state.staySlideNew){
+      state.staySlideNew = false;
+      var slideEl = el.querySelector('.stay-slide');
+      if(slideEl){
+        slideEl.getBoundingClientRect(); /* register the closed position, then slide up */
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){ slideEl.classList.add('open'); }); });
+      }
+    }
     if(keepScroll !== null){
       var newView = el.querySelector('.view');
       if(newView) newView.scrollTop = keepScroll;
@@ -4609,13 +4608,13 @@
        own chrome, same reasoning as refreshBtn above). */
     var tabbar = document.getElementById('tabbar');
     if(tabbar){
-      tabbar.hidden = !(state.screen==='home' || state.screen==='stays');
+      tabbar.hidden = !(state.screen==='home' || state.screen==='stays' || state.screen==='stayDetail');
       var tabExplore = document.getElementById('tabExplore');
       var tabStays = document.getElementById('tabStays');
       if(tabExplore) tabExplore.classList.toggle('on', state.screen==='home');
-      if(tabStays) tabStays.classList.toggle('on', state.screen==='stays');
+      if(tabStays) tabStays.classList.toggle('on', state.screen==='stays' || state.screen==='stayDetail');
       var tabbarIndicator = document.getElementById('tabbarIndicator');
-      if(tabbarIndicator) tabbarIndicator.classList.toggle('right', state.screen==='stays');
+      if(tabbarIndicator) tabbarIndicator.classList.toggle('right', state.screen==='stays' || state.screen==='stayDetail');
     }
     updateStackClearance();
     saveProgress();
@@ -4932,241 +4931,29 @@
     };
   }
 
-  /* ---------- Stays: open/close as a "zoom to white, then grow" expand/collapse ----------
-     round 26: a plain box-expand (no flip) grows/shrinks the card between its grid
-     slot and fullscreen. The user asked for a smoother transition than a bare
-     box-morph, so each direction now has three phases, using a .stay-flash overlay
-     (see its CSS comment) as the connective tissue between them:
-       open:  A) quick zoom + fade to white, still in the grid slot
-              B) box-morph grows to fullscreen while the flash stays opaque white
-              C) render() swaps in the real detail screen, then the flash fades out
-                 to reveal it
-       close: A) the live detail screen fades to white in place
-              B) box-morph shrinks back down to the grid slot while the flash stays
-                 opaque white
-              C) the flash fades out to reveal the card's own photo underneath
-     PHASE_ZOOM/PHASE_GROW/PHASE_REVEAL name the three durations so open and close
-     stay in lockstep. */
-  var STAY_PHASE_ZOOM = 150;   /* A: zoom+flash-to-white */
-  var STAY_PHASE_GROW = 480;   /* B: box-morph grow/shrink while opaque white */
-  var STAY_PHASE_REVEAL = 260; /* C: flash fades out to reveal what's underneath */
-
-  function openStayFlip(stayId){
+  /* ---------- Stays: the detail slides up from the bottom, and slides back down on close ---------- */
+  function openStay(stayId){
     if(state.animating) return;
-    var st = STAYS.filter(function(s){return s.id===stayId;})[0];
+    var st = STAYS.filter(function(x){ return x.id===stayId; })[0];
     if(!st || stayLocked(st)) return;
-    if(reduceMotion){
-      state.screen='stayDetail'; state.openStay=st.id; state.sheetAbout=null; render();
-      return;
-    }
-    var screenEl = document.getElementById('screen');
-    var cardEl = screenEl.querySelector('.stay-card[data-stay="'+st.id+'"]');
-    if(!cardEl){ state.screen='stayDetail'; state.openStay=st.id; state.sheetAbout=null; render(); return; }
-
-    state.animating = true;
-
-    var rect = cardEl.getBoundingClientRect();
-    var parentRect = screenEl.getBoundingClientRect();
-
-    /* cache where this card sits (and its grid slot), so the close animation can morph
-       the fullscreen view back down to this exact spot and rejoin the same grid area */
-    state.closeStayTargetRect = { top: rect.top-parentRect.top, left: rect.left-parentRect.left, width: rect.width, height: rect.height };
-    state.closeStayId = st.id;
-    state.closeStayArea = cardEl.getAttribute('data-area');
-
-    /* reparent into #screen so top/left/width/height below are measured against the
-       right containing block. .stay-card is position:relative by default (it sits in
-       a CSS grid, not an absolute stack), so this needs an explicit position:absolute
-       override too. */
-    screenEl.appendChild(cardEl);
-    cardEl.style.position = 'absolute';
-    cardEl.style.margin = '0';
-    cardEl.style.zIndex = 500;
-    cardEl.style.top = (rect.top-parentRect.top)+'px';
-    cardEl.style.left = (rect.left-parentRect.left)+'px';
-    cardEl.style.width = rect.width+'px';
-    cardEl.style.height = rect.height+'px';
-
-    /* phase A: a quick zoom + fade to white, still sitting in the grid slot */
-    var flash = document.createElement('div');
-    flash.className = 'stay-flash';
-    cardEl.appendChild(flash);
-    cardEl.style.transition = 'transform '+STAY_PHASE_ZOOM+'ms ease';
-    flash.style.transition = 'opacity '+STAY_PHASE_ZOOM+'ms ease';
-    cardEl.getBoundingClientRect(); /* force reflow so the "from" state is registered */
-
-    requestAnimationFrame(function(){
-      cardEl.style.transform = 'scale(1.05)';
-      flash.style.opacity = '1';
-    });
-
-    setTimeout(function(){
-      /* phase B: box-morph grows to fullscreen while the flash stays opaque white --
-         the visible motion here is just a plain white rectangle changing size. */
-      cardEl.style.transition = '';
-      cardEl.style.transform = '';
-      cardEl.classList.add('opening');
-      cardEl.getBoundingClientRect();
-
-      requestAnimationFrame(function(){
-        cardEl.style.top = '0px';
-        cardEl.style.left = '0px';
-        cardEl.style.width = parentRect.width+'px';
-        cardEl.style.height = parentRect.height+'px';
-        cardEl.style.borderRadius = '0px';
-        cardEl.style.boxShadow = 'none';
-      });
-
-      setTimeout(function(){
-        /* phase C: swap in the real detail screen, then fade the flash out to
-           reveal it. The overlay has to survive render() wiping out #screen's own
-           content, so it's reparented into #uiLayer (a persistent sibling) as a
-           `position:fixed` copy an instant before render() runs -- same opacity, so
-           there's no visible seam. */
-        var fixedFlash = document.createElement('div');
-        fixedFlash.className = 'stay-flash stay-flash-fixed';
-        document.getElementById('uiLayer').appendChild(fixedFlash);
-
-        state.screen='stayDetail'; state.openStay=st.id; state.animating=false; state.sheetAbout=null;
-        render();
-
-        fixedFlash.style.transition = 'opacity '+STAY_PHASE_REVEAL+'ms ease';
-        fixedFlash.getBoundingClientRect();
-        requestAnimationFrame(function(){ fixedFlash.style.opacity = '0'; });
-        setTimeout(function(){ fixedFlash.remove(); }, STAY_PHASE_REVEAL + 60);
-      }, STAY_PHASE_GROW);
-    }, STAY_PHASE_ZOOM);
+    state.screen = 'stayDetail'; state.openStay = st.id; state.sheetAbout = null;
+    state.staySlideNew = !reduceMotion;
+    render();
   }
-
-  function closeStayFlip(){
-    if(reduceMotion){ state.screen='stays'; state.openStay=null; state.sheetAbout=null; render(); return; }
-    var screenEl = document.getElementById('screen');
-    var target = state.closeStayTargetRect;
-    var st = STAYS.filter(function(s){return s.id===state.closeStayId;})[0];
-    if(!target || !st || state.animating){ state.screen='stays'; state.openStay=null; state.sheetAbout=null; render(); return; }
+  function closeStay(){
+    if(state.animating) return;
+    var slide = document.querySelector('.stay-slide');
+    function done(){ state.screen='stays'; state.openStay=null; state.sheetAbout=null; state.animating=false; render(); }
+    if(!slide || reduceMotion){ done(); return; }
     state.animating = true;
-
-    var parentRect = screenEl.getBoundingClientRect();
-    var locked = stayLocked(st);
-
-    /* phase A: the live detail screen fades to white in place, via a fixed overlay
-       (same reasoning as openStayFlip's phase C, just in reverse -- this needs to
-       sit above the still-live view, which is about to be torn down). */
-    var fixedFlash = document.createElement('div');
-    fixedFlash.className = 'stay-flash stay-flash-fixed';
-    fixedFlash.style.opacity = '0';
-    document.getElementById('uiLayer').appendChild(fixedFlash);
-    fixedFlash.getBoundingClientRect();
-    fixedFlash.style.transition = 'opacity '+STAY_PHASE_ZOOM+'ms ease';
-    requestAnimationFrame(function(){ fixedFlash.style.opacity = '1'; });
-
-    setTimeout(function(){
-      /* phase B: tear down the live view, rebuild the grid behind everything (it just
-         sits in its normal resting layout, fully hidden under the shrinking card
-         until the very end), and start a fresh fullscreen card -- still covered by
-         the (now reparented-as-a-child) flash -- shrinking down to its grid slot. */
-      var viewEl = screenEl.querySelector('.view');
-      if(viewEl) viewEl.remove();
-
-      var bgEl = document.createElement('div');
-      bgEl.className = 'view';
-      bgEl.style.pointerEvents = 'none';
-      bgEl.style.zIndex = 400;
-      bgEl.innerHTML = staysScreen(st.id); /* the closing card itself is excluded until it lands */
-      screenEl.appendChild(bgEl);
-
-      var wrapper = document.createElement('div');
-      wrapper.className = 'stay-card closing' + (locked ? ' locked' : '');
-      wrapper.setAttribute('data-area', state.closeStayArea);
-      wrapper.setAttribute('data-stay', st.id);
-      wrapper.innerHTML = stayCardFrontHTML(st);
-      wrapper.style.position = 'absolute';
-      wrapper.style.margin = '0';
-      wrapper.style.zIndex = 500;
-      wrapper.style.top = '0px';
-      wrapper.style.left = '0px';
-      wrapper.style.width = parentRect.width+'px';
-      wrapper.style.height = parentRect.height+'px';
-      wrapper.style.borderRadius = '0px';
-      wrapper.style.boxShadow = 'none';
-      screenEl.appendChild(wrapper);
-
-      /* the flash keeps covering everything (still fully opaque) -- move it from the
-         fixed overlay into a child of `wrapper` so it shrinks along with the box-morph
-         below, same opacity throughout so there's no visible seam. */
-      var flash = document.createElement('div');
-      flash.className = 'stay-flash';
-      flash.style.opacity = '1';
-      wrapper.appendChild(flash);
-      fixedFlash.remove();
-
-      wrapper.getBoundingClientRect(); /* force reflow so the "from" (fullscreen) state is registered */
-      wrapper.classList.add('opening'); /* reuse its box-morph transition timing */
-
-      requestAnimationFrame(function(){
-        wrapper.style.top = target.top+'px';
-        wrapper.style.left = target.left+'px';
-        wrapper.style.width = target.width+'px';
-        wrapper.style.height = target.height+'px';
-        wrapper.style.borderRadius = '20px';
-      });
-
-      setTimeout(function(){
-        /* phase C: landed at the grid slot -- fade the flash out to reveal the
-           card's own photo underneath, and bring its resting shadow back. */
-        flash.style.transition = 'opacity '+STAY_PHASE_REVEAL+'ms ease';
-        requestAnimationFrame(function(){ flash.style.opacity = '0'; });
-
-        wrapper.style.transition = 'box-shadow .12s ease';
-        wrapper.style.boxShadow = '0 16px 28px -12px rgba(0,0,0,.32), 0 5px 10px -4px rgba(0,0,0,.22)';
-      }, STAY_PHASE_GROW);
-
-      setTimeout(function(){
-        state.screen='stays'; state.openStay=null; state.animating=false; state.sheetAbout=null;
-
-        /* fold `wrapper` directly into the grid as its real card -- avoids a full
-           render() swap for the same GPU-compositing/shimmer reason explained in
-           closeDayFlip() */
-        flash.remove();
-        wrapper.className = 'stay-card' + (locked ? ' locked' : '');
-        wrapper.style.position = '';
-        wrapper.style.top = '';
-        wrapper.style.left = '';
-        wrapper.style.width = '';
-        wrapper.style.height = '';
-        wrapper.style.margin = '';
-        wrapper.style.borderRadius = '';
-        wrapper.style.transition = '';
-        wrapper.style.zIndex = '';
-        wrapper.style.boxShadow = '';
-        wrapper.style.transform = '';
-
-        var gridEl = bgEl.querySelector('.stays-grid');
-        if(gridEl) gridEl.appendChild(wrapper);
-
-        bgEl.style.pointerEvents = '';
-        bgEl.style.zIndex = '';
-
-        /* mirrors closeDayFlip()'s own refreshBtn/tabbar/updateStackClearance/
-           saveProgress bypass-of-render() fix -- same reasoning */
-        var refreshBtn = document.getElementById('refreshBtn');
-        if(refreshBtn) refreshBtn.hidden = false;
-        var tabbarEl = document.getElementById('tabbar');
-        if(tabbarEl){
-          tabbarEl.hidden = false;
-          var tabExploreEl = document.getElementById('tabExplore');
-          var tabStaysEl = document.getElementById('tabStays');
-          if(tabExploreEl) tabExploreEl.classList.remove('on');
-          if(tabStaysEl) tabStaysEl.classList.add('on');
-          var tabbarIndicatorEl = document.getElementById('tabbarIndicator');
-          if(tabbarIndicatorEl) tabbarIndicatorEl.classList.add('right');
-        }
-        updateStackClearance();
-        saveProgress();
-
-        wire();
-      }, STAY_PHASE_GROW + STAY_PHASE_REVEAL + 70);
-    }, STAY_PHASE_ZOOM);
+    slide.classList.remove('open');
+    var finished = false;
+    function fin(ev){
+      if(finished || (ev && ev.target!==slide)) return;
+      finished = true; slide.removeEventListener('transitionend', fin); done();
+    }
+    slide.addEventListener('transitionend', fin);
+    setTimeout(fin, 600); /* fallback if transitionend never fires */
   }
 
   /* ---------- shared handlers for the day-detail content (chapters, about, weather, back, reset) ---------- */
@@ -5174,7 +4961,7 @@
     var back = root.querySelector('[data-back]');
     if(back) back.addEventListener('click', function(){ closeDayFlip(); });
     var stayBack = root.querySelector('[data-stay-back]');
-    if(stayBack) stayBack.addEventListener('click', function(){ closeStayFlip(); });
+    if(stayBack) stayBack.addEventListener('click', function(){ closeStay(); });
     /* ---- day cards (see the "day cards: the chapter engine" comment) ---- */
     var dcReset = root.querySelector('[data-dc-reset]');
     if(dcReset) dcReset.addEventListener('click', function(){ delete state.dayProgress[state.openDay]; state.confirming=null; state.scrollToEnd=false; render(); });
@@ -5405,7 +5192,7 @@
     el.querySelectorAll('.stay-card').forEach(function(b){
       if(b.classList.contains('locked')) return; /* no detail view for a stay that hasn't unlocked yet */
       b.addEventListener('click', function(){
-        openStayFlip(b.getAttribute('data-stay'));
+        openStay(b.getAttribute('data-stay'));
       });
     });
   }

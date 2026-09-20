@@ -4,6 +4,15 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 31 — 2026-09-20 (stay detail slides up, one aligned card per stay)
+
+- No more zoom/flash animation: the stay detail slides up from the bottom over the Stays grid (`.stay-slide`, `openStay()`), and the close button slides the whole view back down (`closeStay()`). The old `openStayFlip`/`closeStayFlip` code is gone. The grid stays rendered underneath; the tab bar stays put and is covered by the slide.
+- Every stay is now ONE card with the same layout: hotel name, address, Directions pill (opens Google Maps), then the About pills, then a divider and the details (nights, getting there, leaving, meals, bath etiquette). `STAY_CARDS` is now `{address, maps, chips, fields, lists}` per stay. The separate "Around the stay" / "The ryokan" / "The town" cards and the dots are gone.
+- Directions: Isshuku Noma and Kabin Gion by address, Komanoyu by name search (Nukumorino-yado Komanoyu), ARIA Takanawa by Marco's own Google Maps link (the pin is "ARiA STAY TAKANAWA").
+- Addresses from Marco: Komanoyu "47-2 Fukushima, Kiso, Nagano" (Directions search uses the name plus this address), ARIA Takanawa "1-27-9 Takanawa, HJ PLACE TAKANAWA, Tokyo" (Directions is still Marco's Maps link).
+
+---
+
 ## ROUND 30 — 2026-09-20 (stay cards rebuilt like the day cards)
 
 A stay now opens as swipeable cards (same look as chapter cards, nothing to unlock) instead of one scrolling About page. Header: days, area name, hotel. `STAY_CARDS` (below `DAY_DATA`) holds the content; About sheets are read from the day chapters (one source): Stay 1 from DAY1 `kita-shinjuku`, Stay 2 from DAY4 `komanoyu` and `to-komanoyu`, Stay 3 from DAY5 `gion` (Gion, Hanamikoji) and `yasaka-shrine`. `STAYS` now only holds the settled facts (name, area, days, unlock day, address); the old copies of the About rows (with em dashes) are gone.
