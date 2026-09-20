@@ -4,6 +4,36 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 28 — 2026-09-18
+*Written up 2026-09-20 from git history (commit e729716) and the code comments — not from the original session's notes.*
+
+Locked cards no longer use a runtime CSS blur. The user supplied pre-made locked cover images (already desaturated/dimmed in their own editor) for all 10 days and all 4 stays, so `PHOTOS_LOCKED` / `STAY_PHOTOS_LOCKED` map each day/stay to its `…b.jpg` file, and `heroStyleForDay(n, locked)` / `heroStyleForStay(st, locked)` choose between locked and normal photos (falling back to the normal photo, then to the generated mood gradient). The `.stack-card.locked .hero` and `.stay-card.locked .hero` filter rules were deleted — the blur had been fighting the drag animation and costing GPU. Day 2's photo, previously a base64 JPEG embedded in `index.html`, became a normal file (`cards images/day card - 2.jpg`) like the others. All cover photos were recompressed (most day covers went from ~0.5–2MB down to ~90–180KB). `sw.js` bumped `CACHE_VERSION` v1 → v2 and added the new files to its precache list so installed phones re-download.
+
+## ROUND 27 — 2026-09-17 / 2026-09-18
+*Written up 2026-09-20 from git history (commits f7d3a87, 70aa861, 7bdffa3) and code comments.*
+
+**Spacing (17 Sep):** the title on the day-detail and Stays-detail screens was still reading as too close to the fixed close button on a real device, partly because the button's own shadow bleeds a few px past its 34px box. `.dayhead` went from `min-height:34px` / 8px bottom padding to `min-height:44px` / 12px. The user also asked for more space between About rows ("Why it matters" / "A little context" / "Look for"…), so the gap went from 10px to 18px in all three places those rows render (`.sheet-body`, `.about-group-rows`, `.stay-detail-body`).
+
+**Drag smoothness (18 Sep):** the user reported the home deck's dragging felt laggy while everything else was smooth. The drag handler wrote `transform` synchronously on every `pointermove`, which can fire far more often than the screen repaints. It now stores the latest `dx` and applies it once per animation frame through `requestAnimationFrame` (`applyDragTransform()`, with a `translate3d` form), and `.stack-card` got `will-change:transform`. Release/`endDrag()` unchanged.
+
+**Offline support (18 Sep):** added `sw.js` and a small registration `<script>` at the very end of `index.html`, outside the main IIFE. HTML and `manifest.json` are network-first (so a push shows up whenever the phone is online and the cache is only a fallback); photos, icons, SVGs and the Outfit font are cache-first with a background refresh. The install step fetches each `PRECACHE_URLS` entry independently so one missing file can't fail the whole install. Whenever images change, update the list and bump `CACHE_VERSION`. Tested by the user on a real phone (offline behavior looked good).
+
+**Interim (18 Sep, commit 7bdffa3):** blur on locked cards was increased and an opaque black `background:#000` added behind `.stack-card`/`.stay-card`. The blur was replaced in round 28; the black backgrounds stayed.
+
+## ROUND 26 — 2026-09-17
+*Written up 2026-09-20 from git history (commits 5bbb12f, b5842ad, 2fc9578, plus the cover-photo commits 8a7a44c / b0aef81 / 14cbf4e on 18 Sep) and code comments.*
+
+**Stays layout (late round-25 follow-up, commit 5bbb12f):** `.stays-view` lost its own top padding — the shared `.home-hero` already reserves safe-area-top + 24px, so stacking both pushed the Stays hero lower than Explorer's. Grid rows reverted from `150px 145px 105px` to `150px 105px 145px`, so the single-night Kiso-Fukushima card is the smaller left card and the 3-night Gion card the larger, matching stay length.
+
+**Stays open/close (commits b5842ad, 2fc9578):** round 24's box-morph + 3D flip was first simplified to a plain box expand/collapse (with a white flash on close fixed), then given a three-phase "zoom to white, then grow" transition using a `.stay-flash` overlay: A) quick `scale(1.05)` and fade to the page's `--bg` tone in the grid slot, B) box-morph to/from fullscreen while the flash stays opaque, C) fade the flash out to reveal the destination. Constants `STAY_PHASE_ZOOM` / `STAY_PHASE_GROW` / `STAY_PHASE_REVEAL` (150 / 480 / 260ms) keep open and close in lockstep. Because `render()` replaces `#screen`'s innerHTML, the overlay is reparented as a `position:fixed` `.stay-flash-fixed` copy into `#uiLayer` when it has to survive a render. `.stay-card` lost its `.flip-inner`/`.flip-face` wrapper. Stay cards also got a two-layer resting shadow (`0 16px 28px -12px rgba(0,0,0,.32), 0 5px 10px -4px rgba(0,0,0,.22)`) — the old -14px-spread shadow was near-invisible.
+
+**Tab-switch deck motion (2fc9578):** `goStays()` now gathers the day deck into a tidy stack (320ms) before switching; `goExplore()` starts gathered and springs the cards back out to their fan. Reuses `gatherStyle()`/`stackStyle()`/`stackTransform()`.
+
+**Cleanup (2fc9578):** the round-24 debug dot/panel (`#debugToggle`, `#debugPanel`, `wireDebugPanel()`) removed after the user confirmed round 25's fix on a real device; an X-button overlap on the Stays detail screen fixed.
+
+**Cover photos (18 Sep):** day cards 1–10 and stay cards 1–4 got real cover photos in `cards images/` (PNGs converted to JPG), wired into `PHOTOS`/`STAY_PHOTOS` with the generated mood gradients as the fallback.
+
+
 ## ROUND 25 — 2026-09-17
 New chat session, opened by reading PROJECT-CONTEXT.txt as instructed. The user reported the standalone/Safari bottom-gap and sheet-crop bugs were still happening (three screenshots: the standalone home screen showing a visible gap under the tabbar pill, the round-24 debug panel's own readout from that same standalone launch, and the About sheet showing its content cut off partway down with dead space below). Also asked to disable pinch/double-tap zoom.
 
