@@ -4,6 +4,15 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 29f — 2026-09-20 (Days 5 and 6 rebuilt in the new card structure)
+
+`DAY5` "After the Mountains": essential info, To Kyoto (Shinano 6 / Nozomi 367 with car and seat numbers, no ticket codes), To Our Stay (Kabin Gion), Gion after dark (Kyoto, Gion, Hanamikoji, Yasaka Pagoda pills), Yasaka Shrine, Pontocho for dinner. `DAY6` "Sacred Paths": essential info, Fushimi Inari, Open middle, To Kiyomizu-dera (Yasaka Pagoda, Ninenzaka, Sannenzaka pills), Kiyomizu-dera (Kiyomizu-dera, Main Hall & Stage, Oku-no-in pills), Back to Gion. Content from the Master Spec, the itinerary doc and research packs A/B; About rows are the pack text with em dashes removed and app-instruction lines reworded. Same rules as Day 4: locked card says what to do to open it, unlocked card says what to do and how long, no red labels.
+- Directions: Kabin Gion (a search, not a pin), Yasaka Shrine, Pontocho. Fushimi Inari and Kiyomizu-dera have none on purpose (the doc's map for Day 6 is Kabin Gion only).
+- Open flags: the itinerary doc says the Komanoyu shuttle is about 10:10, the app keeps Marco's 10:00. Kiyomizu-dera's 18:00 closing time is a planning assumption that Marco chose to keep as is (the card says "expected to close at 18:00"). Weather is a placeholder. Day 6's Fushimi Inari has no real deadline, only a quiet-versus-crowded tradeoff. Ticket lines on To Kyoto ("paper for the Shinano 6, QR code for the Nozomi 367") are inferred from the doc.
+- Day 5 tomorrow: leave Kabin Gion 06:30 to 07:00. Day 6 tomorrow: leave Kabin Gion around 09:15.
+
+---
+
 ## ROUND 29e — 2026-09-20 (Day 4 rebuilt in the new card structure)
 
 Day 4 "Into Edo" (28 Sep) is now `DAY4` in `index.html`: essential info card, To Kiso Valley (Azusa 13, Shiojiri change), Narai-juku (4 pills from research pack A), To Komanoyu (16:46 train, 17:30 shuttle), Komanoyu (meals, bath etiquette, About). Built from the Master Spec, the itinerary doc and research packs A/B, written from the traveller's point of view: each locked card says where to be and when, each unlocked card says what to do and how long. No red labels (times live in the unlock line, the timing list and the `expect` line). Kiso-Fukushima and Komanoyu About rows are trimmed copies of the Stay 2 content; the Komanoyu "Etiquette" row was dropped because the "Before the bath" bullets say the same.

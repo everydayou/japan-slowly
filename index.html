@@ -1266,7 +1266,7 @@
   }
 
   /* ---------- day chapter content (rebuilt, "chapter engine" format) ----------
-     Days 1-4, rebuilt from the Master Spec + the itinerary doc + research packs A/B after
+     Days 1-6, rebuilt from the Master Spec + the itinerary doc + research packs A/B after
      the original conversation copy was lost. Every day is one object in DAY_DATA (below);
      `chapters` are shown one at a time as swipeable cards (see dayDetailScreen()).
 
@@ -1877,7 +1877,594 @@
     "tomorrow": "The shuttle back to Kiso-Fukushima Station leaves at 10:00. Have your bags ready."
   };
 
-  var DAY_DATA = {1:DAY1, 2:DAY2, 3:DAY3, 4:DAY4};
+  var DAY5 = {
+    "weather": {
+      "lo": 18,
+      "hi": 26,
+      "cond": "Mild, mostly clear",
+      "hourly": [
+        [
+          "10:00",
+          "19°"
+        ],
+        [
+          "13:00",
+          "25°"
+        ],
+        [
+          "16:00",
+          "26°"
+        ],
+        [
+          "19:00",
+          "22°"
+        ],
+        [
+          "21:00",
+          "20°"
+        ],
+        [
+          "00:00",
+          "18°"
+        ]
+      ]
+    },
+    "energy": "Low to medium",
+    "walking": "Low by day, more in the evening",
+    "outside": "Mostly transit by day, outdoors in the evening",
+    "dress": "Comfortable shoes and a light layer for the evening",
+    "bring": "Train tickets · a small day bag for the evening",
+    "first": "Be ready for the shuttle at 10:00",
+    "chapters": [
+      {
+        "id": "essential",
+        "kind": "essential",
+        "name": "Today’s essential info"
+      },
+      {
+        "id": "to-kyoto",
+        "name": "To Kyoto",
+        "unlock": "Be ready at Komanoyu for the 10:00 shuttle. The Shinano 6 leaves Kiso-Fukushima at 10:30 and you change trains at Nagoya. Once you arrive at Kyoto Station, tap “I’m here”.",
+        "meta": "Reserved seats on both trains. Take your time at Nagoya and follow the signs for the Shinkansen.",
+        "timing": {
+          "title": "Getting there",
+          "rows": [
+            [
+              "10:00",
+              "The Komanoyu shuttle takes you to Kiso-Fukushima Station."
+            ],
+            [
+              "10:30",
+              "The Shinano 6 leaves Kiso-Fukushima. Ordinary Car 4, seats 8A, 8B and 9A."
+            ],
+            [
+              "12:01",
+              "Arrive at Nagoya. You have 32 minutes to change."
+            ],
+            [
+              "12:33",
+              "The Nozomi 367 leaves Nagoya. Ordinary Car 14, seats 8D, 8E and 9E."
+            ],
+            [
+              "13:06",
+              "Arrive at Kyoto."
+            ]
+          ]
+        },
+        "checklist": {
+          "title": "Before you go",
+          "items": [
+            "Check out of Komanoyu and have your bags ready for the shuttle",
+            "Have your tickets ready: paper for the Shinano 6, QR code for the Nozomi 367"
+          ]
+        },
+        "expect": "About 10 to 15 minutes by taxi to your stay.",
+        "blurb": "Welcome to Kyoto, capital of Japan for more than a thousand years. Take a taxi from the station to your stay."
+      },
+      {
+        "id": "to-stay",
+        "name": "To Our Stay",
+        "unlock": "Take a taxi from Kyoto Station to Kabin Gion, about 10 to 15 minutes. Once you arrive, tap “I’m here”.",
+        "meta": "Your stay has its own card in the Stays tab, with the address and a short guide to the area.",
+        "mapsUrl": mapsSearch('Kabin Gion 18-12 Yamatocho Higashiyama Ward Kyoto'),
+        "expect": "Check-in is from 15:00. If the room is not ready, leave your bags and head out.",
+        "blurb": "Drop your bags, freshen up and head out when you are ready. The old streets of Gion are within walking distance."
+      },
+      {
+        "id": "gion",
+        "name": "Gion, after dark",
+        "unlock": "Head out on foot once the light starts to fade and the daytime crowds thin. Once you are in Gion, tap “I’m here”.",
+        "expect": "About 1 hour.",
+        "blurb": "A walk through the old entertainment district. Start east through Gion and let Hanamikoji and the side lanes shape the route. The Yasaka Pagoda is a visual compass rather than a destination. Follow the photography signs and keep to the side of the road.",
+        "groups": [
+          {
+            "name": "Kyoto",
+            "rows": [
+              [
+                "Why it matters",
+                "Kyoto gives context to almost every place in the following days. It was Japan’s imperial capital for more than a millennium, and many practices now treated as “traditional Japanese culture” were refined in this environment."
+              ],
+              [
+                "A little history",
+                "The imperial court moved to Heian-kyo (Kyoto) in 794, and Kyoto remained the capital until the 19th century. The city accumulated temples, shrines, court culture, craft traditions, tea culture, performance traditions and distinctive urban architecture. Crucially, many of these remain living practices rather than museum reconstructions."
+              ],
+              [
+                "Look for",
+                "Notice the coexistence of ordinary contemporary life and carefully preserved details: machiya façades, latticework, narrow lanes, temple roofs, seasonal decorations and the surrounding mountains framing the city."
+              ],
+              [
+                "How to experience it",
+                "Think of Kyoto as living tradition. That makes the etiquette, especially in Gion, feel logical rather than restrictive."
+              ],
+              [
+                "Etiquette",
+                "Historic districts are residential and working environments. Avoid treating maiko, geiko, private homes or worship spaces as public entertainment."
+              ],
+              [
+                "One memorable detail",
+                "Kyoto’s grid was modeled in part on the Chinese Tang capital Chang’an. Even today, the flat central grid and surrounding eastern and western hills shape how the city is experienced on foot."
+              ]
+            ]
+          },
+          {
+            "name": "Gion",
+            "rows": [
+              [
+                "Why it matters",
+                "Gion is valuable not because you might “spot a geisha,” but because it remains one of Kyoto’s kagai, districts where geiko and maiko live, train and work within a highly developed performing-arts and hospitality culture."
+              ],
+              [
+                "A little history",
+                "The district grew around Yasaka Shrine and developed into an entertainment area of teahouses and performance culture. The connection between Gion, Yasaka Shrine and seasonal traditions remains visible today, especially through the Gion Matsuri and the area’s active geiko culture."
+              ],
+              [
+                "Look for",
+                "Look for ochaya-style architecture, subdued machiya fronts, lattices, noren curtains, lanterns, narrow entrances and the transition between busy Shijo-dori and quieter lanes. The visual restraint is part of the identity."
+              ],
+              [
+                "How to experience it",
+                "Walk slowly after the daytime crowds thin. Treat the district as an atmosphere to inhabit, not a hunt for performers."
+              ],
+              [
+                "Etiquette",
+                "Do not photograph maiko or geiko without permission; do not trespass into private alleys or properties; keep to the side of roads; obey no-photography signs. Kyoto explicitly reminds visitors that Gion is a place where people live and work, not a theme park."
+              ],
+              [
+                "One memorable detail",
+                "The word “geiko” is Kyoto’s regional term for geisha. A maiko is an apprentice; the culture includes dance, music, seasonal dress, conversation and hospitality, not simply appearance."
+              ]
+            ]
+          },
+          {
+            "name": "Hanamikoji",
+            "rows": [
+              [
+                "Why it matters",
+                "Hanamikoji is one of the clearest places to read Gion’s architectural language and understand the district as a working kagai rather than a themed attraction."
+              ],
+              [
+                "A little history",
+                "The southern Gion area contains historic machiya and teahouse architecture and is protected for its landscape. Geiko and maiko still move through the district between training, engagements and performances."
+              ],
+              [
+                "Look for",
+                "Look for the restrained wooden fronts, lattices, lanterns and entrances that reveal very little of the interiors. The architecture often creates privacy rather than display."
+              ],
+              [
+                "How to experience it",
+                "Walk it once without trying to photograph every façade. The experience is strongest when you notice how quiet the buildings can feel even on a busy street."
+              ],
+              [
+                "Etiquette",
+                "Photography restrictions and private-property boundaries matter here. Do not pursue or obstruct geiko or maiko. Stay out of private side lanes where access is prohibited."
+              ],
+              [
+                "One memorable detail",
+                "The understated façades are intentional: much of Gion’s cultural life happens behind doors rather than being staged in the street."
+              ]
+            ]
+          },
+          {
+            "name": "Yasaka Pagoda",
+            "rows": [
+              [
+                "Why it matters",
+                "The 46-metre five-story pagoda is one of the most effective visual anchors in Higashiyama because it rises directly out of a neighbourhood rather than an isolated temple compound."
+              ],
+              [
+                "A little history",
+                "Hokan-ji is commonly known as Yasaka Pagoda. Tradition associates its origins with Prince Shotoku and the late 6th century, although the structure seen today belongs to a much later architectural history. Its location between Kiyomizu-dera and Yasaka Shrine makes it a natural marker on the old hillside route."
+              ],
+              [
+                "Look for",
+                "Look at how the pagoda appears and disappears between rooftops as you move. Its proportion against low machiya is what makes the view distinctive."
+              ],
+              [
+                "How to experience it",
+                "Do not rush straight to the closest photo angle. Let it first appear in the street, then use it as orientation while moving between Gion and Kiyomizu."
+              ],
+              [
+                "Etiquette",
+                "Remember that the surrounding lanes are residential. Avoid blocking the street for portrait setups."
+              ],
+              [
+                "One memorable detail",
+                "One reason the image feels so “Kyoto” is scale: a tall religious structure is embedded among ordinary houses and shops rather than separated from them by a monumental plaza."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "id": "yasaka-shrine",
+        "name": "Yasaka Shrine",
+        "unlock": "Walk to Yasaka Shrine at the eastern end of Shijo, a short walk from Gion. Once you are at the shrine, tap “I’m here”.",
+        "mapsUrl": mapsSearch('Yasaka Shrine Kyoto'),
+        "expect": "About 15 to 20 minutes.",
+        "blurb": "An active shrine that is quietly lit after dark. Give space to people praying, then let the lanterns lead you back toward Gion.",
+        "aboutLabel": "Yasaka Shrine",
+        "about": [
+          [
+            "Why it matters",
+            "Yasaka Shrine is the spiritual anchor at the eastern end of Shijo and helps explain why Gion developed where it did. It is also the home shrine of the Gion Matsuri, one of Kyoto’s defining festivals."
+          ],
+          [
+            "A little history",
+            "The shrine’s history reaches back at least to the 9th century in official Kyoto accounts, with traditions placing its origins even earlier. Worship here became strongly associated with protection from epidemic disease. The Gion festival traces its origin to rituals held during a plague in 869."
+          ],
+          [
+            "Look for",
+            "Look at the relationship between the west gate, Shijo Street and Gion; inside, notice worshippers ringing bells, offering coins and clapping. The main hall uses a distinctive Gion-zukuri form in which worship and sanctuary spaces are covered by one large roof."
+          ],
+          [
+            "How to experience it",
+            "Visiting after dark suits it: the shrine is not simply a daytime monument, and the lantern-lit atmosphere makes a good transition back into Gion."
+          ],
+          [
+            "Etiquette",
+            "It is an active shrine. Give space to people praying; do not stand directly in front of worshippers for photos; follow normal Shinto courtesy."
+          ],
+          [
+            "One memorable detail",
+            "The Gion Matsuri began as a response to epidemic disease. In 869, sixty-six halberds were erected to represent Japan’s provinces as part of prayers to end a plague, an origin that gives today’s huge summer festival an unexpectedly serious foundation."
+          ]
+        ]
+      },
+      {
+        "id": "pontocho",
+        "name": "Pontocho, for dinner",
+        "unlock": "Whenever you are ready to eat, walk to Pontocho, the narrow lane beside the Kamo River. Once you are there, tap “I’m here”.",
+        "meta": "No booking is fixed. Choose somewhere that feels right.",
+        "mapsUrl": mapsSearch('Pontocho Kyoto'),
+        "expect": "As long as dinner takes.",
+        "blurb": "Narrow frontage, lanterns and discreet entrances. Choose somewhere that feels right instead of following a fixed plan.",
+        "aboutLabel": "Pontocho",
+        "about": [
+          [
+            "Why it matters",
+            "Pontocho is a compact way to experience Kyoto’s evening intimacy: a narrow alley of restaurants and traditional entertainment culture beside the Kamo River."
+          ],
+          [
+            "A little context",
+            "The lane developed as an entertainment district from the Edo period and became one of Kyoto’s hanamachi (traditional geiko and maiko entertainment districts). Kyoto City materials describe the alley as roughly 500 metres long, with characteristic two-storey architecture."
+          ],
+          [
+            "Look for",
+            "Narrow frontage, lanterns, machiya-like façades, discreet entrances and, where visible, the river side of the buildings. Seasonal riverside platforms are part of the area’s character."
+          ],
+          [
+            "How to experience it",
+            "Use it as a dinner option rather than a must-see route. After Gion, the pleasure is choosing somewhere that feels right instead of following a fixed restaurant booking."
+          ],
+          [
+            "Etiquette",
+            "This remains an active entertainment district. Do not obstruct doorways or photograph geiko or maiko closely without permission. Follow any local photography restrictions."
+          ],
+          [
+            "One memorable detail",
+            "A commonly repeated explanation is that “Pontocho” combines the Portuguese word “ponte” (bridge) with Japanese “cho” (town or street), though place-name etymologies are not always definitive."
+          ]
+        ]
+      }
+    ],
+    "tomorrow": "Leave Kabin Gion between 06:30 and 07:00. It is an early start."
+  };
+
+  var DAY6 = {
+    "weather": {
+      "lo": 18,
+      "hi": 26,
+      "cond": "Mild, mostly clear",
+      "hourly": [
+        [
+          "07:00",
+          "18°"
+        ],
+        [
+          "10:00",
+          "22°"
+        ],
+        [
+          "13:00",
+          "25°"
+        ],
+        [
+          "16:00",
+          "26°"
+        ],
+        [
+          "18:00",
+          "22°"
+        ],
+        [
+          "21:00",
+          "20°"
+        ]
+      ]
+    },
+    "energy": "High",
+    "walking": "High, with hills",
+    "outside": "Mostly outdoors",
+    "dress": "Comfortable shoes, the hills and steps add up",
+    "bring": "Water · a small day bag · a light layer for the evening",
+    "first": "Leave Kabin Gion between 06:30 and 07:00",
+    "chapters": [
+      {
+        "id": "essential",
+        "kind": "essential",
+        "name": "Today’s essential info"
+      },
+      {
+        "id": "fushimi",
+        "name": "Fushimi Inari",
+        "unlock": "Leave Kabin Gion between 06:30 and 07:00 and take the Keihan line from Gion-Shijo to Fushimi-Inari. Once you are at the shrine, tap “I’m here”.",
+        "meta": "The earlier you go, the quieter the torii paths are.",
+        "expect": "As long as you enjoy it. The summit is optional.",
+        "blurb": "Walk the torii paths before the main crowds arrive. Go as far as your energy and interest allow, then head back for breakfast and rest.",
+        "aboutLabel": "Fushimi Inari Taisha",
+        "about": [
+          [
+            "Why it matters",
+            "Fushimi Inari is the head shrine of the Inari tradition, with tens of thousands of affiliated Inari shrines across Japan. The torii are visually dominant, but the deeper idea is worship of Inari Okami and of the sacred mountain itself."
+          ],
+          [
+            "A little history",
+            "The shrine traces its establishment to 711. Inari worship became associated with abundant harvests and later with business prosperity, household safety and many other forms of good fortune. The entire 233-metre Inariyama mountain is considered part of the sacred precinct."
+          ],
+          [
+            "Look for",
+            "Look beyond the tunnel effect. On the backs of torii, notice inscriptions recording donors and dates. Watch for white fox imagery, stone worship sites, small shrines and the increasing number of otsuka stones as you climb. The mountain becomes more varied and less “Instagram tunnel” the farther you move from the entrance."
+          ],
+          [
+            "How to experience it",
+            "Walk through Senbon Torii, but go only as far as interest and energy justify. The summit is optional because the cultural experience begins long before it."
+          ],
+          [
+            "Etiquette",
+            "This is a sacred area. Do not block narrow torii paths for photography; do not sit on the ground, shout, eat while walking, enter restricted areas or damage gates or trees. Give worshippers priority."
+          ],
+          [
+            "One memorable detail",
+            "The foxes are not Inari. Official shrine explanations describe foxes as messengers of Inari Okami, often conceived as invisible “white foxes.” Torii donation became widespread from the Edo period as an offering of prayer or gratitude; today the shrine says there are around 10,000 torii of different sizes."
+          ],
+          [
+            "Good to know",
+            "If you reach the Okusha prayer area, try the “Omokaruishi” stone-lantern tops: make a wish, lift the stone, and tradition says a lighter-than-expected weight is auspicious."
+          ]
+        ]
+      },
+      {
+        "id": "open-middle",
+        "name": "Open middle",
+        "unlock": "Head back to Kabin Gion when you have had enough of the shrine. Once you are back, tap “I’m here”.",
+        "expect": "However long you want. Nothing is fixed.",
+        "blurb": "Breakfast, a relaxed lunch, wandering the neighbourhood or resting at the stay. Save your energy for the afternoon: you leave around 15:15."
+      },
+      {
+        "id": "to-kiyomizu",
+        "name": "To Kiyomizu-dera",
+        "unlock": "Leave Kabin Gion around 15:15 and walk east and uphill through Higashiyama. Once you can see the Yasaka Pagoda, tap “I’m here”.",
+        "expect": "About 1 hour to walk up, so you arrive around 16:10 to 16:20.",
+        "blurb": "Choose the streets that look interesting rather than following a fixed route. The pagoda, Ninenzaka and Sannenzaka are your compass on the way up.",
+        "groups": [
+          {
+            "name": "Yasaka Pagoda",
+            "rows": [
+              [
+                "Why it matters",
+                "The 46-metre five-story pagoda is one of the most effective visual anchors in Higashiyama because it rises directly out of a neighbourhood rather than an isolated temple compound."
+              ],
+              [
+                "A little history",
+                "Hokan-ji is commonly known as Yasaka Pagoda. Tradition associates its origins with Prince Shotoku and the late 6th century, although the structure seen today belongs to a much later architectural history. Its location between Kiyomizu-dera and Yasaka Shrine makes it a natural marker on the old hillside route."
+              ],
+              [
+                "Look for",
+                "Look at how the pagoda appears and disappears between rooftops as you move. Its proportion against low machiya is what makes the view distinctive."
+              ],
+              [
+                "How to experience it",
+                "Do not rush straight to the closest photo angle. Let it first appear in the street, then use it as orientation while moving between Gion and Kiyomizu."
+              ],
+              [
+                "Etiquette",
+                "Remember that the surrounding lanes are residential. Avoid blocking the street for portrait setups."
+              ],
+              [
+                "One memorable detail",
+                "One reason the image feels so “Kyoto” is scale: a tall religious structure is embedded among ordinary houses and shops rather than separated from them by a monumental plaza."
+              ]
+            ]
+          },
+          {
+            "name": "Ninenzaka",
+            "rows": [
+              [
+                "Why it matters",
+                "Ninenzaka is part of the pedestrian transition between Yasaka Pagoda and Kiyomizu-dera. Its value is not a single monument but the sustained historic streetscape and the way it channels people uphill toward the temple."
+              ],
+              [
+                "A little history",
+                "Together with Sannenzaka, it forms a route long used by worshippers approaching temples and shrines in Higashiyama. The surrounding Sanneizaka district is protected as an important group of historic buildings."
+              ],
+              [
+                "Look for",
+                "Look for stone paving, changes in grade, rows of machiya, tiled eaves and the way the slope frames the next section of the route."
+              ],
+              [
+                "How to experience it",
+                "Early morning or after shops close reveals the street’s architecture more clearly. During busy periods, enjoy the movement rather than fighting for an empty photograph."
+              ],
+              [
+                "Etiquette",
+                "Do not block the narrow way, use tripods or treat shopfronts and private thresholds as staging areas."
+              ],
+              [
+                "One memorable detail",
+                "The streets work best as a pilgrimage approach: their meaning comes from movement toward Kiyomizu-dera, not from “checking off” a photogenic slope."
+              ]
+            ]
+          },
+          {
+            "name": "Sannenzaka",
+            "rows": [
+              [
+                "Why it matters",
+                "Sannenzaka adds an unusually rich layer of folklore to the Kiyomizu approach: it is simultaneously a practical slope, an old pilgrimage route and a place wrapped in name legends and superstition."
+              ],
+              [
+                "A little history",
+                "Kyoto records describe the slope under several names. One explanation links “Sannenzaka” to the third year of the Daido era (808); another name, Sanneizaka, is associated with prayers for safe childbirth. The wider district became one of Kyoto’s early nationally designated Important Preservation Districts for Groups of Historic Buildings."
+              ],
+              [
+                "Look for",
+                "Look for the stone steps and the shift in view as you climb or descend. Traditional machiya details (lattices, eaves and small protective elements) are easier to notice when the street is quiet."
+              ],
+              [
+                "How to experience it",
+                "Experience it twice if the day allows: once climbing toward Kiyomizu in afternoon light, and again descending after dark. The same architecture feels completely different."
+              ],
+              [
+                "Etiquette",
+                "Residential etiquette applies: no tripods, do not block the road, keep noise down."
+              ],
+              [
+                "One memorable detail",
+                "The famous superstition says that falling on Sannenzaka could shorten your life by three years. Historical guides already recorded versions of this belief centuries ago; shops once sold gourds connected to protective folklore around the slope."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "id": "kiyomizu",
+        "name": "Kiyomizu-dera",
+        "unlock": "Walk up to Kiyomizu-dera and enter around 16:10 to 16:20. Once you are inside the temple grounds, tap “I’m here”.",
+        "meta": "Sunset today is at about 17:44. The temple is expected to close at 18:00.",
+        "expect": "About 2 hours, through sunset.",
+        "blurb": "Scout the main stage and Oku-no-in first, then be settled at your viewpoint by about 17:05. Sunset is around 17:44. Understand the space first, then wait for the light.",
+        "groups": [
+          {
+            "name": "Kiyomizu-dera",
+            "rows": [
+              [
+                "Why it matters",
+                "Kiyomizu-dera is more than the famous balcony. It is a Kannon pilgrimage temple whose identity is tied to the spring at Otowa Waterfall, the cliffside architecture and a long tradition of ordinary people visiting for worship and views."
+              ],
+              [
+                "A little history",
+                "The temple was founded in 778. Its name means “pure water,” referring to the spring at Otowa. Fires repeatedly destroyed its buildings; most of the present complex dates from rebuilding in 1633. It forms part of the UNESCO-listed Historic Monuments of Ancient Kyoto."
+              ],
+              [
+                "Look for",
+                "Notice the sequence: approach through the hillside town, enter the temple precinct, then watch the built structures project into the wooded valley. The contrast between architectural mass and forest is essential. At Otowa Waterfall, the water story becomes literal."
+              ],
+              [
+                "How to experience it",
+                "Arrive early enough before sunset to experience the temple as a sacred place before searching for the photograph. Scouting the stage and Oku-no-in first is the right order: understand the space, then wait for the light."
+              ],
+              [
+                "Etiquette",
+                "Lower your voice; avoid blocking pathways for group photos; tripods, monopods and drones are prohibited. Keep food and drink to designated areas and respect off-limits sections."
+              ],
+              [
+                "One memorable detail",
+                "The temple’s origin story begins with a monk following a dream until he finds a clear spring on Mt. Otowa. The site and the name Kiyomizu, “pure water,” start with water before architecture."
+              ]
+            ]
+          },
+          {
+            "name": "Main Hall & Stage",
+            "rows": [
+              [
+                "Why it matters",
+                "The stage is an engineering object, a ritual platform and a city viewpoint at once. Understanding how it is built makes the famous photograph much more interesting."
+              ],
+              [
+                "A little history",
+                "The current Main Hall and stage were rebuilt in 1633. The stage projects over the steep slope using kake-zukuri construction: a dense framework of wooden pillars and horizontal members carries the load without nails in the principal joints. The temple describes the stage as nearly 13 metres high."
+              ],
+              [
+                "Look for",
+                "From the stage, look down into the timber structure if you can see the supports; from elsewhere, look back at how the balcony seems suspended in the trees. Notice that the stage belongs to the Main Hall rather than being a separate viewing deck."
+              ],
+              [
+                "How to experience it",
+                "Spend a few moments facing the landscape before photographing it. Then move to Oku-no-in for the classic view back toward the Main Hall."
+              ],
+              [
+                "Etiquette",
+                "The platform is part of an active temple, not an observation attraction only. Keep moving when crowded and do not occupy railings for long setups."
+              ],
+              [
+                "One memorable detail",
+                "The Japanese expression “to jump off the stage of Kiyomizu” means to make a bold decision, to take the plunge. Historically, some people literally leapt from the stage while praying to Kannon, which helps explain how deeply the structure entered popular imagination."
+              ]
+            ]
+          },
+          {
+            "name": "Oku-no-in",
+            "rows": [
+              [
+                "Why it matters",
+                "Oku-no-in is the viewpoint that explains the famous composition: it looks back across the wooded valley toward the Main Hall stage, with Kyoto extending beyond."
+              ],
+              [
+                "A little history",
+                "The present Oku-no-in building was reconstructed in 1633, at the same time as the Main Hall, and has its own stage-like platform. It stands directly above Otowa Waterfall."
+              ],
+              [
+                "Look for",
+                "Look for the Main Hall as an object in the landscape rather than only the city view. At golden hour the woods, timber structure and roofline become layers; the photograph works because you are seeing architecture across a valley."
+              ],
+              [
+                "How to experience it",
+                "Arrive at the viewpoint before the best light, choose the framing, then stop fiddling with logistics. The moment should remain a temple visit with a photographic anchor, not a photo shoot with a temple attached."
+              ],
+              [
+                "Etiquette",
+                "Keep the passage clear and respect any current photography instructions or crowd-control measures."
+              ],
+              [
+                "One memorable detail",
+                "The best-known Kiyomizu photograph is actually a dialogue between two stages: you are often standing on Oku-no-in’s own stage while photographing the Main Hall’s stage across the valley."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "id": "back-to-gion",
+        "name": "Back to Gion",
+        "unlock": "When you are ready for dinner, wander back downhill after dark toward Yasaka Shrine and Gion. Once you are in Gion, tap “I’m here”.",
+        "expect": "Whenever you are ready for dinner.",
+        "blurb": "Take whichever old streets feel most atmospheric on the way down. Sannenzaka feels completely different after dark. No booking, no fixed plan: choose somewhere inviting."
+      }
+    ],
+    "tomorrow": "Leave Kabin Gion around 09:15."
+  };
+
+  var DAY_DATA = {1:DAY1, 2:DAY2, 3:DAY3, 4:DAY4, 5:DAY5, 6:DAY6};
   if(TEST_MODE) DAYS.forEach(function(d){ if(DAY_DATA[d.n]) d.status = 'active'; });
 
   /* ---------- progress persistence (round 21) ----------
