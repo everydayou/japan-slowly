@@ -4,6 +4,12 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 44 — 2026-09-20 (deck starts on Day 1)
+
+- The default focused deck card is now Day 1 (`stackIndex:0`, was 1, which is why a first-time open landed on Day 2). Resuming where you left off is unchanged: the saved `stackIndex` still overrides the default on every later open.
+
+---
+
 ## ROUND 43 — 2026-09-20 (PROJECT-CONTEXT split so a new chat reads the right thing)
 
 - Another chat that was given the GitHub link to `PROJECT-CONTEXT.txt` reported that only Days 1-3 were done. Cause: the file had grown to about 190 KB and still carried the old "Days 1 and 2 / Days 1-3 so far / Guide Mode does not exist" text; a fetch tool reads and summarises only part of a file that size. Fix: `PROJECT-CONTEXT.txt` is now about 10 KB and contains only the current state, fixed rules and a chapter-data cheat sheet; the full old file (design contract, history, superseded entries) moved unchanged to `DESIGN-CONTRACT.txt` with a header saying PROJECT-CONTEXT.txt wins on any conflict. README points to both.

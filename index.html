@@ -3654,7 +3654,7 @@
      above) can override screen/openDay/stackIndex/chapter-reveal-state below -- a
      returning visitor resumes exactly where they left off instead of always restarting
      at the intro splash with every chapter re-hidden. */
-  var state = { guide:false, screen:'intro', openDay:null, openStay:null, dayProgress:{}, stackIndex:1, confirming:null, scrollToEnd:false, animating:false, sheetAbout:null };
+  var state = { guide:false, screen:'intro', openDay:null, openStay:null, dayProgress:{}, stackIndex:0, confirming:null, scrollToEnd:false, animating:false, sheetAbout:null };
   applyStatuses();
   (function applySavedProgress(){
     var saved = loadProgress();
