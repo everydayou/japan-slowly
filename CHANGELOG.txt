@@ -4,6 +4,21 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 29d — 2026-09-20 (Marco's notes after testing)
+
+- Day card teasers rewritten as real teasers: Day 1 "The long flight ends. The first night in Tokyo has barely begun.", Day 2 "Walk until the city changes its mind. Save some energy for after dark.", Day 3 "Pack light and follow someone who knows the way."
+- New first card in every day: "Today's essential info" (`kind:'essential'`, always open, same content as the button's sheet, which still works).
+- Italic hint lines removed from Harajuku, Omotesando, Shibuya, Pasela, MITSUKI and To Kamakura (the hint was an old concept).
+- Shibuya: red label and Note removed, unlocked time is now "Explore until 19:30, then head to the next location."
+- Pasela: red label removed; booking moved to the unlocked card (`bookingUnlocked`) with only what the card did not already say (venue, booked under, confirmation); Directions stay in the locked Info.
+- MITSUKI: passport moved to the essential info (Bring); the tick-box checklist is gone.
+- Day 3: To Kamakura loses its red label; A day in Kamakura moves its intro line and Good to know to the unlocked card (`bulletsUnlocked`).
+- Saved test progress from before this round is off by one card (the essential card was inserted at the front): use "Test · reset this day".
+
+- Day 1: Haneda loses its red label and its "Welcome to Japan." line moves into the unlocked text; Kita-Shinjuku loses its italic line and its Stays-tab note moves into the unlocked text; Food around you loses its italic line, and its two Good to know bullets were dropped because the Okubo and Shin-Okubo pills already carry the same points under Etiquette. Back to Tokyo also lost its italic line (its unlock line and blurb already say it).
+- Rule from Marco: content text is never italic. The only italic text is the "Tomorrow" note on the last card (`.dc-tomorrow`).
+---
+
 ## ROUND 29c — 2026-09-20 (card structure, Day 1 traveller view)
 
 - Card layout per Marco: locked = title + red label + one open Info container (To unlock, hint, Note, booking/timing, tasks, bullets, Directions); unlocked = container folded, separator, time here, blurb, chips. Red label now stays after a chapter is visited.
