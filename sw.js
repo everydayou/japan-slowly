@@ -87,6 +87,10 @@ self.addEventListener('fetch', function(event){
   var req = event.request;
   if(req.method !== 'GET') return;
 
+  /* live weather: never intercept it, so the app always gets a fresh answer from the network
+     (the app itself keeps the last good answer for offline use) */
+  if(req.url.indexOf('api.open-meteo.com') !== -1) return;
+
   var accept = req.headers.get('accept') || '';
   var isHTML = req.mode === 'navigate' || accept.indexOf('text/html') !== -1;
   var isManifest = req.url.indexOf('manifest.json') !== -1;

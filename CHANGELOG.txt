@@ -4,6 +4,23 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 37 — 2026-09-20 (Day 4: earlier shuttle, earlier train from Narai)
+
+- Marco: the Komanoyu shuttle from Kiso-Fukushima is at 16:30 (was 17:30), so the Narai visit ends earlier. Weekday locals from Narai towards Kiso-Fukushima (Yahoo! Transit, Mon 28 Sep is a weekday): 13:11, 14:14, 15:36, 16:46, 17:30. Plan is now: leave the street 15:25, 15:36 train, arrive about 15:57 (estimated from the usual 21-minute ride, not read from a timetable), shuttle 16:30 (about 30 minutes to wait). The 16:46 would miss it.
+- Changed: Narai `expect` (2 h 20 min), To Komanoyu unlock/timing rows/expect, Stay 2 "Getting there", guide notes for Komanoyu and Narai (the 15:36 note plus a shorter-visit caveat for the 13:45 backup from Shiojiri).
+
+---
+
+## ROUND 36 — 2026-09-20 (real locks, Guide Mode override, live weather)
+
+- TEST_MODE is gone. Real locking: a day opens at 00:00 Japan time (UTC+9, computed from the clock, not the phone's time zone) on its own date (Day 1 = 25 Sep); stays follow their `unlockDay`; a chapter with `gate:{time}` (Pasela, 20:00) shows "Not yet. Opens at 20:00." until that time in Japan, then becomes a normal "I'm here" card; chapters marked `startArrived` start open. `applyStatuses()` sets `DAYS[].status`; `clockTick()` re-checks every 30 s and when the app returns to the foreground, and steps back to the deck if the open day is no longer allowed.
+- Guide Mode is the override (everything open, chapters start locked, skip-the-wait on gated chapters, per-day "Guide · reset this day"). New entry point for it while every day is still locked: triple-tap the date line (25 SEP – 4 OCT 2026) under the wordmark on the home screen; it turns red while Guide Mode is on. Triple-tap on a day title still works inside a day. Switching Guide Mode off from inside a day or stay that has become locked returns to the deck / stays grid (`toggleGuide()`).
+- Live weather from Open-Meteo (no key, free for personal use, needs credit): one request each for Tokyo, Kiso-Fukushima and Kyoto covers all ten days (16-day range). Fetched on open, when the app returns to the foreground, when the connection comes back and every 30 minutes; the last good answer is kept in localStorage (`japanSlowlyWeather_v1`) so it works offline. The hard-coded `weather` per day stays as the fallback and is labelled "Typical weather for this time of year"; live data is labelled "Live forecast, updated ...". `sw.js` no longer intercepts api.open-meteo.com. Day to region map is `DAY_LOC` (Day 7 uses Kyoto for Osaka; Day 8 uses Kyoto).
+- Content: Day 4 guide note now says the Komanoyu shuttle is 17:30 in and 10:00 out (the doc's "10:10" is gone); Day 9 Kiyosumi Gardens is now "About 30 minutes, more of a pause than a visit".
+- Trains tab: dropped, will not be built.
+
+---
+
 ## ROUND 35 — 2026-09-20 (Day 1 guide: Marco's solo afternoon)
 
 - Day 1 Guide now covers the early arrival plan: tickets first (JR EAST Travel Service Center T3 is open 06:45 to 20:00 daily per JR East, so the 20:00 assumption is confirmed), route to Kita-Shinjuku (Keikyu to Shinagawa + Yamanote direct to Shin-Okubo, or limousine bus), expected arrival at the stay around 16:30 to 17:00, Shinjuku shopping hours and stops, leave Shinjuku by about 20:15, and a last-trains note on the Okubo card. New `GUIDE['1.kita-shinjuku']` with Directions chips (Haneda T3, UNIQLO, MUJI, Don Quijote Kabukicho).
