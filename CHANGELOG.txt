@@ -4,6 +4,13 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 29h — 2026-09-20 (Days 9 and 10 research added)
+
+Researched from the web (japan-guide, GO TOKYO, Wikipedia, ginza.jp, Tsukiji Outer Market site, MUJI, others) and added About pills: Day 9 Tsukiji Outer Market, Kiyosumi Gardens, Fukagawa Edo Museum, Kappabashi, Sensō-ji; Day 10 Ginza, UNIQLO Ginza, MUJI Ginza. Small Notes added (opening hours and prices on Kiyosumi and Fukagawa, Sensō-ji main hall closes 17:00, Ginza avenue closed to cars from 12:00 on Sunday 4 Oct). Day 10 Haneda card now says just "the airport" with a Directions chip for Haneda Airport, plus Keikyu (about 15 minutes from Shinagawa) and "your airline decides your terminal".
+- Open flags: the Master Spec says Haneda Terminal 1, but most international flights use Terminal 3, so Marco should confirm each airline and terminal. Opening hours, prices and Saturday/Sunday closing rules come from web sources and should be rechecked close to the trip (Kiyosumi, Fukagawa Edo Museum, Kappabashi, Sensō-ji hall hours, Tsukiji stalls). Durations for Kiyosumi, Kappabashi and the bamboo grove are still inferred.
+
+---
+
 ## ROUND 29g — 2026-09-20 (Days 7 to 10 built in the new card structure)
 
 `DAY7` "mnham-mnham" (Osaka - let's go / Wagyu Idaten, Namba while you wait, Kuromon and Namba, Nakanoshima pause, Dotonbori after dark), `DAY8` "Forest of Faces" (To the Bamboo Grove, Otagi Nenbutsu-ji, Down through Saga-Toriimoto, Back to Kyoto Station with Nozomi 32, To ARIA Takanawa), `DAY9` "Tokyo in Layers" (Tsukiji, Kiyosumi Gardens, Fukagawa Edo Museum, Kappabashi, Asakusa and Senso-ji), `DAY10` "Tokyo Takeaways" (ARIA checkout, Ginza, Back to ARIA and Haneda). Each starts with the essential-info card. Pills for Days 7 and 8 come from research packs A/B (em dashes removed, app-instruction lines reworded). DAYS titles updated: Day 7 "mnham-mnham", Day 9 "Tokyo in Layers" (teaser "Early markets, quiet gardens and old streets. Tokyo has layers."), Day 10 "Tokyo Takeaways".
