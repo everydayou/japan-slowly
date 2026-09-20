@@ -315,7 +315,7 @@
     border-radius:22px;
     cursor:pointer;
     border:0; padding:0; margin:0; font:inherit; color:inherit; text-align:left;
-    background:#000;
+    background:transparent;
     will-change:transform;
     /* release-into-place snap after a drag (NOT the day open/close flip, which is a
        separate, protected animation elsewhere). Originally .5s with a curve that decelerated
@@ -325,7 +325,8 @@
        slightly past rest, then eases back) which reads as a natural physical "landing"
        instead of a robotic stop. */
     transition:transform .6s cubic-bezier(.34,1.56,.64,1), opacity .5s ease, box-shadow .3s ease;
-    box-shadow:0 22px 40px -18px rgba(0,0,0,.55);
+    /* second layer (0 offset, wide blur) lets each card cast a shadow sideways and up onto the cards behind it, not only down onto the page */
+    box-shadow:0 22px 40px -18px rgba(0,0,0,.55), 0 0 36px 2px rgba(0,0,0,.38);
     perspective:1600px;
     -webkit-tap-highlight-color:transparent;
   }
@@ -618,6 +619,11 @@
   .dc-tomorrow{ font-style:italic; }
   .dc-hint{ font-size:14px; line-height:20px; color:var(--ink-soft); }
   .dc-blurb{ font-size:14px; line-height:20px; color:var(--ink-soft); }
+  .view-daycards .day-title{ -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; }
+  .view-daycards .day-title.guide-on{ color:var(--accent); }
+  .dc-guide{ border:1.5px solid var(--accent); border-radius:16px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; }
+  .dc-guide .dc-chip{ height:auto; min-height:32px; padding:6px 12px; line-height:1.25; }
+  .dc-guide-title{ font-weight:600; font-size:12px; line-height:16px; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); }
   .dc-divider{ border-top:1px dashed var(--chip-line); margin:12px 0; }
 
   .dc-info{ background:var(--frame); border-radius:16px; }
@@ -864,7 +870,7 @@
   .stay-card{
     position:relative; overflow:hidden; border-radius:20px;
     border:0; padding:0; text-align:left; cursor:pointer;
-    background:#000;
+    background:transparent;
     -webkit-tap-highlight-color:transparent;
     /* round 26: was 0 10px 22px -14px -- read as basically invisible against the
        grid's own background (the -14px spread was eating almost all of the 22px
@@ -1164,7 +1170,7 @@
 
   /* ---------- trip data ---------- */
   var DAYS = [
-    {n:1, date:'FRI 25 SEP', unlock:'25 Sep', title:'konnichi-fucking-wa',
+    {n:1, date:'FRI 25 SEP', unlock:'25 Sep', title:'konnichifuckingwa',
       teaser:'The long flight ends. The first night in Tokyo has barely begun.',
       status:'journal'},
     {n:2, date:'SAT 26 SEP', unlock:'26 Sep', title:'lost in translation',
@@ -3441,6 +3447,64 @@
 
   var DAY_DATA = {1:DAY1, 2:DAY2, 3:DAY3, 4:DAY4, 5:DAY5, 6:DAY6, 7:DAY7, 8:DAY8, 9:DAY9, 10:DAY10};
 
+  /* ---------- Guide Mode notes (Marco's view) ----------
+     Key = day number + '.' + chapter id. Only guide-only material from the itinerary doc and
+     Master Spec: context, things to reconfirm, backups, food references, Directions for
+     places travellers do not get a pin for. NEVER put codes, reservation numbers or card
+     digits here: this file is a public web page. */
+  var GUIDE = {
+    '1.haneda':{items:[
+      'Your own arrival is at 13:50. Clear immigration, baggage and customs, activate the eSIM and set up Suica.',
+      'Collect all three Azusa tickets at the JR EAST Travel Service Center, Terminal 3, 2F arrivals lobby. The planning assumption is a 20:00 closing time, so verify it shortly before travel. Check that all three tickets include both the basic fare and the reserved seat.',
+      'Bring the booking confirmation, the pickup code, your passport and the physical payment card as backup.',
+      'Shinjuku errands (UNIQLO, MUJI, toiletries, snacks) stay in Shinjuku, not Ginza, so there is time to get back to Haneda.',
+      'The others land on Emirates EK312 at 22:20 in Terminal 3. Check its live status and aim to reach Haneda around 21:30 to 21:45. Leaving the airport around 23:15 to 23:45 is realistic.']},
+    '1.okubo':{items:[
+      'You will probably be back around or after midnight, when ordinary restaurants are closed. Save two or three late-night options around Kita-Shinjuku, Okubo or Shin-Okubo and confirm their Friday hours shortly before.',
+      'Fallbacks: buy food at Haneda before leaving, use a convenience store, or try a late Matsuya, Sukiya or Yoshinoya after checking the nearest branch and its hours.',
+      'Lowest stress: pick up food on the way back from Haneda, so nobody has to search after arriving.']},
+    '2.shibuya':{items:['Shibuya Sky is an optional backup if the group wants a viewpoint.']},
+    '2.nightlife':{items:[
+      'MITSUKI is at 1-22-12 Dogenzaka, close to karaoke. Choose the club once the final 26 September lineups are known.',
+      'Entry: no formal dress code is assumed. Avoid sandals and very sporty clothing. Reconfirm event-specific dress, ticket and entry rules close to the date.',
+      'Backups: OATH (casual DJ bar for house, techno and disco), WOMB (larger multi-floor club, only if the lineup is compelling) and VENT (sound-focused basement club near Omotesando, less convenient after karaoke). Recheck the lineup, ID, footwear and ticketing for each.',
+      'Do a final nightlife check 24 to 48 hours before: lineup, tickets, entry rules, footwear and the last-train or taxi plan.',
+      'Use Suica by day. If you stay out beyond the last trains around midnight, plan to return by taxi.']},
+    '3.kamakura':{items:['Kamakura was the political centre of Japan’s first warrior government. Notice the geography as much as the monuments: wooded hills, temple precincts, residential streets and the sea all compress into a small city.']},
+    '3.back-to-tokyo':{items:['Take the JR Shonan-Shinjuku Line towards Shinjuku. Direct services run roughly twice an hour, otherwise make the simple change at Ofuna. Check the live route when your friend is ready to finish.']},
+    '4.to-kiso':{items:[
+      'Collect the Azusa paper tickets in advance with the group pickup QR code and be at Shinjuku Station by about 09:30.',
+      'Buy the two local-train journeys (Shiojiri to Narai, Narai to Kiso-Fukushima) at a station.',
+      'Confirm the Kiso-Fukushima pickup time for three people, and the luggage arrangement during the Narai visit.']},
+    '4.narai':{items:[
+      'Read Narai as travel infrastructure, not scenery: the long linear street, former inns and wholesalers, working water points and deep merchant houses all reflect the movement of people and goods along the Nakasendo.',
+      'Backup: if the 12:41 connection from Shiojiri is missed, the next local leaves at 13:45 and reaches Narai at 14:09.']},
+    '4.komanoyu':{items:['Reconfirm the exact shuttle departure with Komanoyu before the stay. The itinerary doc says around 10:10, the plan says 10:00.']},
+    '5.gion':{items:['Gion is a working kagai and Higashiyama is lived-in heritage. Follow the photography signs and avoid intrusive shots.']},
+    '6.fushimi':{items:['Fushimi Inari is the head shrine of the Inari tradition. Look beyond the tunnel effect: foxes are messengers, not the deity, and the inscriptions on the backs of torii record donors and dates.'],
+      maps:[['Directions: Fushimi Inari Taisha', mapsSearch('Fushimi Inari Taisha Kyoto')]]},
+    '6.kiyomizu':{items:[
+      'Kiyomizu-dera is a Kannon pilgrimage temple, not only a balcony viewpoint. The stage is one part of the complex, the Oku-no-in side gives the classic view back toward it, and Otowa Waterfall is central to the temple’s identity.',
+      'Reverify the opening and closing times around 30 September, and check the weather for the sunset window.'],
+      maps:[['Directions: Kiyomizu-dera', mapsSearch('Kiyomizu-dera Kyoto')]]},
+    '7.osaka':{items:['Reconfirm the Wagyu Idaten queue or ticket process and its hours 24 to 48 hours before.']},
+    '7.nakanoshima':{items:['Check the Brooklyn Roasting Company hours before the day.']},
+    '7.dotonbori':{items:['Food references: Juhachiban takoyaki, a PABLO sweet, and optionally the eel at Hozenji Yamakazu. Verify the exact PABLO item and outlet, and the Yamakazu hours and queue.']},
+    '8.bamboo':{items:['Treat the grove as atmosphere, not a checklist stop. Move quietly, stay on the paths and avoid touching or damaging the bamboo.'],
+      maps:[['Directions: Arashiyama Bamboo Grove', mapsSearch('Arashiyama Bamboo Grove Kyoto')]]},
+    '8.otagi':{items:[
+      'The individuality is the story. Many of the rakan figures were carved by different people during the temple’s modern revival, which is why the faces and personalities vary so much.',
+      'Reverify the temple’s opening schedule close to 2 October, and check Kyoto congestion and transport conditions.'],
+      maps:[['Directions: Otagi Nenbutsu-ji', mapsSearch('Otagi Nenbutsu-ji Kyoto')]]},
+    '9.tsukiji':{maps:[['Directions: Tsukiji Outer Market', mapsSearch('Tsukiji Outer Market Tokyo')]]},
+    '9.kiyosumi':{maps:[['Directions: Kiyosumi Gardens', mapsSearch('Kiyosumi Gardens Tokyo')]]},
+    '9.fukagawa':{maps:[['Directions: Fukagawa Edo Museum', mapsSearch('Fukagawa Edo Museum Tokyo')]]},
+    '9.kappabashi':{maps:[['Directions: Kappabashi', mapsSearch('Kappabashi Kitchen Town Tokyo')]]},
+    '9.asakusa':{maps:[['Directions: Sensō-ji', mapsSearch('Senso-ji Asakusa Tokyo')]]},
+    '10.ginza':{maps:[['Directions: UNIQLO Ginza', mapsSearch('UNIQLO Ginza Tokyo')],['Directions: MUJI Ginza', mapsSearch('MUJI Ginza Tokyo')]]}
+  };
+
+
   /* ---------- Stay cards content ----------
      Read from the day chapters where the copy already exists (one source), so editing a
      chapter's About also updates the stay. Only settled facts: Komanoyu's and ARIA Takanawa's
@@ -3515,7 +3579,7 @@
   var STORAGE_KEY = 'japanSlowlyProgress_v1';
   function saveProgress(){
     try{
-      var payload = { screen:state.screen, openDay:state.openDay, openStay:state.openStay, stackIndex:state.stackIndex, dayProgress:state.dayProgress };
+      var payload = { guide:state.guide, screen:state.screen, openDay:state.openDay, openStay:state.openStay, stackIndex:state.stackIndex, dayProgress:state.dayProgress };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     }catch(e){ /* private browsing / quota / disabled -- just don't persist */ }
   }
@@ -3536,7 +3600,7 @@
      above) can override screen/openDay/stackIndex/chapter-reveal-state below -- a
      returning visitor resumes exactly where they left off instead of always restarting
      at the intro splash with every chapter re-hidden. */
-  var state = { screen:'intro', openDay:null, openStay:null, dayProgress:{}, stackIndex:1, confirming:null, scrollToEnd:false, animating:false, sheetAbout:null };
+  var state = { guide:false, screen:'intro', openDay:null, openStay:null, dayProgress:{}, stackIndex:1, confirming:null, scrollToEnd:false, animating:false, sheetAbout:null };
   (function applySavedProgress(){
     var saved = loadProgress();
     if(!saved) return;
@@ -3555,6 +3619,7 @@
       });
     }
     if(typeof saved.stackIndex==='number') state.stackIndex = saved.stackIndex;
+    if(saved.guide===true) state.guide = true;
     // openDay/screen only restored together, and only if that day still exists and isn't locked --
     // guards against a stale save pointing at a day that's since been removed or re-locked.
     if(saved.screen==='day' && saved.openDay!=null){
@@ -4044,10 +4109,22 @@
      as a sheet. */
   function dcEssentialCardHTML(ch, ctx, visited, cur){
     var body = '<span class="dc-pill '+(visited?'visited':'onway')+'">'+(visited?'Visited':'Today')+'</span>' +
-      '<div class="dc-title">'+escH(ch.name)+'</div>' + essentialSheetBody(ctx.data);
+      '<div class="dc-title">'+escH(ch.name)+'</div>' + essentialSheetBody(ctx.data) + dcGuideHTML(ctx.day, ch.id);
     var foot = '';
     if(cur) foot = (state.confirming==='ready') ? dcConfirmHTML('ready') : '<button class="dc-btn" data-dc-ask="ready">'+escH(ch.readyLabel || 'Ready for what’s next')+'</button>';
     return '<div class="dc-card" data-dc-card="'+escH(ch.id)+'"><div class="dc-card-body">'+body+'</div>' + (foot ? '<div class="dc-card-foot">'+foot+'</div>' : '') + '</div>';
+  }
+
+  /* Guide Mode (triple-tap the day title): extra guide-only notes per chapter, read from GUIDE
+     (below DAY_DATA), shown in a red-outlined block. Nothing in here may be a secret: the page is public. */
+  function dcGuideHTML(dayN, chId){
+    if(!state.guide) return '';
+    var g = GUIDE[dayN+'.'+chId];
+    if(!g) return '';
+    var h = '<div class="dc-guide"><div class="dc-guide-title">Guide</div>';
+    if(g.items && g.items.length) h += '<ul class="dc-bullets">'+g.items.map(function(t){ return '<li>'+escH(t)+'</li>'; }).join('')+'</ul>';
+    if(g.maps && g.maps.length) h += '<div class="dc-chips">'+dcMapsChips(g.maps)+'</div>';
+    return h + '</div>';
   }
 
   function dcCardHTML(ch, i, ctx){
@@ -4066,6 +4143,7 @@
 
     var body = pill + '<div class="dc-title">'+escH(ch.name)+'</div>';
     if(ch.timeNote) body += '<div class="dc-badge">'+escH(ch.timeNote)+'</div>';
+    body += dcGuideHTML(ctx.day, ch.id);
     body += dcInfoHTML(ch, p, arrived);
 
     var below = '';
@@ -4104,7 +4182,7 @@
     var len = data.chapters.length;
     var done = journal ? len : Math.min(p.done, len-1);
     var count = journal ? len : done+1;
-    var ctx = { p:p, done:done, len:len, data:data };
+    var ctx = { p:p, done:done, len:len, data:data, day:day.n };
     var dots = '<div class="dc-dots" role="tablist" aria-label="Chapters reached so far">';
     var cards = '';
     for(var i=0;i<count;i++){
@@ -4141,7 +4219,7 @@
 
     var dayLocked = day.status==='locked';
     html += '<div class="backhero-text"><div class="day-date">'+day.date+' &middot; Day '+day.n+'/10</div>' +
-      (dayLocked ? '<div class="day-title hidden-title">Title withheld</div>' : '<div class="day-title">'+day.title+'</div>') +
+      (dayLocked ? '<div class="day-title hidden-title">Title withheld</div>' : '<div class="day-title'+(state.guide?' guide-on':'')+'">'+day.title+'</div>') +
       '<div class="day-teaser">'+day.teaser+'</div></div>';
 
     if(dayData){
@@ -4957,7 +5035,15 @@
   }
 
   /* ---------- shared handlers for the day-detail content (chapters, about, weather, back, reset) ---------- */
+  var guideTaps = [];
   function wireCommon(root){
+    var gTitle = (state.screen==='day') ? root.querySelector('.view-daycards .day-title') : null;
+    if(gTitle) gTitle.addEventListener('click', function(){
+      var now = Date.now();
+      guideTaps = guideTaps.filter(function(t){ return now - t < 800; });
+      guideTaps.push(now);
+      if(guideTaps.length >= 3){ guideTaps = []; state.guide = !state.guide; render(); }
+    });
     var back = root.querySelector('[data-back]');
     if(back) back.addEventListener('click', function(){ closeDayFlip(); });
     var stayBack = root.querySelector('[data-stay-back]');

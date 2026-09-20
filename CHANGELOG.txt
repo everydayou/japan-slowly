@@ -4,6 +4,30 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 34 — 2026-09-20 (gradient back, black container background gone, deck shadows)
+
+- Marco meant the black BACKGROUND of the card container, not the dark gradient. `.shade` gradient and the plain text are restored on all day and stay cards (the text-shadow workaround is removed). `background:#000` on `.stack-card` and `.stay-card` is now `transparent`.
+- Day deck cards get a second, wide zero-offset shadow layer (`0 0 36px 2px rgba(0,0,0,.38)`) so each card also casts a shadow sideways and upward onto the cards behind it, not only down onto the page.
+
+---
+
+## ROUND 33 — 2026-09-20 (Guide Mode)
+
+- Triple-tap the day title (on a day screen) to switch Guide Mode on or off: the title turns red and each chapter with guide notes shows a red-outlined "Guide" block above its Info container. Saved between visits (`state.guide`, in the same localStorage key). Traveller view is unchanged. Nothing else differs between the modes.
+- Notes live in `GUIDE` (below `DAY_DATA`), keyed `day.chapterId`: `items` (bullets) and `maps` (Directions chips). Filled from the itinerary doc and Master Spec: Day 1 (Marco's arrival tasks, Azusa ticket collection, shopping, EK312 pickup timing, late food), Day 2 (Shibuya Sky backup, MITSUKI entry, OATH/WOMB/VENT backups, last-train plan), Day 3 (Kamakura context, way back), Day 4 (ticket collection, local tickets, pickup confirmation, Narai context and backup train, shuttle time to reconfirm), Day 5 (Gion context), Day 6 (Fushimi Inari and Kiyomizu-dera context plus guide-only Directions), Day 7 (reconfirm Idaten, Brooklyn hours, food references), Day 8 (bamboo grove and Otagi context, reverify checks, guide-only Directions), Day 9 (Directions for every stop), Day 10 (Directions for UNIQLO and MUJI Ginza).
+- Rule: never put pickup codes, reservation numbers or card digits in `GUIDE` (or anywhere): the page is public. The Day 1 line only says to bring the pickup code.
+- (Corrected in Round 34: the gradient stays, see below.)
+
+---
+
+## ROUND 32 — 2026-09-20 (unlocked cards without the dark gradient, Day 1 title)
+
+- Unlocked day cards and unlocked stay cards no longer have the black gradient (`.shade`) over the photo; a soft text shadow keeps the title readable. Locked cards are unchanged.
+- Day 1 title is one word: "konnichifuckingwa".
+- Guide Mode idea discussed (triple-tap on the day title turns it red and shows extra guide-only info per chapter), not built yet.
+
+---
+
 ## ROUND 31 — 2026-09-20 (stay detail slides up, one aligned card per stay)
 
 - No more zoom/flash animation: the stay detail slides up from the bottom over the Stays grid (`.stay-slide`, `openStay()`), and the close button slides the whole view back down (`closeStay()`). The old `openStayFlip`/`closeStayFlip` code is gone. The grid stays rendered underneath; the tab bar stays put and is covered by the slide.
