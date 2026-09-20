@@ -4,6 +4,15 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 30 — 2026-09-20 (stay cards rebuilt like the day cards)
+
+A stay now opens as swipeable cards (same look as chapter cards, nothing to unlock) instead of one scrolling About page. Header: days, area name, hotel. `STAY_CARDS` (below `DAY_DATA`) holds the content; About sheets are read from the day chapters (one source): Stay 1 from DAY1 `kita-shinjuku`, Stay 2 from DAY4 `komanoyu` and `to-komanoyu`, Stay 3 from DAY5 `gion` (Gion, Hanamikoji) and `yasaka-shrine`. `STAYS` now only holds the settled facts (name, area, days, unlock day, address); the old copies of the About rows (with em dashes) are gone.
+- Stay 1 Isshuku Noma: Your stay (address, nights, leaving on Day 4, Directions), Around the stay (Kita-Shinjuku pill). Stay 2 Komanoyu: Your stay (shuttle 17:30, meals, leaving 10:00), The ryokan (Before the bath, Komanoyu pill), The town (Kiso-Fukushima pill). Stay 3 Kabin Gion: Your stay (address, check-in from 15:00, check-out Day 8 with luggage kept, Directions), Around the stay (Gion, Hanamikoji, Yasaka Shrine). Stay 4 ARIA Takanawa: Your stay (Nozomi 32 to Shinagawa 18:08, nights 2 and 3 Oct, luggage on Day 10, Directions), Around the stay (new Takanawa pill from web sources: Wikipedia Takanawa and Takanawa Gateway Station).
+- Fixed on the way: Day 8 "To ARIA Takanawa" said "three nights"; it is two (2 and 3 Oct, check-out on the morning of Day 10).
+- Open: Komanoyu has no street address in any source, so no address or Directions on its cards. ARIA Takanawa's Directions (Stay 4 card and Day 8 "To ARIA Takanawa") now use Marco's own Google Maps link (maps.app.goo.gl/fqdxqihf1QPTjcqa7); its street address is still not written on the card. Marco is fine without check-in and check-out times. Check-in and check-out times are only known for Kabin Gion (15:00), and Marco is fine leaving the rest out. The Stay-unlock timing rule is still not implemented.
+
+---
+
 ## ROUND 29i — 2026-09-20 (review notes on Days 7 to 10, lowercase titles, Copenhagen card)
 
 - All day titles are lowercase (DAYS data). Chapter card sections have more vertical space (card gap 8 to 20px, Info body gap 16 to 20px).
