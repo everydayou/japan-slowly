@@ -4,6 +4,16 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 29e — 2026-09-20 (Day 4 rebuilt in the new card structure)
+
+Day 4 "Into Edo" (28 Sep) is now `DAY4` in `index.html`: essential info card, To Kiso Valley (Azusa 13, Shiojiri change), Narai-juku (4 pills from research pack A), To Komanoyu (16:46 train, 17:30 shuttle), Komanoyu (meals, bath etiquette, About). Built from the Master Spec, the itinerary doc and research packs A/B, written from the traveller's point of view: each locked card says where to be and when, each unlocked card says what to do and how long. No red labels (times live in the unlock line, the timing list and the `expect` line). Kiso-Fukushima and Komanoyu About rows are trimmed copies of the Stay 2 content; the Komanoyu "Etiquette" row was dropped because the "Before the bath" bullets say the same.
+- Marco OK'd 16:46 / 17:07 / 17:30 but wants it checked on the spot: the To Komanoyu card carries a Note telling travellers to check the timetable at Narai Station.
+- Open: the itinerary doc still lists the 15:36 Narai train and no 16:46 one; the Master Spec says Marco confirmed 16:46 / 17:07 / 17:30. Built on the Master Spec. Please re-verify before the trip.
+- Guide-only items left out: booking/pickup codes, collecting the Azusa tickets, confirming the shuttle time.
+- Day 3's "tomorrow" line now matches Day 4 (leave the apartment by 09:25, at the station by 09:45).
+
+---
+
 ## ROUND 29d — 2026-09-20 (Marco's notes after testing)
 
 - Day card teasers rewritten as real teasers: Day 1 "The long flight ends. The first night in Tokyo has barely begun.", Day 2 "Walk until the city changes its mind. Save some energy for after dark.", Day 3 "Pack light and follow someone who knows the way."

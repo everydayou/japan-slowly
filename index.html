@@ -1266,7 +1266,7 @@
   }
 
   /* ---------- day chapter content (rebuilt, "chapter engine" format) ----------
-     Days 1-3, rebuilt from the Master Spec + the itinerary doc + research packs A/B after
+     Days 1-4, rebuilt from the Master Spec + the itinerary doc + research packs A/B after
      the original conversation copy was lost. Every day is one object in DAY_DATA (below);
      `chapters` are shown one at a time as swipeable cards (see dayDetailScreen()).
 
@@ -1531,10 +1531,353 @@
         maps:[['Directions: Kita-Kamakura Station', mapsTransit('Kita-Kamakura Station')], ['Directions: Shinjuku Station', mapsTransit('Shinjuku Station')]]
       }
     ],
-    tomorrow:'Azusa 13 leaves Shinjuku at 10:00. Aim to be at the station around 09:30.'
+    tomorrow:'Azusa 13 leaves Shinjuku at 10:00. Leave the apartment by 09:25 and be at the station by 09:45.'
   };
 
-  var DAY_DATA = {1:DAY1, 2:DAY2, 3:DAY3};
+  var DAY4 = {
+    "weather": {
+      "lo": 15,
+      "hi": 22,
+      "cond": "Cooler, chance of mist",
+      "hourly": [
+        [
+          "09:00",
+          "17°"
+        ],
+        [
+          "12:00",
+          "21°"
+        ],
+        [
+          "15:00",
+          "22°"
+        ],
+        [
+          "18:00",
+          "18°"
+        ],
+        [
+          "21:00",
+          "16°"
+        ],
+        [
+          "00:00",
+          "15°"
+        ]
+      ]
+    },
+    "energy": "Medium",
+    "walking": "Medium",
+    "outside": "Mostly on foot at Narai, indoors at the ryokan",
+    "dress": "Comfortable shoes and a light layer for the mountains",
+    "bring": "Azusa ticket · some cash for local trains and snacks",
+    "first": "Be at Shinjuku Station by 09:45",
+    "chapters": [
+      {
+        "id": "essential",
+        "kind": "essential",
+        "name": "Today’s essential info"
+      },
+      {
+        "id": "to-kiso",
+        "name": "To Kiso Valley",
+        "unlock": "Leave the apartment by 09:25 and be at Shinjuku Station by 09:45. The Azusa 13 leaves at 10:00. Once you get off at Shiojiri, tap “I’m here”.",
+        "meta": "Reserved seats on the Azusa 13. On the way, watch the city give way to forested slopes and narrow valleys.",
+        "timing": {
+          "title": "Getting there",
+          "rows": [
+            [
+              "09:25",
+              "Leave the apartment."
+            ],
+            [
+              "09:45",
+              "Be at Shinjuku Station and find the platform."
+            ],
+            [
+              "10:00",
+              "The Azusa 13 leaves Shinjuku towards Shiojiri."
+            ],
+            [
+              "12:27",
+              "Arrive at Shiojiri."
+            ],
+            [
+              "12:41",
+              "Local train from Shiojiri to Narai. If you miss it, the next one leaves at 13:45."
+            ]
+          ]
+        },
+        "checklist": {
+          "title": "Before you go",
+          "items": [
+            "Pack up and check out of the apartment",
+            "Keep your Azusa ticket where you can reach it",
+            "Buy the two local train tickets at a station (Shiojiri to Narai, Narai to Kiso-Fukushima)"
+          ]
+        },
+        "mapsUrl": mapsTransit('Shinjuku Station'),
+        "expect": "You have 14 minutes to change trains.",
+        "blurb": "Tokyo is far behind you and the mountains have taken over. Follow the platform signs to the local train to Narai at 12:41. It has no reserved seats.",
+        "aboutLabel": "Kiso Valley",
+        "about": [
+          [
+            "Why it matters",
+            "The valley gives meaning to Narai and Komanoyu. The preserved post towns are not isolated museum pieces: they grew because the mountains made travel demanding and concentrated movement along a narrow route."
+          ],
+          [
+            "A little history",
+            "The Nakasendo crossed central Japan through mountainous terrain between Edo and Kyoto. The Kiso section became one of its most evocative stretches because steep valleys and limited space helped preserve sections of the old road and several post towns."
+          ],
+          [
+            "Look for",
+            "From the train, notice how quickly urban plains give way to forested slopes and narrow settlements along the railway and river. The constrained geography helps explain why the old route mattered."
+          ],
+          [
+            "How to experience it",
+            "Let the landscape be the reveal. The important shift is not “we have arrived at attraction X” but “Tokyo has disappeared and we are now travelling through a mountain corridor people once crossed on foot.”"
+          ],
+          [
+            "Etiquette",
+            "Weather changes faster in the mountains. Practical layers handle warmth, rain and footwear so the cultural part of the day can stay unhurried."
+          ],
+          [
+            "One memorable detail",
+            "The Nakasendo was one of the five main highways formalized in the early Edo period. Government officials, samurai, merchants and ordinary travellers moved through the same chain of post towns now being revisited as heritage landscapes."
+          ]
+        ]
+      },
+      {
+        "id": "narai",
+        "name": "Narai-juku",
+        "unlock": "Take the 12:41 local train from Shiojiri to Narai. It arrives at 13:04. Once you step out at Narai, tap “I’m here”.",
+        "expect": "About 3 hours 30 minutes. Leave the street by 16:35 for the 16:46 train.",
+        "blurb": "Close to a kilometre of wooden merchant houses, still lived in, still working. Walk it slowly, then turn back for a different view. One or two interiors are worth more than trying to enter everything, and if somewhere inviting appears, stop for soba, oyaki or gohei-mochi.",
+        "groups": [
+          {
+            "name": "The Nakasendo",
+            "rows": [
+              [
+                "Why it matters",
+                "The road is the organizing story behind Narai: a 17th-century trunk route connecting the political center of Edo with Kyoto through the interior rather than along the coast."
+              ],
+              [
+                "A little history",
+                "Under the Tokugawa shogunate, the Nakasendo became one of the Five Routes. Post towns provided lodging, horses, porters, food and services. Travellers therefore experienced Japan as a sequence of regulated stages rather than continuous wilderness."
+              ],
+              [
+                "Look for",
+                "Look for evidence that Narai was infrastructure: the long linear street, former wholesalers, inns, water points and the road continuing toward Torii Pass. These are traces of movement, not decorative scenery."
+              ],
+              [
+                "How to experience it",
+                "Imagine the town from the perspective of someone arriving on foot after a mountain crossing. The street makes more sense when you see every shopfront, water source and lodging house as support for travellers."
+              ],
+              [
+                "Etiquette",
+                "Respect private homes. Much of Narai is still lived in and worked in; preservation does not mean the settlement is an open-air film set."
+              ],
+              [
+                "One memorable detail",
+                "The word “juku” in Narai-juku indicates a post station or post town, so the name itself tells you what the place was built to do."
+              ]
+            ]
+          },
+          {
+            "name": "Main street",
+            "rows": [
+              [
+                "Why it matters",
+                "This is the museum without walls. Its continuous wooden architecture communicates more than any single exhibit about the scale, density and commercial life of a post town."
+              ],
+              [
+                "A little history",
+                "Merchant and service buildings developed directly along the highway. Narai houses often have a narrow street frontage and extend deeply into the plot, with an earthen-floor passage and rooms arranged alongside it."
+              ],
+              [
+                "Look for",
+                "Look upward: second floors can project over the first, eaves are functional as well as decorative, and façades manage light, weather and privacy. At ground level, watch for thresholds that separate the street from the doma earthen floor inside."
+              ],
+              [
+                "How to experience it",
+                "Do not rush from landmark to landmark. Walk one direction, then turn back for a different view; the repetition of façades and small variations is the point."
+              ],
+              [
+                "Etiquette",
+                "Avoid blocking the narrow street for photos. Be especially considerate around private entrances and operating businesses."
+              ],
+              [
+                "One memorable detail",
+                "Six communal water places remain in use. They once refreshed travellers and supplied villagers; seeing water still running through the town makes the old road feel operational rather than archaeological."
+              ]
+            ]
+          },
+          {
+            "name": "Nakamura Residence",
+            "rows": [
+              [
+                "Why it matters",
+                "This former lacquered-comb wholesaler’s house lets you step behind the façade and understand how a prosperous Narai merchant actually lived and worked."
+              ],
+              [
+                "A little history",
+                "The house dates to around 1843 and preserves the typical Narai machiya arrangement. The Nakamura family traded lacquered combs, an industry associated with the town. The residence is designated an Important Cultural Property."
+              ],
+              [
+                "Look for",
+                "Look for the narrow frontage and deep interior, the doma earthen-floor passage, the row of living rooms, upper-floor projection and details around the eaves. Inside, pay attention to how daylight moves through a long, narrow building."
+              ],
+              [
+                "How to experience it",
+                "Use this as the main interior visit if time is limited. Once you have seen the spatial logic here, many façades outside become easier to “read.”"
+              ],
+              [
+                "Etiquette",
+                "It is a historic interior rather than a recreated theme space; follow instructions about shoes, touching objects and photography."
+              ],
+              [
+                "One memorable detail",
+                "An attempt to relocate the building in the late 1960s helped galvanize local interest in preserving Narai’s historic townscape in place, so the house is tied not only to Edo-period commerce but to the modern preservation story."
+              ]
+            ]
+          },
+          {
+            "name": "Kamidonya Shiryokan",
+            "rows": [
+              [
+                "Why it matters",
+                "This house explains the administrative machinery behind the post town. “Donya” were not simply shopkeepers: official wholesalers helped manage transport, porters, horses and freight moving along the highway."
+              ],
+              [
+                "A little history",
+                "The Tezuka family served as a wholesaler in Narai for roughly 270 years, from the early 17th century into the Meiji era. The residence preserves documents, ceramics, lacquerware and other materials associated with that role."
+              ],
+              [
+                "Look for",
+                "Look for the scale compared with ordinary houses, the formal rooms, storage and displayed records. If Nakamura explains merchant life, Kamidonya helps explain logistics and status."
+              ],
+              [
+                "How to experience it",
+                "Visit this second, only if interest and time remain after Nakamura Residence. Together the two houses reveal different layers of the same post-town economy."
+              ],
+              [
+                "Etiquette",
+                "Follow museum rules regarding photography, shoes and handling exhibits."
+              ],
+              [
+                "One memorable detail",
+                "Before railways, moving people and goods across Japan required an enormous human system. This house belonged to people who helped make that system function."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "id": "to-komanoyu",
+        "name": "To Komanoyu",
+        "unlock": "Leave the street by 16:35 and take the 16:46 local train to Kiso-Fukushima. It arrives at 17:07. Once you are at Kiso-Fukushima Station, tap “I’m here”.",
+      "meta": "Check the departure time on the timetable at Narai Station when you get there.",
+        "timing": {
+          "title": "Getting there",
+          "rows": [
+            [
+              "16:35",
+              "Leave Narai-juku and walk back to the station."
+            ],
+            [
+              "16:46",
+              "Local train from Narai to Kiso-Fukushima."
+            ],
+            [
+              "17:07",
+              "Arrive at Kiso-Fukushima."
+            ],
+            [
+              "17:30",
+              "The Komanoyu shuttle picks you up at the station."
+            ]
+          ]
+        },
+        "mapsUrl": mapsTransit('Kiso-Fukushima Station'),
+        "expect": "About 20 minutes before the shuttle at 17:30.",
+        "blurb": "Wait for the Komanoyu shuttle at the station. Kiso-Fukushima was once a checkpoint town on the Nakasendo, guarding movement through the valley.",
+        "aboutLabel": "Kiso-Fukushima",
+        "about": [
+          [
+            "Why it matters",
+            "Mostly a transfer point, but a little context stops it feeling arbitrary: Kiso-Fukushima was historically one of the important control points on the Nakasendo and the administrative centre of the Kiso area."
+          ],
+          [
+            "A little context",
+            "During the Edo period, the town was a post town and the site of one of the route’s major checkpoints, where movement of people and goods was controlled. It later developed as a regional centre along the Kiso River."
+          ],
+          [
+            "Look for",
+            "From the station or the shuttle, notice the narrow valley geography, river, wooded slopes and older building pockets compressed between them."
+          ],
+          [
+            "One memorable detail",
+            "The historic checkpoint gives a concrete mental image of how controlled long-distance travel could be in the Edo period, useful context before sleeping in the same valley."
+          ]
+        ]
+      },
+      {
+        "id": "komanoyu",
+        "name": "Komanoyu",
+        "unlock": "The Komanoyu shuttle takes you up into the hills. Once you have arrived at the ryokan, tap “I’m here”.",
+        "expect": "The rest of the evening. Nothing else is planned.",
+        "blurb": "A 19th-century inn with its own hot spring, tucked into the same valley you just crossed. Tonight is slow, on purpose: shoes off, tatami underfoot, and dinner that takes its time.",
+        "bookingUnlocked": {
+          "title": "Meals",
+          "rows": [
+            [
+              "Dinner",
+              "served 18:00 to 19:00"
+            ],
+            [
+              "Breakfast",
+              "served 07:00 to 08:00"
+            ]
+          ]
+        },
+        "bulletsUnlocked": {
+          "title": "Before the bath",
+          "items": [
+            "Wash and rinse before you get in",
+            "Bathe without a towel in the water, and keep your hair out of it",
+            "Keep phones out of the bathing area and speak quietly",
+            "Wear the yukata for dinner if you like"
+          ]
+        },
+        "aboutLabel": "Komanoyu",
+        "about": [
+          [
+            "Why it matters",
+            "This is not merely the hotel at the end of the day. The ryokan format (tatami, futon, communal bathing, local food and hospitality) turns accommodation itself into part of the cultural experience."
+          ],
+          [
+            "A little history",
+            "Komanoyu was established in 1897 and sits in the Kiso mountains. The property describes itself as one of the few hot-spring inns in Kiso-Fukushima with its own source, with an indoor bath made from Kiso hinoki cypress and iron-rich water. Its cuisine emphasizes Kiso and Shinshu mountain-and-river ingredients."
+          ],
+          [
+            "Look for",
+            "Notice the transition rituals: shoes off, tatami rooms, yukata, dinner pacing, bedding appearing later, bath etiquette and the quieter relationship between building and landscape. In the bath, notice the scent and feel of hinoki if using the cypress indoor bath."
+          ],
+          [
+            "How to experience it",
+            "Let the evening stay slow. Bathe before or after dinner depending on the ryokan rhythm, wear the yukata if comfortable, and treat dinner as an experience rather than refuelling."
+          ],
+          [
+            "One memorable detail",
+            "Komanoyu combines a late-19th-century inn lineage with a private hot-spring source in the same mountain corridor you have just crossed."
+          ]
+        ]
+      }
+    ],
+    "tomorrow": "The shuttle back to Kiso-Fukushima Station leaves at 10:00. Have your bags ready."
+  };
+
+  var DAY_DATA = {1:DAY1, 2:DAY2, 3:DAY3, 4:DAY4};
   if(TEST_MODE) DAYS.forEach(function(d){ if(DAY_DATA[d.n]) d.status = 'active'; });
 
   /* ---------- progress persistence (round 21) ----------
