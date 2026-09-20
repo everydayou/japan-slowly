@@ -4,6 +4,20 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 41 — 2026-09-20 (Copenhagen card only after Day 10 opens)
+
+- The Copenhagen card showed while everything was locked because old test progress for Day 10 was still saved on the phone. `copenhagenOpen()` now also requires Day 10 itself to be open, so left-over progress cannot reveal it. `render()` clamps `stackIndex` to `deckLast()` so a saved position on the hidden card falls back to Day 10.
+- Guide Mode never locks a day that the calendar has already opened (`dayReached(n) || chain`), so switching Guide Mode on during the trip only adds, never removes.
+- Note: progress made while testing in Guide Mode is the same progress the real trip uses. Use "Guide · reset from this day" on Day 1 before leaving to clear everything.
+
+---
+
+## ROUND 40 — 2026-09-20 (locked day: one centred message)
+
+- A locked day screen now shows its date line and teaser, then a chapter-style card with only "Unlocks 25 Sep at 00:00 Japan time", centred in the card (Guide Mode: "Opens when Day n is finished"). The old sentences ("This day hasn't opened yet ...", "The app won't push a notice ...") and `.lockednote` CSS are gone; locked days now use the `view-daycards` shell (`.dc-locked-card`, `.dc-locked-msg`).
+
+---
+
 ## ROUND 39 — 2026-09-20 (Guide Mode opens one day at a time)
 
 - Marco found the existing Guide Mode entry points, so the Days-tab triple-tap from Round 38 was removed again (date line and day title triple-taps remain). The no-titles-on-locked-days change stays.

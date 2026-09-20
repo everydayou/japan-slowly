@@ -433,8 +433,9 @@
   .backhero-text .day-title{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:25px; margin-top:5px; color:var(--ink); }
   .backhero-text .day-teaser{ font-size:14px; margin-top:6px; line-height:1.45; color:var(--ink-soft); }
 
-  .lockednote{ margin:16px 24px 0; font-size:16px; color:var(--ink-faint); line-height:1.5; }
-  .lockednote .mono{ color:var(--ink-soft); }
+  /* locked day: one chapter-style card with a single centred message */
+  .dc-locked-card{ align-items:center; justify-content:center; text-align:center; }
+  .dc-locked-msg{ font-size:16px; line-height:1.5; color:var(--ink-soft); }
 
   /* round 24: full-screen Stays detail view (openStayFlip()/closeStayFlip()) -- reuses
      the same .about-item/.about-group rows the bottom-sheet About panel already used
@@ -1198,7 +1199,9 @@
   ];
   function copenhagenOpen(){
     var p = state.dayProgress[10], d = DAY_DATA[10];
-    return !!(p && d && p.done >= d.chapters.length-1);
+    var day10 = DAYS.filter(function(x){ return x.n===10; })[0];
+    /* only once Day 10 itself is open: left-over progress from testing must not reveal it early */
+    return !!(day10 && day10.status==='active' && p && d && p.done >= d.chapters.length-1);
   }
   function deckLast(){ return DAYS.length - 1 - (copenhagenOpen() ? 0 : 1); }
 
@@ -1297,7 +1300,7 @@
       if(d.extra) return;
       if(state.guide){
         /* Guide Mode: only Day 1 is open; each next day opens when the one before is finished */
-        d.status = (DAY_DATA[d.n] && prevDone) ? 'active' : 'locked';
+        d.status = (DAY_DATA[d.n] && (prevDone || dayReached(d.n))) ? 'active' : 'locked';
         prevDone = (d.status==='active') && dayComplete(d.n);
       } else {
         d.status = (DAY_DATA[d.n] && dayReached(d.n)) ? 'active' : 'locked';
@@ -4361,9 +4364,8 @@
       if(isJournal) html += '<div class="journalflag">Past day &middot; kept as trip journal &middot; fully unlocked</div>';
       html += dcCardsHTML(day, dayData);
     } else {
-      html += state.guide
-        ? '<div class="lockednote">Guide Mode: this day opens when Day '+(day.n-1)+' is finished.</div>'
-        : '<div class="lockednote">This day hasn’t opened yet. <span class="mono">Unlocks '+day.unlock+' at 00:00 Japan time</span>. The app won’t push a notice, it’ll just be waiting next time you look.</div>';
+      var lockMsg = state.guide ? 'Opens when Day '+(day.n-1)+' is finished' : 'Unlocks '+day.unlock+' at 00:00 Japan time';
+      html += '<div class="dc-carousel"><div class="dc-card dc-locked-card"><div class="dc-locked-msg">'+escH(lockMsg)+'</div></div></div>';
     }
     return html;
   }
@@ -4738,6 +4740,7 @@
 
   function render(){
     applyStatuses(); /* Guide Mode's day chain depends on progress, which changes while you use the app */
+    if(state.stackIndex > deckLast()) state.stackIndex = deckLast(); /* the Copenhagen card may not be in the deck */
     var el = document.getElementById('screen');
     /* el.innerHTML gets torn down and rebuilt on every render(), which by default
        creates a brand-new .view with scrollTop 0 -- so a same-screen re-render (e.g.
@@ -4758,7 +4761,7 @@
 
     var isDetailScreen = (state.screen==='day');
     var dayForView = state.screen==='day' ? DAYS.filter(function(d){return d.n===state.openDay;})[0] : null;
-    var hasCards = !!dayDataFor(dayForView);
+    var hasCards = !!dayDataFor(dayForView) || (!!dayForView && dayForView.status==='locked');
     var html = '<div class="view'+(isDetailScreen ? ' view-day' : '')+(hasCards ? ' view-daycards' : '')+'" data-screen-key="'+screenKey+'">';
     if(state.screen==='intro'){
       html += introScreen();
@@ -4854,7 +4857,7 @@
     var backEl = cardEl.querySelector('.flip-back');
     /* wrapped in the same .view shell render() will build, so the layout does not jump when
        render() swaps the real thing in at the end of the animation */
-    backEl.innerHTML = '<div class="view view-day'+(dayData ? ' view-daycards' : '')+'">' + dayDetailScreen(day, dayData, 'day'+day.n) + '</div>';
+    backEl.innerHTML = '<div class="view view-day'+((dayData || day.status==='locked') ? ' view-daycards' : '')+'">' + dayDetailScreen(day, dayData, 'day'+day.n) + '</div>';
     dcMount(backEl);
 
     /* openDayFlip only ever opens the current front card (see the click handler in
