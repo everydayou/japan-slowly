@@ -431,7 +431,6 @@
   .backhero-text{ padding:14px 24px 16px; }
   .backhero-text .day-date{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:700; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); }
   .backhero-text .day-title{ font-family:'Outfit',ui-sans-serif,system-ui,sans-serif; font-weight:600; font-size:25px; margin-top:5px; color:var(--ink); }
-  .backhero-text .day-title.hidden-title{ letter-spacing:.14em; opacity:.55; font-weight:500; font-size:17px; }
   .backhero-text .day-teaser{ font-size:14px; margin-top:6px; line-height:1.45; color:var(--ink-soft); }
 
   .lockednote{ margin:16px 24px 0; font-size:16px; color:var(--ink-faint); line-height:1.5; }
@@ -1287,10 +1286,22 @@
     var j = jstNow(), k = dayDateKey(dayN);
     return j.date > k || (j.date === k && j.time >= ch.gate.time);
   }
+  /* a day counts as finished once its last chapter has been reached AND confirmed */
+  function dayComplete(n){
+    var d = DAY_DATA[n], p = state.dayProgress[n];
+    return !!(d && p && p.done >= d.chapters.length-1 && p.arrived);
+  }
   function applyStatuses(){
+    var prevDone = true;
     DAYS.forEach(function(d){
       if(d.extra) return;
-      d.status = (DAY_DATA[d.n] && (state.guide || dayReached(d.n))) ? 'active' : 'locked';
+      if(state.guide){
+        /* Guide Mode: only Day 1 is open; each next day opens when the one before is finished */
+        d.status = (DAY_DATA[d.n] && prevDone) ? 'active' : 'locked';
+        prevDone = (d.status==='active') && dayComplete(d.n);
+      } else {
+        d.status = (DAY_DATA[d.n] && dayReached(d.n)) ? 'active' : 'locked';
+      }
     });
   }
   /* what changes with the clock: which days are open and which gates have opened */
@@ -4337,12 +4348,12 @@
     var isJournal = day.status==='journal';
     var html = '<button class="close-fab" data-back aria-label="Close">'+closeIcon+'</button>';
     html += '<div class="dayhead">' +
-      ((dayData && !isJournal && state.guide) ? '<button class="resetbtn" data-dc-reset>Guide · reset this day</button>' : '') +
+      ((dayData && !isJournal && state.guide) ? '<button class="resetbtn" data-dc-reset>Guide · reset from this day</button>' : '') +
       '</div>';
 
     var dayLocked = day.status==='locked';
     html += '<div class="backhero-text"><div class="day-date">'+day.date+' &middot; Day '+day.n+'/10</div>' +
-      (dayLocked ? '<div class="day-title hidden-title">Title withheld</div>' : '<div class="day-title'+(state.guide?' guide-on':'')+'">'+day.title+'</div>') +
+      (dayLocked ? '' : '<div class="day-title'+(state.guide?' guide-on':'')+'">'+day.title+'</div>') +
       '<div class="day-teaser">'+day.teaser+'</div></div>';
 
     if(dayData){
@@ -4350,7 +4361,9 @@
       if(isJournal) html += '<div class="journalflag">Past day &middot; kept as trip journal &middot; fully unlocked</div>';
       html += dcCardsHTML(day, dayData);
     } else {
-      html += '<div class="lockednote">This day hasn’t opened yet. <span class="mono">Unlocks '+day.unlock+' at 00:00 Japan time</span>. The app won’t push a notice, it’ll just be waiting next time you look.</div>';
+      html += state.guide
+        ? '<div class="lockednote">Guide Mode: this day opens when Day '+(day.n-1)+' is finished.</div>'
+        : '<div class="lockednote">This day hasn’t opened yet. <span class="mono">Unlocks '+day.unlock+' at 00:00 Japan time</span>. The app won’t push a notice, it’ll just be waiting next time you look.</div>';
     }
     return html;
   }
@@ -4518,7 +4531,7 @@
       (locked ? '<div class="status-pill">Locked</div>' : '') +
       '<div class="content">' +
         '<div class="day-date">'+d.date+' &middot; Day '+d.n+'/10</div>' +
-        (locked ? '<div class="day-title" style="font-style:italic;font-weight:400;font-size:16px;letter-spacing:.04em;opacity:.7;">Title withheld</div>' : '<div class="day-title">'+d.title+'</div>') +
+        (locked ? '' : '<div class="day-title">'+d.title+'</div>') +
         '<div class="day-teaser">'+d.teaser+'</div>' +
       '</div>';
   }
@@ -4724,6 +4737,7 @@
   }
 
   function render(){
+    applyStatuses(); /* Guide Mode's day chain depends on progress, which changes while you use the app */
     var el = document.getElementById('screen');
     /* el.innerHTML gets torn down and rebuilt on every render(), which by default
        creates a brand-new .view with scrollTop 0 -- so a same-screen re-render (e.g.
@@ -5189,7 +5203,11 @@
     if(stayBack) stayBack.addEventListener('click', function(){ closeStay(); });
     /* ---- day cards (see the "day cards: the chapter engine" comment) ---- */
     var dcReset = root.querySelector('[data-dc-reset]');
-    if(dcReset) dcReset.addEventListener('click', function(){ delete state.dayProgress[state.openDay]; state.confirming=null; state.scrollToEnd=false; render(); });
+    if(dcReset) dcReset.addEventListener('click', function(){
+      /* Guide Mode is a chain: resetting a day also resets every day after it, which locks them again */
+      Object.keys(state.dayProgress).forEach(function(k){ if(parseInt(k,10) >= state.openDay) delete state.dayProgress[k]; });
+      state.confirming=null; state.scrollToEnd=false; render();
+    });
     root.querySelectorAll('[data-dc-ask]').forEach(function(b){
       b.addEventListener('click', function(){ state.confirming = b.getAttribute('data-dc-ask'); render(); });
     });

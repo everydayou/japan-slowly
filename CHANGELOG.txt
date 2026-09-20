@@ -4,6 +4,23 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 39 — 2026-09-20 (Guide Mode opens one day at a time)
+
+- Marco found the existing Guide Mode entry points, so the Days-tab triple-tap from Round 38 was removed again (date line and day title triple-taps remain). The no-titles-on-locked-days change stays.
+- Guide Mode is now a chain instead of "everything open": only Day 1 opens; Day n+1 opens once Day n is finished (its last chapter reached and confirmed with "I'm here", `dayComplete()`). Stays follow their day. `applyStatuses()` now runs at the start of every `render()` because the chain depends on progress.
+- "Guide · reset from this day" clears that day's progress AND every later day's, which locks them again (and closes the Copenhagen card if Day 10 was reset). A locked day in Guide Mode says "this day opens when Day n-1 is finished".
+- Normal (traveller) view is unchanged: date-based, 00:00 Japan time.
+
+---
+
+## ROUND 38 — 2026-09-20 (Guide Mode via the Days tab, no titles on locked days)
+
+- Guide Mode also toggles with three quick taps on the Days tab (left icon of the bottom menu), from any screen. The triple-tap on the home date line and on a day title still work.
+- Locked days no longer show any title: the "Title withheld" placeholder is gone from the deck card and from the locked day screen (date, Day n/10 and teaser stay). Removed the `.hidden-title` CSS.
+- The "Guide · reset this day" button is shown at the top of every open day while Guide Mode is on (verified).
+
+---
+
 ## ROUND 37 — 2026-09-20 (Day 4: earlier shuttle, earlier train from Narai)
 
 - Marco: the Komanoyu shuttle from Kiso-Fukushima is at 16:30 (was 17:30), so the Narai visit ends earlier. Weekday locals from Narai towards Kiso-Fukushima (Yahoo! Transit, Mon 28 Sep is a weekday): 13:11, 14:14, 15:36, 16:46, 17:30. Plan is now: leave the street 15:25, 15:36 train, arrive about 15:57 (estimated from the usual 21-minute ride, not read from a timetable), shuttle 16:30 (about 30 minutes to wait). The 16:46 would miss it.
