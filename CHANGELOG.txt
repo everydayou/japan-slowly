@@ -4,6 +4,12 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 42 — 2026-09-20 (docs catch-up for a new chat)
+
+- `PROJECT-CONTEXT.txt`: added a "CURRENT STATE" block at the top of Quick Status (what exists, real locking, Guide Mode, weather, card rules, working method, decisions, open points) and marked the entries it replaced as SUPERSEDED or RESOLVED (TEST_MODE, "Guide Mode does not exist", Days 1-3 only, missing addresses, unlockDay guess, the untracked day 11 image, static weather). `README.md`: live link and status updated. No app code changed.
+
+---
+
 ## ROUND 41 — 2026-09-20 (Copenhagen card only after Day 10 opens)
 
 - The Copenhagen card showed while everything was locked because old test progress for Day 10 was still saved on the phone. `copenhagenOpen()` now also requires Day 10 itself to be open, so left-over progress cannot reveal it. `render()` clamps `stackIndex` to `deckLast()` so a saved position on the hidden card falls back to Day 10.

@@ -2,8 +2,8 @@
 
 A spoiler-light, installable web experience for a 3-person Japan trip (25 Sep – 4 Oct 2026). One traveller plans; the other two should discover each day progressively instead of reading the full itinerary up front.
 
-**Live prototype (Explorer Mode, Day 1 + Day 2 only):**
-https://claude.ai/artifact/TvJbJit7d7dEqz3pDfVYvP
+**Live app (all 10 days, Explorer Mode + Guide Mode):**
+https://everydayou.github.io/japan-slowly/
 
 This repo exists so a fresh chat (Claude, ChatGPT, whichever) can pick up this project with full context, per the product concept's own preferred workflow: *Planner → chat → GitHub → published trip data → travellers' phones.*
 
@@ -19,7 +19,7 @@ The rest of this README is the slower, human-facing version of the same informat
 >
 > **Two modes:** Explorer Mode (father/brother — future days locked, progressive chapter reveals, optional "About this place" context after arrival) and Guide Mode (planner — full itinerary, exact logistics, manual reveal/skip/undo controls; not primarily a CMS, still unbuilt).
 >
-> **Status:** only the Explorer Mode home screen (10-day card reel) plus full Day 1 and Day 2 detail screens are prototyped, as a single self-contained HTML file (`index.html`) published as a Claude Artifact. Guide Mode, days 3–10, weather API, and the GitHub-based content-publishing pipeline are all still unbuilt. See "What's built" and "What's not built yet" below before assuming anything works.
+> **Status (2026-09-20):** Explorer Mode is built end to end: all 10 days as swipeable chapter cards, a hidden Day 11 "copenhagen" card, 4 stays, real date/time locks (a day opens at 00:00 Japan time), live weather (Open-Meteo, cached for offline), and an installable offline PWA. Guide Mode exists as a personal override (triple-tap the date line or a day title): it opens days one at a time and shows guide-only notes. The Trains tab and location-based unlocking were dropped. The content-publishing pipeline is still unbuilt. **`PROJECT-CONTEXT.txt` (its CURRENT STATE block) is the source of truth; the sections below are older background.**
 
 Full product concept: `docs/Japan Slowly - Product Concept v2.docx` (includes an even more detailed zero-context brief in its Appendix A). Trip logistics/content source: `docs/Japan Day-by-Day Itinerary (Current).docx`.
 
