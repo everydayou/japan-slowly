@@ -4,6 +4,17 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 29c — 2026-09-20 (card structure, Day 1 traveller view)
+
+- Card layout per Marco: locked = title + red label + one open Info container (To unlock, hint, Note, booking/timing, tasks, bullets, Directions); unlocked = container folded, separator, time here, blurb, chips. Red label now stays after a chapter is visited.
+- Checklists only for tasks; plain information became bullets (Okubo, Kamakura, MITSUKI dress code).
+- Day 1 rebuilt for travellers landing 22:50: Haneda welcome, To Kita-Shinjuku (Stays tab pointer), Food around you. Shinjuku chapter and Haneda ticket checklist removed (guide content, commit 25ebbe7 has the text).
+- Day 2: Harajuku says to head there and has Directions to Harajuku Station; Shibuya red label is "Be at the next location at 20:00".
+- Storytelling pass (traveller shoes) over every chapter of Days 1-3: each locked card says what to do to open it, each unlocked card says what to do or see and how long (`expect`). The durations (Haneda, Kita-Shinjuku 30 min, Food 1 h, Harajuku 1-2 h, Omotesando 1 h, Shibuya until 20:00, Kamakura 20 min to spare) are my suggestions and are meant to be adjusted by Marco; the walk times (Omotesando to Shibuya about 20 min via Cat Street) are unverified.
+- Every chapter now carries an explicit `unlock` line (Day 3 chapters too) and a blurb so the unlocked card is never empty.
+
+---
+
 ## ROUND 29b — 2026-09-20 (testing mode, Pasela gate, log corrections)
 
 Marco wants to walk every card of Days 1-3 before real unlock logic is written.

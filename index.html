@@ -636,6 +636,7 @@
   .dc-check.done span{ text-decoration:line-through; color:var(--ink-faint); }
 
   .dc-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+  .dc-divider{ margin:4px 0; }
   .dc-chip{
     height:32px; padding:0 12px; display:inline-flex; align-items:center; border:1px solid var(--chip-line); border-radius:90px;
     background:transparent; color:var(--ink); font:inherit; font-weight:600; font-size:14px; line-height:1; text-decoration:none;
@@ -653,8 +654,8 @@
   .dc-confirm-text{ font-size:14px; line-height:20px; color:var(--ink-soft); }
   .dc-confirm-btns{ display:flex; gap:8px; }
   .dc-btn.provisional{ background:transparent; color:var(--ink-soft); border:1.5px dashed var(--ink-faint); font-weight:500; }
-  .dc-gatenote{ display:flex; align-items:center; gap:8px; font-size:14px; line-height:20px; font-weight:600; color:var(--ink); }
-  .dc-gatenote svg{ width:16px; height:16px; flex:none; color:var(--ink-soft); }
+  .dc-duration{ display:flex; align-items:center; gap:8px; font-size:14px; line-height:20px; font-weight:600; color:var(--ink); }
+  .dc-duration svg{ width:16px; height:16px; flex:none; color:var(--ink-soft); }
   .dc-lastnote{ font-size:14px; line-height:20px; font-style:italic; color:var(--ink-faint); }
 
   /* essential-info + place sheets reuse the About sheet; these are just their extras */
@@ -1159,7 +1160,7 @@
   /* ---------- trip data ---------- */
   var DAYS = [
     {n:1, date:'FRI 25 SEP', unlock:'25 Sep', title:'Konnichi-fucking-wa',
-      teaser:'Landing, the first tickets, and a first taste of the city before dark.',
+      teaser:'Landing late, a ride into the city, and a first taste of it after dark.',
       status:'journal'},
     {n:2, date:'SAT 26 SEP', unlock:'26 Sep', title:'Lost in Translation',
       teaser:'Harajuku to Shibuya on foot, a booked karaoke room, then one more stop the guide picks.',
@@ -1271,19 +1272,24 @@
      Chapter fields (all optional except id/name):
        id, name           stable id (Stay 1 reads DAY1's `kita-shinjuku` about) + card title
        startArrived       true = card opens already in its "Exploring now" state (no "I'm here")
-       timeNote / expect  ONE red line under the title: timeNote = a real deadline, expect = a duration
-       hint               short italic line, always visible (never inside Info)
-       meta               "Note:" line inside the Info box
-       booking / timing   {title, rows:[[lead, text], ...]} bulleted inside Info ("lead: text" / "lead text")
-       checklist          {title, items:[text, ...]} tickable, ticks are saved
-       (Info only renders when at least one of meta/booking/timing/checklist exists; it never
-        auto-collapses after arrival when the chapter has timing or booking)
-       blurb              fuller line, shown after arrival
+       timeNote           the ONE red line under the title, visible in every state (a real deadline or time)
+       expect             time to spend here, shown first in the unlocked part below the separator
+       unlock             how this card opens ("Head to X. Once you are there, tap I'm here."); default generated
+       gate               {time} makes it a time-locked (fixed) chapter: "Not yet" + test-only skip button
+       -- everything below sits inside the Info container (open while locked, folded once unlocked) --
+       hint               short italic line
+       meta               "Note:" line
+       booking / timing   {title, rows:[[lead, text], ...]} bulleted ("lead: text" / "lead text")
+       checklist          {title, items:[text, ...]} ONLY for real tasks; tickable, ticks are saved
+       bullets            {title, items:[text, ...]} plain good-to-know information
+       maps / mapsUrl     Directions chips that belong to the locked part: [[label, url], ...] / one url
+       -- below the separator once unlocked --
+       blurb              short line about the place
        groups             [{name, rows}] -> one chip per place, each opens a sheet
        about, aboutLabel  flat [label, text] rows -> a single chip (label = aboutLabel || name)
-       mapsUrl            opt-in "Directions" chip (only for one real, pinnable destination)
+       mapsUnlocked       Directions chips that only appear once unlocked: [[label, url], ...]
        readyLabel         override for the "Ready for what's next" button
-     No em dashes in copy. No reservation numbers / codes / card digits, ever. */
+     No em dashes in copy. No card digits or pickup codes; a booking confirmation only when Marco asks. */
   /* TESTING MODE: every day that has card data can be opened, every chapter starts with its
      content locked, and time/location gates carry a clearly marked test-only skip button.
      The real time and location unlock logic replaces this later (see dcCardHTML `gate`). */
@@ -1297,21 +1303,19 @@
     dress:'Layers for a long-haul arrival', bring:'Passport · booking details', first:'Start on arrival',
     chapters:[
       {id:'haneda', name:'Touchdown at Haneda', startArrived:true,
-        timeNote:'Landing at 13:50',
-        hint:'First stop before anything else: collect the tickets you’ll need this week.',
-        meta:'Immigration, baggage and customs first, then the ticket counter.',
-        booking:{title:'Ticket counter', rows:[
-          ['JR EAST Travel Service Center','Terminal 3, 2F arrivals lobby'],
-          ['Open','06:45 to 20:00 daily (check shortly before you travel)']]},
-        checklist:{title:'Before you leave the airport', items:[
-          'Collect the group’s Azusa tickets at the JR EAST counter',
-          'Check that all three travellers get both the basic-fare and reserved-seat tickets',
-          'Have your booking confirmation and passport ready',
-          'Bring the payment card used for booking as backup']}
+        timeNote:'Landing at 22:50',
+        unlock:'Once you are through immigration, baggage and customs and out in the arrivals hall, tap “I’m here”.',
+        expect:'A few minutes, then head into the city.',
+        hint:'Welcome to Japan.',
+        meta:'Marco will meet you in the arrivals hall.',
+        blurb:'You made it. Say hello to Marco, take a breath, then head into the city.'
       },
       {id:'kita-shinjuku', name:'To Kita-Shinjuku',
+        unlock:'Take the ride into the city and head to your stay in Kita-Shinjuku. Once you arrive, tap “I’m here”.',
+        expect:'About 30 minutes to drop your bags and settle in.',
         hint:'No train booked for this leg, just an ordinary ride into the city.',
-        blurb:'Small streets, low buildings, vending machines: the ordinary Tokyo you’ll come back to each night.',
+        meta:'Your stay has its own card in the Stays tab, with the address and a short guide to the area.',
+        blurb:'This is your base for the first nights. Drop your bags and get your bearings: small streets, low buildings, vending machines, the ordinary Tokyo you’ll come back to each night.',
         mapsUrl:'https://maps.app.goo.gl/BSZBwUuaq2x4u5C99',
         aboutLabel:'Kita-Shinjuku',
         about:[
@@ -1322,21 +1326,12 @@
           ['Etiquette','Keep your voice low late at night, especially when coming back after karaoke or clubbing. Residential lanes are not nightlife spaces, even with central Shinjuku close by.'],
           ['One memorable detail','The speed of the change: within a short walk, the city can go from near silence to rail infrastructure, giant department stores and neon.']]
       },
-      {id:'shinjuku', name:'Shinjuku',
-        hint:'One of the world’s busiest stations, and the city’s front door.',
-        blurb:'On arrival day, let shopping and navigation be the experience. UNIQLO, MUJI, toiletries and snacks cover most of what a long flight leaves behind.',
-        about:[
-          ['Why it matters','Shinjuku is both practical infrastructure and one of Tokyo’s defining experiences. Transport, department stores, skyscrapers, shopping and nightlife all collide around one enormous station complex.'],
-          ['A little context','Modern Shinjuku grew into a major commercial and transport centre after rail development pulled activity westward from the older city core. The station area now has distinct faces: the office-tower district to the west, major retail to the east and nightlife around Kabukicho.'],
-          ['Look for','Instead of “seeing Shinjuku,” notice the transitions: elevated rail lines, department stores built into the station, dense signage, the west-side towers and the more chaotic east-side streets.'],
-          ['How to experience it','Treat it as an orientation challenge, not an attraction. On arrival day, let shopping and finding your way be the experience.'],
-          ['Etiquette','Station flows are fast. Step to the side before checking your phone or regrouping, and do not block gates or stair landings.'],
-          ['One memorable detail','The station is famous for its sheer complexity. The best way to think of it: the station is a district, and different exits can drop you into completely different environments.']]
-      },
-      {id:'okubo', name:'Okubo & Shin-Okubo',
+      {id:'okubo', name:'Food around you',
+        unlock:'Head to Okubo or Shin-Okubo, a few minutes from the stay. Once you arrive, tap “I’m here”.',
         hint:'A different side of Tokyo, a few minutes away.',
-        blurb:'One stop can change the city’s texture completely. Good for dinner after a long travel day.',
-        checklist:{title:'Good to know', items:[
+        expect:'About an hour.',
+        blurb:'It is late, so keep it easy: pick whatever looks good and is still open, then head back and rest. One short hop and the city feels completely different.',
+        bullets:{title:'Good to know', items:[
           'Keep your voice low on the way back, it’s a residential night',
           'Queue neatly if a restaurant has a line']},
         groups:[
@@ -1356,7 +1351,7 @@
             ['One memorable detail','Contemporary Japan absorbs and remixes regional pop culture at high speed, and this is where you can see it on the street.']]}
         ]}
     ],
-    tomorrow:'No fixed early start tomorrow. The day can begin slowly after the late pickup.'
+    tomorrow:'No fixed early start tomorrow. The day can begin slowly after the late arrival.'
   };
 
   var DAY2 = {
@@ -1365,6 +1360,10 @@
     dress:'Comfortable shoes + physical passport', bring:'Suica · a small bag', first:'Start flexible',
     chapters:[
       {id:'harajuku', name:'Harajuku', startArrived:true,
+        unlock:'Head to Harajuku. Once you are there, tap “I’m here”.',
+        meta:'No fixed start time today. The only fixed point is 20:00 in Shibuya.',
+        expect:'About 1 to 2 hours.',
+        mapsUrl:mapsTransit('Harajuku Station'),
         hint:'Youth fashion, backstreets, and Tokyo’s most reinvented neighbourhood.',
         blurb:'Start on Takeshita Street, then drift through the surrounding lanes toward Omotesando. Let Harajuku read as layers: tourist spectacle on Takeshita Street, fashion retail along the edges, and a quieter backstreet culture underneath both.',
         groups:[
@@ -1399,6 +1398,8 @@
             ['One memorable detail','The mountain reference in the name makes the brand feel more Japanese than its modern minimalist interiors first suggest.']]}
         ]},
       {id:'omotesando', name:'Omotesando',
+        unlock:'Walk over to Omotesando, a short stroll from Takeshita Street. Once you are there, tap “I’m here”.',
+        expect:'About 1 hour.',
         hint:'The polished counterweight to Harajuku, one street over.',
         blurb:'Flagship stores and leafy side streets. Work south through Ura-Harajuku toward Shibuya, and let Cat Street form part of the transition rather than a destination of its own.',
         groups:[
@@ -1418,7 +1419,10 @@
             ['One memorable detail','The paired names “Omokado” and “Harakado” are a playful way to tell apart the two Tokyu Plaza buildings facing the same Harajuku and Omotesando crossroads.']]}
         ]},
       {id:'shibuya', name:'Shibuya',
-        timeNote:'Leave by 19:30 for the 20:00 karaoke room',
+        timeNote:'Be at the next location at 20:00',
+        unlock:'Head south on foot to Shibuya, about 20 minutes via Cat Street. Once you are there, tap “I’m here”.',
+        meta:'When you are ready to move on, tap “Ready for what’s next” to see where to be at 20:00.',
+        expect:'Take your time until 20:00.',
         hint:'The city’s main stage today: crowds and screens by afternoon, steeper nightlife streets after dark.',
         blurb:'Let the crossing, Center-gai, Hachiko and Dogenzaka appear as you move, rather than following a fixed route. Nonbei Yokocho, beside the tracks, may feel most atmospheric later in the evening.',
         groups:[
@@ -1461,8 +1465,10 @@
       {id:'pasela', name:'Pasela Shibuya',
         timeNote:'Room booked for 20:00',
         gate:{time:'20:00'},
+        unlock:'Be at the venue a few minutes before 20:00 (Directions below). This card opens at 20:00.',
+        expect:'Booked for 2 hours, 20:00 to 22:00.',
         hint:'Private-room karaoke, a short walk from Hachiko.',
-        blurb:'A private room instead of a public stage: your own song queue, your own drinks, just the three of you.',
+        blurb:'A private room instead of a public stage: your own song queue, your own drinks, just the three of you. Check in with the booking name.',
         booking:{title:'Booking', rows:[
           ['Venue','Karaoke Pasela Shibuya / Modi Shibuya'],
           ['Time','20:00, booked for 2 hours'],
@@ -1478,12 +1484,13 @@
           ['One memorable detail','Part of karaoke’s social power in Japan is the privacy: the point is not performing for strangers but creating a temporary private world with your own group.']]
       },
       {id:'nightlife', name:'MITSUKI',
+        unlock:'Head to MITSUKI, up on Dogenzaka. Once you are at the door, tap “I’m here”.',
+        expect:'As long as you like.',
         hint:'One more stop tonight, one floor below Shibuya.',
         blurb:'A small underground room between a DJ bar and a club, leaning toward house, electro and underground electronic music.',
-        meta:'Lineup and entry rules are event-specific, so recheck a day or two before. Last trains run around midnight, so plan on a taxi home.',
-        checklist:{title:'Before you go', items:[
-          'Carry your physical passport as photo ID',
-          'No sandals or very sporty clothing']},
+        meta:'Entry rules are event-specific. Last trains run around midnight, so plan on a taxi home.',
+        checklist:{title:'Before you go', items:['Carry your physical passport as photo ID']},
+        bullets:{title:'Good to know', items:['No sandals or very sporty clothing']},
         mapsUrl:mapsSearch('MITSUKI 1-22-12 Dogenzaka Shibuya'),
         about:[
           ['Why it matters','MITSUKI fits the scale you want: small, underground and intimate rather than a giant nightclub. It can feel like discovering a basement scene instead of visiting a tourist nightlife attraction.'],
@@ -1503,6 +1510,9 @@
     chapters:[
       {id:'to-kamakura', name:'To Kamakura', startArrived:true,
         timeNote:'Leave by 09:30',
+        unlock:'Leave by 09:30 and take the train from Shinjuku to Kita-Kamakura (schedule below). Once you are at Kita-Kamakura Station, tap “I’m here”.',
+        expect:'About 20 minutes to spare before 11:00.',
+        blurb:'Engaku-ji is a one-minute walk from the station. Your friend meets you there at 11:00.',
         hint:'Ordinary local trains today, no reservation needed. Meeting a friend who knows the city.',
         meta:'JR trains with Suica, no advance ticket or seat reservation. Your friend meets you at Engaku-ji at 11:00.',
         timing:{title:'Getting there for 11:00', rows:[
@@ -1513,9 +1523,11 @@
         maps:[['Directions: Kita-Kamakura Station', mapsTransit('Kita-Kamakura Station')], ['Directions: Engaku-ji', mapsSearch('Engaku-ji Kamakura')]]
       },
       {id:'kamakura', name:'A day in Kamakura',
+        unlock:'Once you have met your friend at Engaku-ji, tap “I’m here”.',
+        expect:'As long as the day takes, no fixed end.',
         hint:'A former samurai capital, hills, sea, and Zen, all pressed into one compact coastal city.',
-        blurb:'No fixed stops today. Enjoy the time there and let the day find its own pace.',
-        checklist:{title:'Good to know', items:[
+        blurb:'No fixed stops today. Follow your friend, enjoy the time there and let the day find its own pace.',
+        bullets:{title:'Good to know', items:[
           'Temples and shrines are active religious sites, so follow local signs',
           'Treat a wooded trail as a hike, not a shortcut']},
         aboutLabel:'Kamakura',
@@ -1527,6 +1539,8 @@
           ['One memorable detail','Kamakura’s historical importance is far bigger than its size today: for roughly a century and a half, political power shifted away from the imperial court in Kyoto to a warrior government based in this compact coastal city.']]
       },
       {id:'back-to-tokyo', name:'Back to Tokyo', startArrived:true,
+        unlock:'Head to the station when the day winds down. Once you are back in Shinjuku, tap “I’m here”.',
+        blurb:'Nothing else is planned. Rest, eat, and let the day settle.',
         hint:'Ordinary trains back, whenever the day naturally winds down.',
         meta:'Take the JR Shonan-Shinjuku Line towards Shinjuku from Kita-Kamakura or Kamakura. Direct services run roughly twice an hour, otherwise change at Ofuna. Check the live route when your friend is ready to finish the day.',
         maps:[['Directions: Kita-Kamakura Station', mapsTransit('Kita-Kamakura Station')], ['Directions: Shinjuku Station', mapsTransit('Shinjuku Station')]]
@@ -2056,18 +2070,33 @@
       }).join('') + '</div>';
   }
 
-  /* Info holds practical logistics only (note / booking / timing / checklist) and does not
-     render at all when a chapter has none of those. Default state: open until you have
-     arrived; after arrival it folds away, EXCEPT when the chapter carries timing or booking
-     (live logistics stay visible). An explicit tap on the header (p.tip) always wins. */
+  /* Card structure (Marco, 20 Sep):
+       LOCKED   pill, title, red label (always visible), then ONE open Info container holding
+                everything else: how to unlock, hint, note, booking / timing, tasks (tick boxes),
+                good-to-know (bullets), and the Directions links that belong to the locked part.
+       UNLOCKED pill, title, red label, the same container folded shut, a dashed separator, then
+                the time to spend here (`expect`), a short blurb, and the info chips (places,
+                About, `mapsUnlocked` Directions).
+     `checklist` is only for real tasks; plain information uses `bullets`. */
+  function dcMapsChips(list){
+    return list.map(function(m){ return '<a class="dc-chip" href="'+escH(m[1])+'" target="_blank" rel="noopener">'+escH(m[0])+'</a>'; }).join('');
+  }
   function dcInfoHTML(ch, p, arrived){
     var parts = [];
+    if(!arrived){
+      var how = ch.unlock || (ch.gate ? 'Opens at '+ch.gate.time+'.' : 'Head to '+ch.name+'. Once you are there, tap “I’m here”.');
+      parts.push(dcField('To unlock', escH(how)));
+    }
+    if(ch.hint) parts.push('<div class="dc-hint">'+escH(ch.hint)+'</div>');
     if(ch.meta) parts.push(dcField('Note:', escH(ch.meta)));
     if(ch.booking) parts.push(dcBullets(ch.booking.title, ch.booking.rows.map(function(r){ return '<li>'+escH(r[0])+': '+escH(r[1])+'</li>'; })));
     if(ch.timing) parts.push(dcBullets(ch.timing.title, ch.timing.rows.map(function(r){ return '<li>'+escH(r[0])+' '+escH(r[1])+'</li>'; })));
     if(ch.checklist) parts.push(dcChecklist(ch, p));
+    if(ch.bullets) parts.push(dcBullets(ch.bullets.title, ch.bullets.items.map(function(t){ return '<li>'+escH(t)+'</li>'; })));
+    var maps = ch.maps || (ch.mapsUrl ? [['Directions', ch.mapsUrl]] : []);
+    if(maps.length) parts.push('<div class="dc-chips">'+dcMapsChips(maps)+'</div>');
     if(!parts.length) return '';
-    var collapsed = (p.tip[ch.id]!==undefined) ? !!p.tip[ch.id] : (arrived && !(ch.timing || ch.booking));
+    var collapsed = (p.tip[ch.id]!==undefined) ? !!p.tip[ch.id] : arrived;
     return '<div class="dc-info'+(collapsed?'':' open')+'">' +
       '<button class="dc-info-head" data-dc-tip="'+escH(ch.id)+'" aria-expanded="'+(collapsed?'false':'true')+'">' +
         DC_STARS + '<span class="dc-info-label">Info</span>' + DC_CHEV +
@@ -2089,37 +2118,32 @@
     var cur = (i === ctx.done);
     var arrived = visited ? true : p.arrived;
     var isLast = (i === ctx.len-1);
-    /* gate = a time-locked (fixed) chapter: shows a countdown-style "not yet" state until its
-       time, then the full content. TEST_MODE: only the skip button opens it for now. */
+    /* gate = a time-locked (fixed) chapter: "Not yet" until its time. TEST_MODE: only the
+       skip button opens it for now. */
     var gated = !!ch.gate && !arrived;
     var pill = visited ? '<span class="dc-pill visited">Visited</span>'
       : (gated ? '<span class="dc-pill onway">Not yet</span>'
       : (arrived ? '<span class="dc-pill on">Exploring now</span>' : '<span class="dc-pill onway">On the way</span>'));
 
     var body = pill + '<div class="dc-title">'+escH(ch.name)+'</div>';
-    var badge = (!visited) ? (ch.timeNote || ch.expect) : '';
-    if(badge) body += '<div class="dc-badge">'+escH(badge)+'</div>';
-    if(ch.hint) body += '<div class="dc-hint">'+escH(ch.hint)+'</div>';
-    if(gated) body += '<div class="dc-gatenote">'+dcIconSvg('clock')+'<span>Opens at '+escH(ch.gate.time)+'</span></div>';
+    if(ch.timeNote) body += '<div class="dc-badge">'+escH(ch.timeNote)+'</div>';
+    body += dcInfoHTML(ch, p, arrived);
 
-    var info = gated ? '' : dcInfoHTML(ch, p, arrived);
-    var chips = '';
+    var below = '';
     if(arrived){
+      if(ch.expect) below += '<div class="dc-duration">'+dcIconSvg('clock')+'<span>'+escH(ch.expect)+'</span></div>';
+      if(ch.blurb) below += '<div class="dc-blurb">'+escH(ch.blurb)+'</div>';
+      var chips = '';
       if(ch.groups){
         chips += ch.groups.map(function(g, gi){ return '<button class="dc-chip" data-dc-open="'+escH(ch.id)+'|g'+gi+'">'+escH(g.name)+'</button>'; }).join('');
       } else if(ch.about){
         chips += '<button class="dc-chip" data-dc-open="'+escH(ch.id)+'|a">'+escH(ch.aboutLabel || ch.name)+'</button>';
       }
+      if(ch.mapsUnlocked) chips += dcMapsChips(ch.mapsUnlocked);
+      if(chips) below += '<div class="dc-chips">'+chips+'</div>';
+      if(isLast && ctx.data.tomorrow) below += dcField('Tomorrow', escH(ctx.data.tomorrow));
     }
-    var maps = ch.maps || (ch.mapsUrl ? [['Directions', ch.mapsUrl]] : []);
-    maps.forEach(function(m){ chips += '<a class="dc-chip" href="'+escH(m[1])+'" target="_blank" rel="noopener">'+escH(m[0])+'</a>'; });
-    var blurb = (arrived && ch.blurb) ? '<div class="dc-blurb">'+escH(ch.blurb)+'</div>' : '';
-    var tomorrow = (isLast && arrived && ctx.data.tomorrow) ? dcField('Tomorrow', escH(ctx.data.tomorrow)) : '';
-    var chipsRow = chips ? '<div class="dc-chips">'+chips+'</div>' : '';
-
-    body += info;
-    if(info && (blurb || chipsRow || tomorrow)) body += '<div class="dc-divider"></div>';
-    body += blurb + chipsRow + tomorrow;
+    if(below) body += '<div class="dc-divider"></div>' + below;
 
     var foot = '';
     if(cur){
