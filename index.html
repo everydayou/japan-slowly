@@ -667,6 +667,7 @@
   .dc-btn.provisional{ background:transparent; color:var(--ink-soft); border:1.5px dashed var(--ink-faint); font-weight:500; }
   .dc-duration{ display:flex; align-items:center; gap:8px; font-size:14px; line-height:20px; font-weight:600; color:var(--ink); }
   .dc-duration svg{ width:16px; height:16px; flex:none; color:var(--ink-soft); }
+  .dc-locnote{ font-size:14px; line-height:20px; color:var(--ink-soft); text-align:center; }
   .dc-lastnote{ font-size:14px; line-height:20px; font-style:italic; color:var(--ink-faint); }
 
   /* essential-info + place sheets reuse the About sheet; these are just their extras */
@@ -3654,7 +3655,7 @@
      above) can override screen/openDay/stackIndex/chapter-reveal-state below -- a
      returning visitor resumes exactly where they left off instead of always restarting
      at the intro splash with every chapter re-hidden. */
-  var state = { guide:false, screen:'intro', openDay:null, openStay:null, dayProgress:{}, stackIndex:0, confirming:null, scrollToEnd:false, animating:false, sheetAbout:null };
+  var state = { guide:false, locNote:null, screen:'intro', openDay:null, openStay:null, dayProgress:{}, stackIndex:0, confirming:null, scrollToEnd:false, animating:false, sheetAbout:null };
   applyStatuses();
   (function applySavedProgress(){
     var saved = loadProgress();
@@ -4310,6 +4311,7 @@
       else if(isLast) foot = '<div class="dc-lastnote">That’s the last chapter for today.</div>';
       else foot = '<button class="dc-btn" data-dc-ask="ready">'+escH(ch.readyLabel || 'Ready for what’s next')+'</button>';
     }
+    if(cur && !arrived && state.locNote) foot = '<div class="dc-locnote">'+escH(state.locNote)+'</div>' + foot;
     return '<div class="dc-card" data-dc-card="'+escH(ch.id)+'"><div class="dc-card-body">'+body+'</div>' + (foot ? '<div class="dc-card-foot">'+foot+'</div>' : '') + '</div>';
   }
 
@@ -4380,12 +4382,49 @@
     p.done = Math.min(p.done, data.chapters.length-1);
     return { day:day, data:data, p:p, ch:data.chapters[p.done], isLast:(p.done===data.chapters.length-1) };
   }
+  /* "I'm here" is checked against the phone's location, but only roughly: it works when the
+     phone is in Japan (a coarse map box, main islands plus the south-west islands). If the
+     phone will not say where it is (permission off, no signal, timeout) the tap is simply
+     allowed, so missing GPS can never strand anyone. Guide Mode skips the check. */
+  function inJapan(lat, lon){
+    if(lat>=30.9 && lat<=45.6 && lon>=129.5 && lon<=146) return true; /* Kyushu to Hokkaido */
+    if(lat>=24 && lat<31 && lon>=122.9 && lon<=131.5) return true;    /* Nansei / Okinawa */
+    return false;
+  }
+  function checkInJapan(done){
+    if(state.guide || !navigator.geolocation){ done(true); return; }
+    var finished = false, timer = null;
+    function fin(ok){ if(finished) return; finished = true; clearTimeout(timer); done(ok); }
+    timer = setTimeout(function(){ fin(true); }, 20000); /* long enough to read the permission prompt */
+    try{
+      navigator.geolocation.getCurrentPosition(
+        function(pos){ fin(inJapan(pos.coords.latitude, pos.coords.longitude)); },
+        function(){ fin(true); },
+        { timeout:15000, maximumAge:600000, enableHighAccuracy:false });
+    }catch(e){ fin(true); }
+  }
+  var locBusy = false;
   function dcArrive(){
-    var a = dcActive(); if(!a) return;
-    a.p.arrived = true;
-    delete a.p.tip[a.ch.id]; /* let the default rule fold Info away now that you are there */
+    var a = dcActive(); if(!a || locBusy) return;
+    var dayN = a.day.n, chId = a.ch.id;
+    locBusy = true;
     state.confirming = null;
+    state.locNote = state.guide ? null : 'Checking where you are…';
     render();
+    checkInJapan(function(ok){
+      locBusy = false;
+      var b = dcActive();
+      if(!b || b.day.n!==dayN || b.ch.id!==chId){ state.locNote = null; return; }
+      if(!ok){
+        state.locNote = 'Your phone says you are not in Japan yet. This card opens once you are there.';
+        render();
+        return;
+      }
+      state.locNote = null;
+      b.p.arrived = true;
+      delete b.p.tip[b.ch.id]; /* let the default rule fold Info away now that you are there */
+      render();
+    });
   }
   function dcSkip(){
     var a = dcActive(); if(!a) return;
@@ -4396,6 +4435,7 @@
   }
   function dcAdvance(){
     var a = dcActive(); if(!a || a.isLast) return;
+    state.locNote = null;
     a.p.done++;
     var next = a.data.chapters[a.p.done];
     a.p.arrived = dcStartsArrived(next);
@@ -5212,10 +5252,10 @@
       state.confirming=null; state.scrollToEnd=false; render();
     });
     root.querySelectorAll('[data-dc-ask]').forEach(function(b){
-      b.addEventListener('click', function(){ state.confirming = b.getAttribute('data-dc-ask'); render(); });
+      b.addEventListener('click', function(){ state.locNote = null; state.confirming = b.getAttribute('data-dc-ask'); render(); });
     });
     root.querySelectorAll('[data-dc-cancel]').forEach(function(b){
-      b.addEventListener('click', function(){ state.confirming = null; render(); });
+      b.addEventListener('click', function(){ state.locNote = null; state.confirming = null; render(); });
     });
     root.querySelectorAll('[data-dc-yes]').forEach(function(b){
       b.addEventListener('click', function(){ if(b.getAttribute('data-dc-yes')==='here') dcArrive(); else dcAdvance(); });

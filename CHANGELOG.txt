@@ -4,6 +4,15 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 45 — 2026-09-20 ("I'm here" must be in Japan)
+
+- Tapping "I'm here" (+ Yes) now checks the phone's location first (`checkInJapan`, `inJapan`). Allowed only if the position falls inside a rough Japan map box (Kyushu to Hokkaido, plus Okinawa and the Nansei islands). From Berlin or Seoul the card stays "on the way" and shows "Your phone says you are not in Japan yet. This card opens once you are there."
+- Never a dead end: if location is denied, unavailable, or gives no answer within 20 s (long enough to read the permission prompt), the tap is allowed. Guide Mode bypasses the check completely. The day itself still has to be open by the clock; this only affects the chapter arrival tap.
+- `dcArrive()` is async and re-checks that the same day and chapter are still active when the answer comes back. `state.locNote` + `.dc-locnote` show the message under the button.
+- The check is coarse on purpose (map box, low-accuracy, 10 min cached position ok). Tested in Playwright with mocked positions: Berlin and Seoul blocked; Tokyo, Osaka, Okinawa allowed; permission denied allowed; Guide Mode with a Berlin phone allowed.
+
+---
+
 ## ROUND 44 — 2026-09-20 (deck starts on Day 1)
 
 - The default focused deck card is now Day 1 (`stackIndex:0`, was 1, which is why a first-time open landed on Day 2). Resuming where you left off is unchanged: the saved `stackIndex` still overrides the default on every later open.
