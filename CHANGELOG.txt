@@ -4,6 +4,15 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 29g — 2026-09-20 (Days 7 to 10 built in the new card structure)
+
+`DAY7` "mnham-mnham" (Osaka - let's go / Wagyu Idaten, Namba while you wait, Kuromon and Namba, Nakanoshima pause, Dotonbori after dark), `DAY8` "Forest of Faces" (To the Bamboo Grove, Otagi Nenbutsu-ji, Down through Saga-Toriimoto, Back to Kyoto Station with Nozomi 32, To ARIA Takanawa), `DAY9` "Tokyo in Layers" (Tsukiji, Kiyosumi Gardens, Fukagawa Edo Museum, Kappabashi, Asakusa and Senso-ji), `DAY10` "Tokyo Takeaways" (ARIA checkout, Ginza, Back to ARIA and Haneda). Each starts with the essential-info card. Pills for Days 7 and 8 come from research packs A/B (em dashes removed, app-instruction lines reworded). DAYS titles updated: Day 7 "mnham-mnham", Day 9 "Tokyo in Layers" (teaser "Early markets, quiet gardens and old streets. Tokyo has layers."), Day 10 "Tokyo Takeaways".
+- Directions: Wagyu Idaten (Day 7), Kyoto Station and ARIA Takanawa (Day 8), Haneda Terminal 1 (Day 10). None on Day 9 (the Master Spec has no pins for it).
+- Open flags: Days 9 and 10 are built from the Master Spec summary only (Japan-Day-by-Day-Itinerary-2.docx is not available here), so they have no About pills and several durations are inferred (Kiyosumi 1 hour, Kappabashi 1 hour, bamboo grove 30 minutes). Day 8's leave window is the Master's 06:30 to 08:00 (the itinerary doc says 06:45 to 07:00). Weather is a placeholder. Day 10 shows both flights (Marco 19:55 on 4 Oct, Fernando and Tomas 00:05 on 5 Oct), no flight numbers; Terminal 1 comes from the Master Spec and the card asks travellers to confirm their terminal. Day 8 assumes luggage is left at Kabin Gion (per the itinerary doc); Day 10 assumes luggage is left at ARIA.
+- Guide-only content left out: food references (Juhachiban, PABLO, Yamakazu), SmartEX ticket codes.
+
+---
+
 ## ROUND 29f — 2026-09-20 (Days 5 and 6 rebuilt in the new card structure)
 
 `DAY5` "After the Mountains": essential info, To Kyoto (Shinano 6 / Nozomi 367 with car and seat numbers, no ticket codes), To Our Stay (Kabin Gion), Gion after dark (Kyoto, Gion, Hanamikoji, Yasaka Pagoda pills), Yasaka Shrine, Pontocho for dinner. `DAY6` "Sacred Paths": essential info, Fushimi Inari, Open middle, To Kiyomizu-dera (Yasaka Pagoda, Ninenzaka, Sannenzaka pills), Kiyomizu-dera (Kiyomizu-dera, Main Hall & Stage, Oku-no-in pills), Back to Gion. Content from the Master Spec, the itinerary doc and research packs A/B; About rows are the pack text with em dashes removed and app-instruction lines reworded. Same rules as Day 4: locked card says what to do to open it, unlocked card says what to do and how long, no red labels.

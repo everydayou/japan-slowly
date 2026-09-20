@@ -1174,13 +1174,13 @@
       teaser:'A day of movement that ends somewhere best discovered after the crowds leave.', status:'locked'},
     {n:6, date:'WED 30 SEP', unlock:'30 Sep', title:'Sacred Paths',
       teaser:'Start before the city is fully awake. Save something for sunset.', status:'locked'},
-    {n:7, date:'THU 1 OCT', unlock:'1 Oct', title:'Eat Osaka',
+    {n:7, date:'THU 1 OCT', unlock:'1 Oct', title:'mnham-mnham',
       teaser:'Come hungry. The day gets louder as the light disappears.', status:'locked'},
     {n:8, date:'FRI 2 OCT', unlock:'2 Oct', title:'Forest of Faces',
       teaser:'Start early. Faces are waiting in the forest.', status:'locked'},
-    {n:9, date:'SAT 3 OCT', unlock:'3 Oct', title:'Open Tokyo',
-      teaser:'Nothing is fixed. Follow whatever Tokyo still owes you.', status:'locked'},
-    {n:10, date:'SUN 4 OCT', unlock:'4 Oct', title:'One Last Look',
+    {n:9, date:'SAT 3 OCT', unlock:'3 Oct', title:'Tokyo in Layers',
+      teaser:'Early markets, quiet gardens and old streets. Tokyo has layers.', status:'locked'},
+    {n:10, date:'SUN 4 OCT', unlock:'4 Oct', title:'Tokyo Takeaways',
       teaser:'One last look before the doors close.', status:'locked'}
   ];
 
@@ -1266,7 +1266,7 @@
   }
 
   /* ---------- day chapter content (rebuilt, "chapter engine" format) ----------
-     Days 1-6, rebuilt from the Master Spec + the itinerary doc + research packs A/B after
+     Days 1-10, rebuilt from the Master Spec + the itinerary doc + research packs A/B after
      the original conversation copy was lost. Every day is one object in DAY_DATA (below);
      `chapters` are shown one at a time as swipeable cards (see dayDetailScreen()).
 
@@ -2464,7 +2464,778 @@
     "tomorrow": "Leave Kabin Gion around 09:15."
   };
 
-  var DAY_DATA = {1:DAY1, 2:DAY2, 3:DAY3, 4:DAY4, 5:DAY5, 6:DAY6};
+  var DAY7 = {
+    "weather": {
+      "lo": 17,
+      "hi": 25,
+      "cond": "Mild, mostly clear",
+      "hourly": [
+        [
+          "09:00",
+          "19°"
+        ],
+        [
+          "12:00",
+          "23°"
+        ],
+        [
+          "15:00",
+          "25°"
+        ],
+        [
+          "18:00",
+          "22°"
+        ],
+        [
+          "21:00",
+          "19°"
+        ],
+        [
+          "23:00",
+          "18°"
+        ]
+      ]
+    },
+    "energy": "Medium",
+    "walking": "Medium to high",
+    "outside": "Urban, mostly outdoors",
+    "dress": "Comfortable shoes, you will be on your feet a lot",
+    "bring": "Water · a small day bag · cash for food stalls",
+    "first": "Leave Kabin Gion around 09:15",
+    "chapters": [
+      {
+        "id": "essential",
+        "kind": "essential",
+        "name": "Today’s essential info"
+      },
+      {
+        "id": "osaka",
+        "name": "Osaka - let’s go",
+        "unlock": "Leave Kabin Gion around 09:15 and travel directly to Osaka-Namba. Once you are at Wagyu Idaten, tap “I’m here”.",
+        "meta": "There is no reservation. Lunch places are allocated before opening and walk-in slots are limited, so being on time matters.",
+        "timing": {
+          "title": "Getting there",
+          "rows": [
+            [
+              "09:15",
+              "Leave Kabin Gion and travel directly to Osaka-Namba."
+            ],
+            [
+              "10:30 to 10:40",
+              "Arrive at Wagyu Idaten. 2F Kakou Building, 1-8-20 Namba, Chuo Ward, Osaka."
+            ],
+            [
+              "10:50 to 11:00",
+              "Lunch places are allocated."
+            ]
+          ]
+        },
+        "mapsUrl": mapsSearch('Wagyu Idaten Namba Osaka'),
+        "expect": "Places are allocated around 10:50 to 11:00. Lunch is listed as 11:30 to 14:30.",
+        "blurb": "Join the queue and follow the staff. Once you have your lunch slot, you are free until it is time to eat.",
+        "aboutLabel": "Wagyu Idaten",
+        "about": [
+          [
+            "Why it matters",
+            "Idaten is operationally important because the day is built around getting the lunch slot first. It also gives the Osaka day a deliberate “special meal” opening rather than random grazing."
+          ],
+          [
+            "A little context",
+            "The restaurant opened in 2023 in Namba and specialises in wagyu-focused rice dishes, including tataki-style preparations and sukiyaki-style options."
+          ],
+          [
+            "Look for",
+            "The focus is the meat rather than an elaborate setting: seared surfaces, sliced wagyu and composed rice bowls or boxes."
+          ],
+          [
+            "Etiquette",
+            "If a queue or ticket system is operating, follow staff instructions and return at the assigned time rather than lingering around the entrance."
+          ],
+          [
+            "One memorable detail",
+            "One of the trip’s most anticipated wagyu meals is in a small Namba dining room rather than a formal luxury steakhouse."
+          ],
+          [
+            "Good to know",
+            "Lunch is currently listed as 11:30 to 14:30, and the restaurant is closed on Mondays."
+          ]
+        ]
+      },
+      {
+        "id": "namba",
+        "name": "Namba, while you wait",
+        "unlock": "Once you have your lunch slot, wander nearby. Tap “I’m here” when you are in the lanes around Namba.",
+        "expect": "Until your lunch slot.",
+        "blurb": "Wander the Hozenji lanes, the Namba arcades or the side streets. Only drift toward Kuromon if there is really enough time. Come back to Idaten when your slot comes up.",
+        "groups": [
+          {
+            "name": "Namba",
+            "rows": [
+              [
+                "Why it matters",
+                "Namba is the operating base of the Osaka day: a dense southern-city centre where food, shopping, theatres, arcades and nightlife compress around the station area."
+              ],
+              [
+                "A little context",
+                "Namba sits in Osaka’s “Minami” (southern downtown) and grew into one of the city’s major commercial and entertainment centres. The area is closely tied to Osaka’s popular food and theatre culture rather than a single monumental attraction."
+              ],
+              [
+                "Look for",
+                "Covered shopping streets, vertical restaurant signs, theatre and entertainment frontage, dense station infrastructure and the quick transition into Hozenji and Dotonbori."
+              ],
+              [
+                "How to experience it",
+                "Treat Namba as a field of options, not another destination to finish. Once you have your lunch slot, nearby wandering can be completely opportunistic."
+              ],
+              [
+                "Etiquette",
+                "Queues are orderly even when streets are busy. Keep access to shop entrances clear."
+              ],
+              [
+                "One memorable detail",
+                "Osaka’s “Minami” identity is useful context: Namba and Dotonbori are the extroverted entertainment face of the city, which makes the later Nakanoshima pause feel intentionally different."
+              ]
+            ]
+          },
+          {
+            "name": "Hozenji",
+            "rows": [
+              [
+                "Why it matters",
+                "Hozenji gives the Osaka day an important tonal contrast: incense, moss, stone paving and a tiny temple area only moments from Dotonbori’s neon."
+              ],
+              [
+                "A little history",
+                "Pilgrims came to Hozenji, and food stalls and teahouses grew around the temple. The surrounding alley later became associated with entertainment, rakugo and manzai. Wartime air raids destroyed the area, but it was rebuilt. The present stone-paved alley has become a symbol of older Naniwa atmosphere."
+              ],
+              [
+                "Look for",
+                "Find the moss-covered Mizukake Fudoson. Worshippers pour water over the figure while making wishes, which is why the statue is green with moss. Notice the wet cobbles, incense and compressed width of the lane."
+              ],
+              [
+                "How to experience it",
+                "Use Hozenji while waiting for lunch or when returning toward Dotonbori. Five quiet minutes here can reset the senses before the neon and food crowds."
+              ],
+              [
+                "Etiquette",
+                "It is a worship site embedded in a nightlife area. Give praying visitors room, pour water only as local practice and signage allow, and do not treat the statue as a prop."
+              ],
+              [
+                "One memorable detail",
+                "After a 2002 fire, regulations threatened to require a wider rebuilt alley. Osaka tourism records that a petition gathered about 300,000 signatures, helping preserve the lane’s original narrow width. The physical intimacy people love today was actively defended."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "id": "kuromon",
+        "name": "Kuromon and Namba",
+        "unlock": "After lunch, walk to Kuromon Market. Once you are there, tap “I’m here”.",
+        "expect": "However long feels right.",
+        "blurb": "Let the market lanes and arcades become the experience. Another bite only matters if something earns it. Toro or uni are references, not goals.",
+        "groups": [
+          {
+            "name": "Kuromon Market",
+            "rows": [
+              [
+                "Why it matters",
+                "Kuromon connects the day’s tasting ambitions to Osaka’s everyday food distribution culture. It is tourist-friendly now, but its identity came from supplying residents and professional cooks."
+              ],
+              [
+                "A little history",
+                "The market’s roots reach back to fish trading near Enmyoji Temple in the late Edo period. Its name, “Black Gate Market,” comes from the temple’s black gate. The market was formally recognized in the early 20th century, was damaged by fire and wartime bombing, and was rebuilt. Today roughly 150 shops line about 580 metres of arcade."
+              ],
+              [
+                "Look for",
+                "Look beyond prepared tourist snacks: notice fish specialists, produce, fugu, knives and tools, packaging and the way retail and immediate eating coexist."
+              ],
+              [
+                "How to experience it",
+                "Because the wagyu lunch comes first, treat Kuromon as tasting rather than another meal. Share one or two things that look exceptional and keep moving."
+              ],
+              [
+                "Etiquette",
+                "Follow each shop’s eating rules and dispose of waste correctly. Avoid blocking stalls while deciding what to buy."
+              ],
+              [
+                "One memorable detail",
+                "The market name is literal history: the “black gate” belonged to a temple that no longer stands, but the market still carries the vanished landmark in its name."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "id": "nakanoshima",
+        "name": "Nakanoshima pause",
+        "unlock": "Around 14:30, or whenever you need a break, go for coffee at Brooklyn Roasting Company and then to Nakanoshima Park. Once you are in the park, tap “I’m here”.",
+        "meta": "Nothing is fixed here. This is a pause, so take it when the day allows.",
+        "expect": "60 to 90 minutes.",
+        "blurb": "Coffee first, then sit or stroll by the water. After a loud morning, doing less is the plan.",
+        "aboutLabel": "Nakanoshima Park",
+        "about": [
+          [
+            "Why it matters",
+            "Nakanoshima is valuable precisely because it is not Namba. The park gives the day a designed pause between heavy lunch and evening neon, while also revealing Osaka as a water city with civic architecture."
+          ],
+          [
+            "A little history",
+            "Nakanoshima Park opened in 1891 as Osaka’s first urban park, on the island between the Dojima and Tosabori rivers. It developed as a civic leisure and cultural space, with restaurants, a beer garden and even a Noh stage in its early history."
+          ],
+          [
+            "Look for",
+            "Notice water on both sides, the long linear shape of the island and the contrast between greenery, modern skyline and historic public buildings such as the Central Public Hall and Nakanoshima Library nearby."
+          ],
+          [
+            "How to experience it",
+            "Sit. This is one of the rare places where doing less is the plan. Coffee and 60 to 90 minutes of walking or sitting is enough."
+          ],
+          [
+            "Etiquette",
+            "Normal park etiquette. The main thing is to protect the pause instead of turning it into more sightseeing."
+          ],
+          [
+            "One memorable detail",
+            "Osaka’s first urban park was not created as empty green relief: early Nakanoshima was already a social and cultural venue, with dining and performance. The city has long used the island as a place to breathe without leaving the center."
+          ]
+        ]
+      },
+      {
+        "id": "dotonbori",
+        "name": "Dotonbori after dark",
+        "unlock": "Head to Dotonbori around 16:30 to 17:00, when the signs and the canal come alive. Once you are there, tap “I’m here”.",
+        "meta": "Arriving earlier or later is fine. Nothing here runs on a deadline.",
+        "expect": "As long as dinner and wandering take.",
+        "blurb": "Dotonbori brings the neon energy and Hozenji is the quieter counterpoint. Explore both on foot instead of navigating between pins.",
+        "bulletsUnlocked": {
+          "title": "Getting back to Kyoto",
+          "items": [
+            "The usual direct train does not run tonight (Kyo-train Garaku does not run on Thursdays), so take an ordinary Hankyu or JR service.",
+            "It is an early start tomorrow, so aim to be back at a sensible hour and have your bag packed tonight."
+          ]
+        },
+        "groups": [
+          {
+            "name": "Dotonbori",
+            "rows": [
+              [
+                "Why it matters",
+                "Dotonbori’s giant signs and food culture are the current form of a much older entertainment district. Knowing the canal and theater history turns the neon from kitsch into continuity."
+              ],
+              [
+                "A little history",
+                "The area takes its name from Yasui Doton, associated with excavation of the waterway in the early 17th century. The district later flourished with theaters, kabuki, puppet theater and teahouses; restaurants expanded to serve theatergoers. Today’s food streets and attention-grabbing signs inherit that entertainment economy."
+              ],
+              [
+                "Look for",
+                "Look for the canal as the organizing line, not only the Glico sign. Notice three-dimensional shop signs competing for attention and how pedestrians, bridges, riverwalk and façades create a performance zone."
+              ],
+              [
+                "How to experience it",
+                "Come after dark. Walk both street level and a short section of the riverwalk so the district reads as a canal entertainment district rather than only a row of restaurants."
+              ],
+              [
+                "Etiquette",
+                "It is crowded; stop for photos out of the main flow and keep food queues compact."
+              ],
+              [
+                "One memorable detail",
+                "Modern Dotonbori’s giant advertising figures compete for attention in much the same way the historic theater district competed for audiences."
+              ]
+            ]
+          },
+          {
+            "name": "Hozenji",
+            "rows": [
+              [
+                "Why it matters",
+                "Hozenji gives the Osaka day an important tonal contrast: incense, moss, stone paving and a tiny temple area only moments from Dotonbori’s neon."
+              ],
+              [
+                "A little history",
+                "Pilgrims came to Hozenji, and food stalls and teahouses grew around the temple. The surrounding alley later became associated with entertainment, rakugo and manzai. Wartime air raids destroyed the area, but it was rebuilt. The present stone-paved alley has become a symbol of older Naniwa atmosphere."
+              ],
+              [
+                "Look for",
+                "Find the moss-covered Mizukake Fudoson. Worshippers pour water over the figure while making wishes, which is why the statue is green with moss. Notice the wet cobbles, incense and compressed width of the lane."
+              ],
+              [
+                "How to experience it",
+                "Use Hozenji while waiting for lunch or when returning toward Dotonbori. Five quiet minutes here can reset the senses before the neon and food crowds."
+              ],
+              [
+                "Etiquette",
+                "It is a worship site embedded in a nightlife area. Give praying visitors room, pour water only as local practice and signage allow, and do not treat the statue as a prop."
+              ],
+              [
+                "One memorable detail",
+                "After a 2002 fire, regulations threatened to require a wider rebuilt alley. Osaka tourism records that a petition gathered about 300,000 signatures, helping preserve the lane’s original narrow width. The physical intimacy people love today was actively defended."
+              ]
+            ]
+          }
+        ]
+      }
+    ],
+    "tomorrow": "Early start. Leave Kabin Gion between 06:30 and 08:00, earlier is quieter. Have your bag packed tonight."
+  };
+
+  var DAY8 = {
+    "weather": {
+      "lo": 16,
+      "hi": 24,
+      "cond": "Mild, mostly clear",
+      "hourly": [
+        [
+          "07:00",
+          "17°"
+        ],
+        [
+          "10:00",
+          "21°"
+        ],
+        [
+          "13:00",
+          "24°"
+        ],
+        [
+          "16:00",
+          "24°"
+        ],
+        [
+          "18:00",
+          "21°"
+        ],
+        [
+          "21:00",
+          "19°"
+        ]
+      ]
+    },
+    "energy": "Medium to high",
+    "walking": "Medium",
+    "outside": "Early outdoor morning, then a long train ride",
+    "dress": "Comfortable shoes, and a light layer for the early morning",
+    "bring": "Water · train tickets · your luggage from Kabin Gion later",
+    "first": "Leave Kabin Gion between 06:30 and 08:00",
+    "chapters": [
+      {
+        "id": "essential",
+        "kind": "essential",
+        "name": "Today’s essential info"
+      },
+      {
+        "id": "bamboo",
+        "name": "To the Bamboo Grove",
+        "unlock": "Leave Kabin Gion between 06:30 and 08:00 and make your way to Arashiyama. Once you are at the Bamboo Grove, tap “I’m here”.",
+        "meta": "Leaving up to 08:00 still keeps the rest of the morning comfortable. There is a booked train this afternoon.",
+        "timing": {
+          "title": "What time feels like",
+          "rows": [
+            [
+              "06:30 to 07:00",
+              "Wonderfully quiet."
+            ],
+            [
+              "07:30 to 08:30",
+              "Still pleasant."
+            ],
+            [
+              "Around 09:00",
+              "Building up."
+            ],
+            [
+              "10:00 onward",
+              "Proper tourist crowds."
+            ]
+          ]
+        },
+        "checklist": {
+          "title": "Before you go",
+          "items": [
+            "Check out of Kabin Gion and leave your luggage there for the day"
+          ]
+        },
+        "expect": "About 30 minutes.",
+        "blurb": "Treat the grove as atmosphere, not a checklist stop. Move quietly and stay on the paths. Please do not touch or damage the bamboo.",
+        "groups": [
+          {
+            "name": "Arashiyama",
+            "rows": [
+              [
+                "Why it matters",
+                "Arashiyama has been appreciated as a retreat and scenic landscape for centuries. The bamboo grove is its most famous image, but the area makes more sense as an old leisure and temple landscape shaped by river, mountains, gardens and former aristocratic connections."
+              ],
+              [
+                "A little history",
+                "The wider Sagano-Arashiyama area was already visited by aristocrats in the Heian period for boating and seasonal scenery. Later temples, villas and preserved routes layered religious and cultural history onto the landscape. The Japanese government recognizes the area for scenic beauty."
+              ],
+              [
+                "Look for",
+                "Notice the relationship between flat river plain and surrounding hills. Even without lingering at Togetsukyo, the mountain backdrop and low-rise scale explain why the area became a retreat."
+              ],
+              [
+                "How to experience it",
+                "Leave the crowded central area early. Think of Arashiyama as the entry point to a quieter movement north into Okusaga, not the whole destination."
+              ],
+              [
+                "Etiquette",
+                "Crowds are the main sensitivity. Keep the group compact, avoid stopping in narrow flow areas, and respect residents as you move into quieter streets."
+              ],
+              [
+                "One memorable detail",
+                "Arashiyama’s literary identity is old: nearby Mt. Ogura is associated with the Ogura Hyakunin Isshu, the famous anthology of one hundred poems by one hundred poets."
+              ]
+            ]
+          },
+          {
+            "name": "Bamboo Grove",
+            "rows": [
+              [
+                "Why it matters",
+                "The bamboo path is visually simple but sensorially strong: vertical rhythm, filtered light, sound and scale. Its value is atmosphere, especially before the crowd becomes the dominant element."
+              ],
+              [
+                "A little history",
+                "Bamboo has long been part of the Sagano landscape and local craft economy. The wider area was used as a retreat by aristocrats, and nearby temples and villas embed the grove within a much older cultural landscape."
+              ],
+              [
+                "Look for",
+                "Look up rather than only forward. Notice how the stalks bend and move together, how light changes between dense and open sections, and how bamboo fencing is made from the same material growing around it."
+              ],
+              [
+                "How to experience it",
+                "Go early, move slowly once inside, and accept that the grove itself is not very long. Do not manufacture extra “things to do”; the experience is mostly seeing and hearing it."
+              ],
+              [
+                "Etiquette",
+                "Do not carve or scratch bamboo. Kyoto has specifically warned about damage from graffiti; damaged stalks may have to be cut. Keep to the path and avoid blocking it for posed photographs."
+              ],
+              [
+                "One memorable detail",
+                "The grove’s fame can make it feel like a standalone attraction, but it is actually a short passage embedded in a larger cultural landscape of temples, villas and bamboo craft."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "id": "otagi",
+        "name": "Otagi Nenbutsu-ji",
+        "unlock": "From Saga-Arashiyama, take a taxi to Otagi Nenbutsu-ji, shortly before 09:00. Once you are at the temple, tap “I’m here”.",
+        "meta": "The temple is expected to open at 09:00 and close at 16:00. The schedule will be confirmed closer to the day.",
+        "expect": "About 1 hour. Aim to be done by 10:30 to 11:00.",
+        "blurb": "Roughly 1,200 stone figures, each with its own expression. Look slowly and find the faces that stay with you. The walk down afterwards and the train this afternoon both depend on finishing on time.",
+        "aboutLabel": "Otagi Nenbutsu-ji",
+        "about": [
+          [
+            "Why it matters",
+            "Otagi is valuable because it feels personal rather than monumental. The 1,200 stone Rakan figures vary in expression, pose and personality, so the temple rewards looking closely rather than standing back for a single grand view."
+          ],
+          [
+            "A little history",
+            "The temple’s present character is strongly connected to a former chief priest who was also a Buddhist sculptor and restorer. He invited people to carve Rakan statues, resulting in roughly 1,200 individual figures across the grounds."
+          ],
+          [
+            "Look for",
+            "Look for tiny differences: laughter, prayer, drinking, musical instruments, pairs of figures, moss and weathering. The expressions make the collection feel like a crowd of individuals rather than repeated religious statuary."
+          ],
+          [
+            "How to experience it",
+            "Do not try to see every statue. Pick favourites, compare expressions, and let everyone wander independently for a few minutes."
+          ],
+          [
+            "Etiquette",
+            "It remains a temple; keep voices low and avoid climbing among or touching the statues unless explicitly permitted."
+          ],
+          [
+            "One memorable detail",
+            "The statues were not mass-produced by one workshop. Their individuality comes from many people responding to the priest’s call, one reason the site can feel unexpectedly humorous and human."
+          ]
+        ]
+      },
+      {
+        "id": "saga-toriimoto",
+        "name": "Down through Saga-Toriimoto",
+        "unlock": "When you are done at Otagi, walk downhill through the old village. Once you are in Saga-Toriimoto, tap “I’m here”.",
+        "expect": "30 to 40 minutes. You are back near Arashiyama by about 11:15 to 11:30.",
+        "blurb": "Old houses, a preserved street and small details. There is no route to follow, so let the village be the experience.",
+        "groups": [
+          {
+            "name": "Saga-Toriimoto",
+            "rows": [
+              [
+                "Why it matters",
+                "Saga-Toriimoto is the calm continuation that makes the morning coherent. Instead of returning immediately to tourist Arashiyama, you descend through an older roadside settlement where machiya and thatched houses survive together."
+              ],
+              [
+                "A little history",
+                "The area grew along the old approach toward Atago Shrine and is designated a Preservation District for Groups of Traditional Buildings. It retains both townhouses and thatched rural-style houses, reflecting the transition from urban edge to mountain road."
+              ],
+              [
+                "Look for",
+                "Look for the change in roof types as you walk, the widening and narrowing of the old road, stone walls, gardens and the large torii gate marking the approach toward Mt. Atago."
+              ],
+              [
+                "How to experience it",
+                "Walk downhill from Otagi. This direction lets the preserved street gradually open back toward Arashiyama and makes the morning feel like a continuous narrative rather than taxiing between attractions."
+              ],
+              [
+                "Etiquette",
+                "It is quiet and residential. Keep noise low, do not photograph into homes, and avoid blocking doorways."
+              ],
+              [
+                "One memorable detail",
+                "Kyoto’s film industry has used Saga-Toriimoto as a period setting because its preserved road can convincingly stand in for older travel routes, a useful clue to why it feels so different from central Arashiyama."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "id": "back-to-kyoto",
+        "name": "Back to Kyoto Station",
+        "unlock": "Leave Arashiyama between 11:30 and 12:00, have lunch, collect your luggage from Kabin Gion and be at Kyoto Station by 15:15. Once you are at the station, tap “I’m here”.",
+        "booking": {
+          "title": "Your train",
+          "rows": [
+            [
+              "Nozomi 32",
+              "Kyoto 16:01, Shinagawa 18:08."
+            ],
+            [
+              "Seats",
+              "Ordinary Car 13, seats 8D, 8E and 9E."
+            ]
+          ]
+        },
+        "checklist": {
+          "title": "Before boarding",
+          "items": [
+            "Have your three SmartEX QR tickets ready"
+          ]
+        },
+        "mapsUrl": mapsTransit('Kyoto Station'),
+        "expect": "About 2 hours 7 minutes to Shinagawa.",
+        "blurb": "A relaxed lunch, your luggage and a calm arrival at the station. Take your seat and let the train carry you back to Tokyo."
+      },
+      {
+        "id": "to-aria",
+        "name": "To ARIA Takanawa",
+        "unlock": "When you arrive in Shinagawa at 18:08, continue to ARIA Takanawa. Once you arrive, tap “I’m here”.",
+        "meta": "Your stay has its own card in the Stays tab, with the address and a short guide to the area.",
+        "mapsUrl": mapsTransit('ARIA Takanawa Tokyo'),
+        "expect": "About 15 minutes from Shinagawa.",
+        "blurb": "Your home for the next three nights. Tonight is deliberately open, so settle in and see what you feel like."
+      }
+    ],
+    "tomorrow": "An early start for a market breakfast. Leave ARIA Takanawa early, so you reach Tsukiji by about 07:30."
+  };
+
+  var DAY9 = {
+    "weather": {
+      "lo": 19,
+      "hi": 25,
+      "cond": "Mild, partly cloudy",
+      "hourly": [
+        [
+          "07:00",
+          "20°"
+        ],
+        [
+          "10:00",
+          "22°"
+        ],
+        [
+          "13:00",
+          "25°"
+        ],
+        [
+          "16:00",
+          "24°"
+        ],
+        [
+          "18:00",
+          "22°"
+        ],
+        [
+          "21:00",
+          "20°"
+        ]
+      ]
+    },
+    "energy": "Medium",
+    "walking": "Medium to high",
+    "outside": "Mostly outdoors, with one museum",
+    "dress": "Comfortable shoes, you will walk a lot",
+    "bring": "Water · a small day bag · cash for the market",
+    "first": "Leave ARIA Takanawa early, to reach Tsukiji by about 07:30",
+    "chapters": [
+      {
+        "id": "essential",
+        "kind": "essential",
+        "name": "Today’s essential info"
+      },
+      {
+        "id": "tsukiji",
+        "name": "Tsukiji Outer Market",
+        "unlock": "Leave ARIA Takanawa early and head to Tsukiji Outer Market, aiming to be there by about 07:30. Once you are at the market, tap “I’m here”.",
+        "meta": "Many stalls start to close in the late morning, so this is a morning stop.",
+        "timing": {
+          "title": "Timing",
+          "rows": [
+            [
+              "07:30 to 09:00",
+              "Explore the market."
+            ]
+          ]
+        },
+        "expect": "About 1.5 hours, roughly 07:30 to 09:00.",
+        "blurb": "Graze instead of sitting down for a big meal. Share a few small things, keep moving and follow whatever smells best."
+      },
+      {
+        "id": "kiyosumi",
+        "name": "Kiyosumi Gardens",
+        "unlock": "Around 09:30, travel from Tsukiji to Kiyosumi Gardens. Once you are in the gardens, tap “I’m here”.",
+        "expect": "About 1 hour.",
+        "blurb": "A quiet reset after the market. Walk the stepping-stone paths around the pond and look for the stones gathered from across Japan."
+      },
+      {
+        "id": "fukagawa",
+        "name": "Fukagawa Edo Museum",
+        "unlock": "Around 10:45 to 11:00, make your way to the Fukagawa Edo Museum. Once you are at the museum, tap “I’m here”.",
+        "expect": "60 to 90 minutes.",
+        "blurb": "A life-size Edo-period neighbourhood you can walk into. Wander the streets and step inside instead of looking from a distance. Have lunch afterwards, wherever suits."
+      },
+      {
+        "id": "kappabashi",
+        "name": "Kappabashi",
+        "unlock": "Around 14:00, walk or travel to Kappabashi, Tokyo’s kitchenware street. Once you are on the street, tap “I’m here”.",
+        "meta": "Most shops close by 17:00.",
+        "expect": "About 1 hour.",
+        "blurb": "Knives, ceramics, plastic food and everything a professional kitchen needs. A walking bridge leads you on toward Asakusa when you are done."
+      },
+      {
+        "id": "asakusa",
+        "name": "Asakusa and Sensō-ji",
+        "unlock": "Around 16:00 to 16:30, walk on to Asakusa. Once you are at Sensō-ji, tap “I’m here”.",
+        "expect": "Until dusk, and as long as you like after.",
+        "blurb": "Tokyo’s oldest temple, saved for the moment the light changes. Stay for the slow shift from afternoon into evening."
+      }
+    ],
+    "tomorrow": "Your last day. Pack tonight. In the morning you check out of ARIA Takanawa and leave your luggage there."
+  };
+
+  var DAY10 = {
+    "weather": {
+      "lo": 19,
+      "hi": 25,
+      "cond": "Mild, partly cloudy",
+      "hourly": [
+        [
+          "08:00",
+          "20°"
+        ],
+        [
+          "11:00",
+          "23°"
+        ],
+        [
+          "14:00",
+          "25°"
+        ],
+        [
+          "17:00",
+          "23°"
+        ],
+        [
+          "19:00",
+          "21°"
+        ],
+        [
+          "21:00",
+          "20°"
+        ]
+      ]
+    },
+    "energy": "Low to medium",
+    "walking": "Low to medium",
+    "outside": "Shops and city streets, then the airport",
+    "dress": "Comfortable clothes for the flight",
+    "bring": "Passport · flight details · a small bag for shopping",
+    "first": "Pack and check out of ARIA Takanawa",
+    "chapters": [
+      {
+        "id": "essential",
+        "kind": "essential",
+        "name": "Today’s essential info"
+      },
+      {
+        "id": "aria-checkout",
+        "name": "ARIA Takanawa",
+        "unlock": "Pack, check out of ARIA Takanawa and leave all your luggage with them for the day. Once you are ready to head out, tap “I’m here”.",
+        "checklist": {
+          "title": "Before you leave",
+          "items": [
+            "Check out of ARIA Takanawa",
+            "Leave all your luggage with them for the day",
+            "Check your route to Haneda and which terminal each of you flies from"
+          ]
+        },
+        "expect": "Ginza shopping starts around 11:00.",
+        "blurb": "A calm last morning. Everything that matters today happens this afternoon, so there is no need to hurry."
+      },
+      {
+        "id": "ginza",
+        "name": "Ginza",
+        "unlock": "Head to Ginza for around 11:00. Once you are in Ginza, tap “I’m here”.",
+        "meta": "Finish by about 14:30, so there is margin before the airport.",
+        "expect": "Around 11:00 to 14:30.",
+        "blurb": "One last shopping district. UNIQLO and MUJI Ginza are the main stops. Pick up your last takeaways and keep an eye on the clock."
+      },
+      {
+        "id": "haneda",
+        "name": "Back to ARIA and Haneda",
+        "unlock": "Be back at ARIA Takanawa around 15:00 to 15:30 to collect your luggage, then leave for Haneda around 16:00 to 16:30. Once you are at Haneda Terminal 1, tap “I’m here”.",
+        "meta": "This is the one real deadline of the day. Aim to reach the airport by about 17:00, and confirm your terminal first.",
+        "booking": {
+          "title": "Your flights",
+          "rows": [
+            [
+              "Marco",
+              "Departs 19:55 on 4 October."
+            ],
+            [
+              "Fernando and Tomás",
+              "Depart 00:05 on 5 October."
+            ]
+          ]
+        },
+        "timing": {
+          "title": "Timing",
+          "rows": [
+            [
+              "15:00 to 15:30",
+              "Back at ARIA Takanawa to collect your luggage."
+            ],
+            [
+              "16:00 to 16:30",
+              "Leave for Haneda."
+            ],
+            [
+              "About 17:00",
+              "Arrive at Haneda Terminal 1."
+            ]
+          ]
+        },
+        "mapsUrl": mapsTransit('Haneda Airport Terminal 1'),
+        "expect": "The trip ends here.",
+        "blurb": "Check in, drop your bags and take the last easy moments of the trip. Thank you for going slowly."
+      }
+    ]
+  };
+
+  var DAY_DATA = {1:DAY1, 2:DAY2, 3:DAY3, 4:DAY4, 5:DAY5, 6:DAY6, 7:DAY7, 8:DAY8, 9:DAY9, 10:DAY10};
   if(TEST_MODE) DAYS.forEach(function(d){ if(DAY_DATA[d.n]) d.status = 'active'; });
 
   /* ---------- progress persistence (round 21) ----------
