@@ -4,6 +4,13 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 47 — 2026-09-21 (bottom bar 8px everywhere, chapter cards 24px from the bottom)
+
+- The bottom Explorer / Stays bar is 8px above the bottom edge in both a browser tab and from the home screen (the standalone-only `bottom:0` override is gone; the `is-standalone` / `is-browser` html classes stay for future use).
+- Day and stay detail: the chapter cards now end 24px above the bottom edge of the screen, matching the 24px side margins (was 16px plus the safe-area inset, about 50px from the home screen). The safe-area inset is no longer added.
+
+---
+
 ## ROUND 46 — 2026-09-21 (5-tap preview shortcut, home-screen vs browser detection)
 
 - Hidden shortcut: 5 quick taps (within 2 s) on the bottom Explorer / Stays bar switch a full preview on or off (`state.peek`, `togglePeek()`). While on, every day, stay and chapter is unlocked (days use the existing fully-unlocked "journal" layout, the Copenhagen card shows) and no progress is saved or changed. Normal view shows the traveller content; with Guide Mode on it also shows the guide blocks. Not persisted: a reload turns it off. Days show "Preview · everything unlocked" under the teaser. Tapping 5x again restores the real locks. `toggleGuide()` and `togglePeek()` share `modeChanged()`.

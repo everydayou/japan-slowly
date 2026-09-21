@@ -590,7 +590,7 @@
   .dc-dot.on{ background:var(--accent); opacity:1; }
   .view-daycards > .dc-carousel{
     flex:1 1 0; min-height:0; margin-top:8px; padding-top:8px;
-    padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 16px);
+    padding-bottom:24px; /* same as the 24px side margins, measured from the bottom edge of the screen */
     display:flex; gap:12px; overflow-x:auto; overflow-y:hidden;
     scroll-snap-type:x mandatory; scroll-padding:0 24px; overscroll-behavior-x:contain;
     -webkit-overflow-scrolling:touch; scrollbar-width:none;
@@ -760,7 +760,7 @@
     position:absolute;
     pointer-events:auto;
     left:50%;
-    bottom:8px; /* opened in a browser tab: 8px above the bottom edge */
+    bottom:8px; /* 8px above the bottom edge, in a browser tab and from the home screen */
     transform:translateX(-50%);
     z-index:50;
     display:flex; align-items:center; gap:2px;
@@ -776,8 +776,6 @@
        smaller blur proportionally. */
     box-shadow:0 4px 12px -4px rgba(0,0,0,.25);
   }
-  /* opened from the home screen (see isStandalone in the script): flush with the bottom edge */
-  html.is-standalone .tabbar{ bottom:0; }
   .tabbar[hidden]{ display:none; }
   /* ---- sliding selection indicator (round 24) ----
      Previously each button's own background/color just snapped between "on"/"off" --
