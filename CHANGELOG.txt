@@ -4,6 +4,14 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 46 — 2026-09-21 (5-tap preview shortcut, home-screen vs browser detection)
+
+- Hidden shortcut: 5 quick taps (within 2 s) on the bottom Explorer / Stays bar switch a full preview on or off (`state.peek`, `togglePeek()`). While on, every day, stay and chapter is unlocked (days use the existing fully-unlocked "journal" layout, the Copenhagen card shows) and no progress is saved or changed. Normal view shows the traveller content; with Guide Mode on it also shows the guide blocks. Not persisted: a reload turns it off. Days show "Preview · everything unlocked" under the teaser. Tapping 5x again restores the real locks. `toggleGuide()` and `togglePeek()` share `modeChanged()`.
+- The app now detects how it was opened (`navigator.standalone` or `display-mode: standalone`) and puts `is-standalone` or `is-browser` on `<html>`, ready for CSS that spaces the bottom bar differently in a browser tab and from the home screen. Follow-up, same round: bottom bar sits 8px above the bottom edge in a browser tab and 0px (flush, `html.is-standalone .tabbar{bottom:0}`) from the home screen; it no longer adds env(safe-area-inset-bottom).
+- On the home deck, only the logo image (`.home-hero .mark`) returns to the intro screen; tapping the wordmark, date or empty header no longer does.
+
+---
+
 ## ROUND 45 — 2026-09-20 ("I'm here" must be in Japan)
 
 - Tapping "I'm here" (+ Yes) now checks the phone's location first (`checkInJapan`, `inJapan`). Allowed only if the position falls inside a rough Japan map box (Kyushu to Hokkaido, plus Okinawa and the Nansei islands). From Berlin or Seoul the card stays "on the way" and shows "Your phone says you are not in Japan yet. This card opens once you are there."

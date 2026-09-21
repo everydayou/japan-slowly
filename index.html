@@ -760,7 +760,7 @@
     position:absolute;
     pointer-events:auto;
     left:50%;
-    bottom:env(safe-area-inset-bottom, 0px);
+    bottom:8px; /* opened in a browser tab: 8px above the bottom edge */
     transform:translateX(-50%);
     z-index:50;
     display:flex; align-items:center; gap:2px;
@@ -776,6 +776,8 @@
        smaller blur proportionally. */
     box-shadow:0 4px 12px -4px rgba(0,0,0,.25);
   }
+  /* opened from the home screen (see isStandalone in the script): flush with the bottom edge */
+  html.is-standalone .tabbar{ bottom:0; }
   .tabbar[hidden]{ display:none; }
   /* ---- sliding selection indicator (round 24) ----
      Previously each button's own background/color just snapped between "on"/"off" --
@@ -1040,6 +1042,14 @@
   var isIOS = /iP(hone|od|ad)/.test(navigator.platform) ||
     (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
 
+  /* ---------- opened from the home screen, or in a browser tab? ----------
+     Sets a class on <html> (`is-standalone` or `is-browser`) so CSS can space things
+     differently in the two cases. iOS reports it through navigator.standalone, everything
+     else through the display-mode media query. */
+  var isStandalone = (window.navigator.standalone === true) ||
+    (window.matchMedia && (window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches));
+  document.documentElement.classList.add(isStandalone ? 'is-standalone' : 'is-browser');
+
   /* ---------- single consolidated viewport-change handler ----------
      Just setAppHeight() + updateStackClearance() as of round 25 -- #tabbar and
      .sheet-panel/.sheet-backdrop no longer need their own JS repositioning (they're
@@ -1202,6 +1212,7 @@
     var p = state.dayProgress[10], d = DAY_DATA[10];
     var day10 = DAYS.filter(function(x){ return x.n===10; })[0];
     /* only once Day 10 itself is open: left-over progress from testing must not reveal it early */
+    if(state.peek) return !!day10;
     return !!(day10 && day10.status==='active' && p && d && p.done >= d.chapters.length-1);
   }
   function deckLast(){ return DAYS.length - 1 - (copenhagenOpen() ? 0 : 1); }
@@ -1299,6 +1310,12 @@
     var prevDone = true;
     DAYS.forEach(function(d){
       if(d.extra) return;
+      if(state.peek){
+        /* preview: every day is open with all of its chapters unlocked (the same fully
+           unlocked layout a past day uses). Nothing is saved and no progress is touched. */
+        d.status = DAY_DATA[d.n] ? 'journal' : 'locked';
+        return;
+      }
       if(state.guide){
         /* Guide Mode: only Day 1 is open; each next day opens when the one before is finished */
         d.status = (DAY_DATA[d.n] && (prevDone || dayReached(d.n))) ? 'active' : 'locked';
@@ -3655,7 +3672,7 @@
      above) can override screen/openDay/stackIndex/chapter-reveal-state below -- a
      returning visitor resumes exactly where they left off instead of always restarting
      at the intro splash with every chapter re-hidden. */
-  var state = { guide:false, locNote:null, screen:'intro', openDay:null, openStay:null, dayProgress:{}, stackIndex:0, confirming:null, scrollToEnd:false, animating:false, sheetAbout:null };
+  var state = { guide:false, peek:false, locNote:null, screen:'intro', openDay:null, openStay:null, dayProgress:{}, stackIndex:0, confirming:null, scrollToEnd:false, animating:false, sheetAbout:null };
   applyStatuses();
   (function applySavedProgress(){
     var saved = loadProgress();
@@ -4363,7 +4380,7 @@
 
     if(dayData){
       html += '<div class="dc-essential-wrap"><button class="dc-pillbtn" data-dc-essential>Today’s essential info</button></div>';
-      if(isJournal) html += '<div class="journalflag">Past day &middot; kept as trip journal &middot; fully unlocked</div>';
+      if(isJournal) html += '<div class="journalflag">'+(state.peek ? 'Preview &middot; everything unlocked' : 'Past day &middot; kept as trip journal &middot; fully unlocked')+'</div>';
       html += dcCardsHTML(day, dayData);
     } else {
       var lockMsg = state.guide ? 'Opens when Day '+(day.n-1)+' is finished' : 'Unlocks '+day.unlock+' at 00:00 Japan time';
@@ -5218,8 +5235,15 @@
   var guideTaps = [];
   /* Guide Mode on/off: re-evaluates which days and stays are open, and steps back out of a
      day or stay that has just become locked (guide switched off). */
+  function togglePeek(){
+    state.peek = !state.peek;
+    modeChanged();
+  }
   function toggleGuide(){
     state.guide = !state.guide;
+    modeChanged();
+  }
+  function modeChanged(){
     applyStatuses();
     if(state.screen==='day'){
       var od = DAYS.filter(function(d){ return d.n===state.openDay; })[0];
@@ -5399,8 +5423,12 @@
        (much bigger) hero, which has no tap behavior of its own -- only its CTA does. */
     var hero = el.querySelector('.home-hero');
     if(hero){
-      hero.style.cursor = 'pointer';
-      hero.addEventListener('click', function(){ goIntro(); });
+      /* only the logo image is tappable (not the whole header) */
+      var heroMark = hero.querySelector('.mark');
+      if(heroMark){
+        heroMark.style.cursor = 'pointer';
+        heroMark.addEventListener('click', function(){ goIntro(); });
+      }
       /* Guide Mode entry point: three quick taps on the date line under the wordmark */
       var heroRange = hero.querySelector('.range');
       if(heroRange) heroRange.addEventListener('click', function(e){
@@ -5522,6 +5550,16 @@
     var tabStays = document.getElementById('tabStays');
     if(tabExplore) tabExplore.addEventListener('click', function(){ goExplore(); });
     if(tabStays) tabStays.addEventListener('click', function(){ goStays(); });
+    /* hidden shortcut: 5 quick taps on the bar switch the full preview on or off (every day,
+       stay and chapter unlocked; shows traveller content, or guide content in Guide Mode) */
+    var tabbarEl = document.getElementById('tabbar');
+    var peekTaps = [];
+    if(tabbarEl) tabbarEl.addEventListener('click', function(){
+      var now = Date.now();
+      peekTaps = peekTaps.filter(function(t){ return now - t < 2000; });
+      peekTaps.push(now);
+      if(peekTaps.length >= 5){ peekTaps = []; togglePeek(); }
+    });
   })();
 
   /* keep the locks honest while the app is open: re-check the clock every 30 s and when the
