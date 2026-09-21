@@ -4,6 +4,12 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 48 — 2026-09-21 (preview mode opens days on the first chapter)
+
+- In the 5-tap preview mode, a day opens on its first chapter instead of the last one (`dcMount()` skips the scroll-to-end when `state.peek`). Normal and Guide Mode are unchanged: a day still opens on the newest chapter. Only the carousel's starting scroll position changes, no progress or unlock logic.
+
+---
+
 ## ROUND 47 — 2026-09-21 (bottom bar 8px everywhere, chapter cards 24px from the bottom)
 
 - The bottom Explorer / Stays bar is 8px above the bottom edge in both a browser tab and from the home screen (the standalone-only `bottom:0` override is gone; the `is-standalone` / `is-browser` html classes stay for future use).

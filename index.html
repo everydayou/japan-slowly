@@ -4360,7 +4360,8 @@
   function dcMount(root){
     var car = root.querySelector('.dc-carousel');
     if(!car) return;
-    if(state.screen!=='stayDetail') car.scrollLeft = car.scrollWidth; /* stay cards start at the first card */
+    /* stay cards start at the first card; so does a day in preview mode (everything unlocked, just exploring) */
+    if(state.screen!=='stayDetail' && !state.peek) car.scrollLeft = car.scrollWidth;
     dcSyncDots(root);
   }
 
