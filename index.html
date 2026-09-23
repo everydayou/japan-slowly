@@ -1200,7 +1200,7 @@
       teaser:'Start early. Faces are waiting in the forest.', status:'locked'},
     {n:9, date:'SAT 3 OCT', unlock:'3 Oct', title:'tokyo in layers',
       teaser:'Early markets, quiet gardens and old streets. Tokyo has layers.', status:'locked'},
-    {n:10, date:'SUN 4 OCT', unlock:'4 Oct', title:'tokyo takeaways',
+    {n:10, date:'SUN 4 OCT', unlock:'4 Oct', title:'sayonara',
       teaser:'One last look before the doors close.', status:'locked'},
     /* not a day: a quiet extra card that joins the deck once Day 10's last chapter is
        reached (see copenhagenOpen). No date, no day counter, does not open. */
@@ -1394,7 +1394,6 @@
         unlock:'Head to Harajuku. Once you are there, tap “I’m here”.',
         meta:'No fixed start time today. The only fixed point is 20:00 in Shibuya.',
         expect:'About 1 to 2 hours.',
-        mapsUrl:mapsTransit('Harajuku Station'),
         blurb:'Start on Takeshita Street, then drift through the surrounding lanes toward Omotesando. Let Harajuku read as layers: tourist spectacle on Takeshita Street, fashion retail along the edges, and a quieter backstreet culture underneath both.',
         groups:[
           {name:'Takeshita Street', rows:[
@@ -4218,10 +4217,8 @@
   }
   function dcInfoHTML(ch, p, arrived){
     var parts = [];
-    if(!arrived){
-      var how = ch.unlock || (ch.gate ? 'Opens at '+ch.gate.time+'.' : 'Head to '+ch.name+'. Once you are there, tap “I’m here”.');
-      parts.push(dcField('To unlock', escH(how)));
-    }
+    var how = ch.unlock || (ch.gate ? 'Opens at '+ch.gate.time+'.' : 'Head to '+ch.name+'. Once you are there, tap “I’m here”.');
+    parts.push(dcField('To unlock', escH(how)));
     if(ch.hint) parts.push('<div class="dc-hint">'+escH(ch.hint)+'</div>');
     if(ch.meta) parts.push(dcField('Note:', escH(ch.meta)));
     if(ch.booking) parts.push(dcBullets(ch.booking.title, ch.booking.rows.map(function(r){ return '<li>'+escH(r[0])+': '+escH(r[1])+'</li>'; })));

@@ -4,6 +4,21 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 50 — 2026-09-23 (Info fold reverted, more directions restored, Day 10 renamed)
+
+- Round 49's "keep Info open until visited" was the wrong fix. Reverted: Info auto-collapses again the moment a chapter is arrived, same as before Round 49. The actual bug it was chasing: "To unlock" used to be removed from the Info container once a chapter unlocked, so re-opening a folded card after arriving showed only "Note" (or nothing, once the unlock text was gone). "To unlock" is now always kept in the Info container, arrived or not, so it and "Note" survive the fold and are still there when you tap Info back open (`dcInfoHTML(ch, p, arrived)` back to its original signature; collapse default back to `arrived`).
+- Directions restored on MITSUKI, Day 3's two Kamakura train chapters, Yasaka Shrine, Pontocho and Wagyu Idaten (all removed in Round 49). Harajuku stays without one, per the original ask.
+- Day 10's title is now "sayonara" (was "tokyo takeaways").
+
+---
+
+## ROUND 49 — 2026-09-23 (Info stays open while you're on a chapter; directions trimmed to booked things only)
+
+- The Info container's default fold now follows "visited" (moved on to a later chapter) instead of "arrived". Before this, the moment a chapter became arrived, whether by tapping "I'm here" or because it starts already arrived (`startArrived`, e.g. Harajuku on Day 2), Info folded immediately and "Note:"/other fields dropped out of sight until tapped open. Now Info stays open for as long as a chapter is the current one; it only folds by default once you move past it (`dcInfoHTML(ch, p, arrived, visited)`, folds on `visited` not `arrived`).
+- Directions chips are now shown only for a booked train leg or a booked place (a reservation, or the day's own accommodation), not for an ordinary "walk over there" chapter. Removed from Day 2 Harajuku (a startArrived chapter, no booking) and MITSUKI (a club, no reservation), Day 3 to-Kamakura and back-to-Tokyo (both explicitly unreserved JR trains), Day 6 Yasaka Shrine, and Day 7 Pontocho and Wagyu Idaten (both explicitly "no booking/no reservation" in their own copy). Kept on Kita-Shinjuku, the Gion and ARIA Takanawa stay chapters, Pasela (booked karaoke), the reserved Azusa leg to Kiso, the Komanoyu shuttle connection, the Kyoto-to-Tokyo Shinkansen leg, and the Haneda departure (booked flights). Guide Mode's own directions (visible only to Marco) were left untouched, since those are a separate, private reference.
+
+---
+
 ## ROUND 48 — 2026-09-21 (preview mode opens days on the first chapter)
 
 - In the 5-tap preview mode, a day opens on its first chapter instead of the last one (`dcMount()` skips the scroll-to-end when `state.peek`). Normal and Guide Mode are unchanged: a day still opens on the newest chapter. Only the carousel's starting scroll position changes, no progress or unlock logic.
