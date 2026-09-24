@@ -675,6 +675,8 @@
   .dc-kicon svg{ width:13px; height:13px; display:block; }
   .dc-hourly{ flex:none; display:flex; gap:14px; overflow-x:auto; margin-top:-6px; }
   .dc-hourly > div{ flex:none; text-align:center; font-size:14px; color:var(--ink-soft); }
+  .dc-hourly .ic{ display:block; width:18px; height:18px; margin:0 auto 4px; color:var(--ink-faint); }
+  .dc-hourly .ic svg{ width:100%; height:100%; }
   .dc-hourly .t{ display:block; font-size:12px; color:var(--ink-faint); margin-bottom:2px; }
   .dc-hourly .g{ display:block; font-weight:600; font-variant-numeric:tabular-nums; }
   .dc-lastupdate{ font-size:14px; color:var(--ink-faint); }
@@ -1338,18 +1340,20 @@
   function mapsTransit(q){ return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(q)+'&travelmode=transit'; }
 
   var DAY1 = {
-    weather:{lo:19,hi:24,cond:'Clear, mild', hourly:[['13:00','24°'],['16:00','23°'],['19:00','21°'],['22:00','19°'],['01:00','18°'],['04:00','17°']]},
+    weather:{lo:19,hi:24,cond:'Clear, mild', hourly:[['08:00','20°'],['10:00','21°'],['12:00','23°'],['14:00','24°'],['16:00','23°'],['18:00','22°'],['20:00','21°'],['22:00','20°']]},
     energy:'Low–medium', walking:'Low–medium', outside:'Mixed indoor/outdoor',
     dress:'Layers for a long-haul arrival', bring:'Passport · booking details', first:'Start on arrival',
     chapters:[
       {id:'essential', kind:'essential', name:'Today’s essential info'},
       {id:'haneda', name:'Touchdown at Haneda',
+        notBefore:'21:00',
         unlock:'Once you are through immigration, baggage and customs and out in the arrivals hall, tap “I’m here”.',
         expect:'A few minutes, then head into the city.',
         meta:'Marco will meet you in the arrivals hall.',
         blurb:'Welcome to Japan. You made it. Say hello to Marco, take a breath, then head into the city.'
       },
       {id:'kita-shinjuku', name:'To Kita-Shinjuku',
+        notBefore:'12:00',
         unlock:'Take the ride into the city and head to your stay in Kita-Shinjuku. Once you arrive, tap “I’m here”.',
         expect:'About 30 minutes to drop your bags and settle in.',
         blurb:'This is your base for the first nights. Drop your bags and get your bearings: small streets, low buildings, vending machines, the ordinary Tokyo you’ll come back to each night. Your stay has its own card in the Stays tab, with the address and a short guide to the area.',
@@ -1364,6 +1368,7 @@
           ['One memorable detail','The speed of the change: within a short walk, the city can go from near silence to rail infrastructure, giant department stores and neon.']]
       },
       {id:'okubo', name:'Food around you',
+        notBefore:'18:00',
         unlock:'Head to Okubo or Shin-Okubo, a few minutes from the stay. Once you arrive, tap “I’m here”.',
         expect:'About an hour.',
         blurb:'It is late, so keep it easy: pick whatever looks good and is still open, then head back and rest. One short hop and the city feels completely different.',
@@ -1388,12 +1393,13 @@
   };
 
   var DAY2 = {
-    weather:{lo:20,hi:26,cond:'Partly cloudy', hourly:[['12:00','25°'],['15:00','26°'],['18:00','23°'],['21:00','21°'],['00:00','19°'],['03:00','18°']]},
+    weather:{lo:20,hi:26,cond:'Partly cloudy', hourly:[['08:00','21°'],['10:00','23°'],['12:00','25°'],['14:00','26°'],['16:00','25°'],['18:00','23°'],['20:00','22°'],['22:00','21°']]},
     energy:'Medium–high', walking:'High', outside:'Mostly urban / outdoors',
     dress:'Comfortable shoes', bring:'Physical passport (photo ID for the last stop) · Suica · a small bag', first:'Start flexible',
     chapters:[
       {id:'essential', kind:'essential', name:'Today’s essential info'},
       {id:'harajuku', name:'Harajuku', startArrived:true,
+        notBefore:'05:00',
         unlock:'Head to Harajuku. Once you are there, tap “I’m here”.',
         meta:'No fixed start time today. The only fixed point is 20:00 in Shibuya.',
         expect:'About 1 to 2 hours.',
@@ -1430,6 +1436,7 @@
             ['One memorable detail','The mountain reference in the name makes the brand feel more Japanese than its modern minimalist interiors first suggest.']]}
         ]},
       {id:'omotesando', name:'Omotesando',
+        notBefore:'12:00',
         unlock:'Walk over to Omotesando, a short stroll from Takeshita Street. Once you are there, tap “I’m here”.',
         expect:'About 1 hour.',
         blurb:'Flagship stores and leafy side streets. Work south through Ura-Harajuku toward Shibuya, and let Cat Street form part of the transition rather than a destination of its own.',
@@ -1450,6 +1457,7 @@
             ['One memorable detail','The paired names “Omokado” and “Harakado” are a playful way to tell apart the two Tokyu Plaza buildings facing the same Harajuku and Omotesando crossroads.']]}
         ]},
       {id:'shibuya', name:'Shibuya',
+        notBefore:'12:00',
         unlock:'Head south on foot to Shibuya, about 20 minutes via Cat Street. Once you are there, tap “I’m here”.',
         expect:'Explore until 19:30, then head to the next location.',
         blurb:'Let the crossing, Center-gai, Hachiko and Dogenzaka appear as you move, rather than following a fixed route. Nonbei Yokocho, beside the tracks, may feel most atmospheric later in the evening.',
@@ -1492,6 +1500,7 @@
         ]},
       {id:'pasela', name:'Pasela Shibuya',
         gate:{time:'20:00'},
+        notBefore:'18:00',
         unlock:'Be at the venue a few minutes before 20:00 (Directions below). This card opens at 20:00.',
         expect:'Booked for 2 hours, 20:00 to 22:00.',
         blurb:'A private room instead of a public stage: your own song queue, your own drinks, just the three of you. Check in with the booking details below.',
@@ -1509,6 +1518,7 @@
           ['One memorable detail','Part of karaoke’s social power in Japan is the privacy: the point is not performing for strangers but creating a temporary private world with your own group.']]
       },
       {id:'nightlife', name:'MITSUKI',
+        notBefore:'18:00',
         unlock:'Head to MITSUKI, up on Dogenzaka. Once you are at the door, tap “I’m here”.',
         expect:'As long as you like.',
         blurb:'A small underground room between a DJ bar and a club, leaning toward house, electro and underground electronic music.',
@@ -1527,12 +1537,13 @@
   };
 
   var DAY3 = {
-    weather:{lo:20,hi:26,cond:'Partly cloudy', hourly:[['09:00','22°'],['12:00','26°'],['15:00','26°'],['18:00','23°'],['21:00','21°']]},
+    weather:{lo:20,hi:26,cond:'Partly cloudy', hourly:[['08:00','21°'],['10:00','23°'],['12:00','25°'],['14:00','26°'],['16:00','25°'],['18:00','23°'],['20:00','22°'],['22:00','21°']]},
     energy:'Medium–high', walking:'Potentially high', outside:'Mostly outdoors',
     dress:'Comfortable walking shoes, trails may be uneven', bring:'Suica · water · comfortable shoes', first:'Leave by 09:30',
     chapters:[
       {id:'essential', kind:'essential', name:'Today’s essential info'},
       {id:'to-kamakura', name:'To Kamakura', startArrived:true,
+        notBefore:'05:00',
         unlock:'Leave by 09:30 and take the train from Shinjuku to Kita-Kamakura (schedule below). Once you are at Kita-Kamakura Station, tap “I’m here”.',
         expect:'About 20 minutes to spare before 11:00.',
         blurb:'Engaku-ji is a one-minute walk from the station. Your friend meets you there at 11:00.',
@@ -1545,6 +1556,7 @@
         maps:[['Directions: Kita-Kamakura Station', mapsTransit('Kita-Kamakura Station')], ['Directions: Engaku-ji', mapsSearch('Engaku-ji Kamakura')]]
       },
       {id:'kamakura', name:'A day in Kamakura',
+        notBefore:'12:00',
         unlock:'Once you have met your friend at Engaku-ji, tap “I’m here”.',
         expect:'As long as the day takes, no fixed end.',
         blurb:'A former samurai capital, hills, sea, and Zen, all pressed into one compact coastal city. No fixed stops today: follow your friend and let the day find its own pace.',
@@ -1560,6 +1572,7 @@
           ['One memorable detail','Kamakura’s historical importance is far bigger than its size today: for roughly a century and a half, political power shifted away from the imperial court in Kyoto to a warrior government based in this compact coastal city.']]
       },
       {id:'back-to-tokyo', name:'Back to Tokyo', startArrived:true,
+        notBefore:'18:00',
         unlock:'Head to the station when the day winds down. Once you are back in Shinjuku, tap “I’m here”.',
         blurb:'Nothing else is planned. Rest, eat, and let the day settle.',
         meta:'Take the JR Shonan-Shinjuku Line towards Shinjuku from Kita-Kamakura or Kamakura. Direct services run roughly twice an hour, otherwise change at Ofuna. Check the live route when your friend is ready to finish the day.',
@@ -1574,32 +1587,7 @@
       "lo": 15,
       "hi": 22,
       "cond": "Cooler, chance of mist",
-      "hourly": [
-        [
-          "09:00",
-          "17°"
-        ],
-        [
-          "12:00",
-          "21°"
-        ],
-        [
-          "15:00",
-          "22°"
-        ],
-        [
-          "18:00",
-          "18°"
-        ],
-        [
-          "21:00",
-          "16°"
-        ],
-        [
-          "00:00",
-          "15°"
-        ]
-      ]
+      "hourly": [["08:00","16°"],["10:00","18°"],["12:00","20°"],["14:00","22°"],["16:00","21°"],["18:00","19°"],["20:00","17°"],["22:00","16°"]]
     },
     "energy": "Medium",
     "walking": "Medium",
@@ -1616,6 +1604,7 @@
       {
         "id": "to-kiso",
         "name": "To Kiso Valley",
+        "notBefore": "05:00",
         "unlock": "Leave the apartment by 09:25 and be at Shinjuku Station by 09:45. The Azusa 13 leaves at 10:00. Once you get off at Shiojiri, tap “I’m here”.",
         "meta": "Reserved seats on the Azusa 13. On the way, watch the city give way to forested slopes and narrow valleys.",
         "timing": {
@@ -1685,6 +1674,7 @@
       {
         "id": "narai",
         "name": "Narai-juku",
+        "notBefore": "12:00",
         "unlock": "Take the 12:41 local train from Shiojiri to Narai. It arrives at 13:04. Once you step out at Narai, tap “I’m here”.",
         "expect": "About 2 hours 20 minutes. Leave the street by 15:25 for the 15:36 train.",
         "blurb": "Close to a kilometre of wooden merchant houses, still lived in, still working. Walk it slowly, then turn back for a different view. One or two interiors are worth more than trying to enter everything, and if somewhere inviting appears, stop for soba, oyaki or gohei-mochi.",
@@ -1810,6 +1800,7 @@
       {
         "id": "to-komanoyu",
         "name": "To Komanoyu",
+        "notBefore": "12:00",
         "unlock": "Leave the street by 15:25 and take the 15:36 local train to Kiso-Fukushima. It arrives at about 15:57. Once you are at Kiso-Fukushima Station, tap “I’m here”.",
       "meta": "Check the departure time on the timetable at Narai Station when you get there.",
         "timing": {
@@ -1859,6 +1850,7 @@
       {
         "id": "komanoyu",
         "name": "Komanoyu",
+        "notBefore": "12:00",
         "unlock": "The Komanoyu shuttle takes you up into the hills. Once you have arrived at the ryokan, tap “I’m here”.",
         "expect": "The rest of the evening. Nothing else is planned.",
         "blurb": "A 19th-century inn with its own hot spring, tucked into the same valley you just crossed. Tonight is slow, on purpose: shoes off, tatami underfoot, and dinner that takes its time.",
@@ -1917,32 +1909,7 @@
       "lo": 18,
       "hi": 26,
       "cond": "Mild, mostly clear",
-      "hourly": [
-        [
-          "10:00",
-          "19°"
-        ],
-        [
-          "13:00",
-          "25°"
-        ],
-        [
-          "16:00",
-          "26°"
-        ],
-        [
-          "19:00",
-          "22°"
-        ],
-        [
-          "21:00",
-          "20°"
-        ],
-        [
-          "00:00",
-          "18°"
-        ]
-      ]
+      "hourly": [["08:00","19°"],["10:00","22°"],["12:00","24°"],["14:00","26°"],["16:00","25°"],["18:00","22°"],["20:00","21°"],["22:00","19°"]]
     },
     "energy": "Low to medium",
     "walking": "Low by day, more in the evening",
@@ -1959,6 +1926,7 @@
       {
         "id": "to-kyoto",
         "name": "To Kyoto",
+        "notBefore": "12:00",
         "unlock": "Be ready at Komanoyu for the 10:00 shuttle. The Shinano 6 leaves Kiso-Fukushima at 10:30 and you change trains at Nagoya. Once you arrive at Kyoto Station, tap “I’m here”.",
         "meta": "Reserved seats on both trains. Take your time at Nagoya and follow the signs for the Shinkansen.",
         "timing": {
@@ -1999,6 +1967,7 @@
       {
         "id": "to-stay",
         "name": "To Our Stay",
+        "notBefore": "12:00",
         "unlock": "Take a taxi from Kyoto Station to Kabin Gion, about 10 to 15 minutes. Once you arrive, tap “I’m here”.",
         "meta": "Your stay has its own card in the Stays tab, with the address and a short guide to the area.",
         "mapsUrl": mapsSearch('Kabin Gion 18-12 Yamatocho Higashiyama Ward Kyoto'),
@@ -2008,6 +1977,7 @@
       {
         "id": "gion",
         "name": "Gion, after dark",
+        "notBefore": "18:00",
         "unlock": "Head out on foot once the light starts to fade and the daytime crowds thin. Once you are in Gion, tap “I’m here”.",
         "expect": "About 1 hour.",
         "blurb": "A walk through the old entertainment district. Start east through Gion and let Hanamikoji and the side lanes shape the route. The Yasaka Pagoda is a visual compass rather than a destination. Follow the photography signs and keep to the side of the road.",
@@ -2133,6 +2103,7 @@
       {
         "id": "yasaka-shrine",
         "name": "Yasaka Shrine",
+        "notBefore": "18:00",
         "unlock": "Walk to Yasaka Shrine at the eastern end of Shijo, a short walk from Gion. Once you are at the shrine, tap “I’m here”.",
         "mapsUrl": mapsSearch('Yasaka Shrine Kyoto'),
         "expect": "About 15 to 20 minutes.",
@@ -2168,6 +2139,7 @@
       {
         "id": "pontocho",
         "name": "Pontocho, for dinner",
+        "notBefore": "18:00",
         "unlock": "Whenever you are ready to eat, walk to Pontocho, the narrow lane beside the Kamo River. Once you are there, tap “I’m here”.",
         "meta": "No booking is fixed. Choose somewhere that feels right.",
         "mapsUrl": mapsSearch('Pontocho Kyoto'),
@@ -2210,32 +2182,7 @@
       "lo": 18,
       "hi": 26,
       "cond": "Mild, mostly clear",
-      "hourly": [
-        [
-          "07:00",
-          "18°"
-        ],
-        [
-          "10:00",
-          "22°"
-        ],
-        [
-          "13:00",
-          "25°"
-        ],
-        [
-          "16:00",
-          "26°"
-        ],
-        [
-          "18:00",
-          "22°"
-        ],
-        [
-          "21:00",
-          "20°"
-        ]
-      ]
+      "hourly": [["08:00","19°"],["10:00","22°"],["12:00","24°"],["14:00","26°"],["16:00","25°"],["18:00","22°"],["20:00","21°"],["22:00","19°"]]
     },
     "energy": "High",
     "walking": "High, with hills",
@@ -2252,6 +2199,7 @@
       {
         "id": "fushimi",
         "name": "Fushimi Inari",
+        "notBefore": "05:00",
         "unlock": "Leave Kabin Gion between 06:30 and 07:00 and take the Keihan line from Gion-Shijo to Fushimi-Inari. Once you are at the shrine, tap “I’m here”.",
         "meta": "The earlier you go, the quieter the torii paths are.",
         "expect": "As long as you enjoy it. The summit is optional.",
@@ -2291,6 +2239,7 @@
       {
         "id": "open-middle",
         "name": "Open middle",
+        "notBefore": "05:00",
         "unlock": "Head back to Kabin Gion when you have had enough of the shrine. Once you are back, tap “I’m here”.",
         "expect": "However long you want. Nothing is fixed.",
         "blurb": "Breakfast, a relaxed lunch, wandering the neighbourhood or resting at the stay. Save your energy for the afternoon: you leave around 15:15."
@@ -2298,6 +2247,7 @@
       {
         "id": "to-kiyomizu",
         "name": "To Kiyomizu-dera",
+        "notBefore": "12:00",
         "unlock": "Leave Kabin Gion around 15:15 and walk east and uphill through Higashiyama. Once you can see the Yasaka Pagoda, tap “I’m here”.",
         "expect": "About 1 hour to walk up, so you arrive around 16:10 to 16:20.",
         "blurb": "Choose the streets that look interesting rather than following a fixed route. The pagoda, Ninenzaka and Sannenzaka are your compass on the way up.",
@@ -2394,6 +2344,7 @@
       {
         "id": "kiyomizu",
         "name": "Kiyomizu-dera",
+        "notBefore": "12:00",
         "unlock": "Walk up to Kiyomizu-dera and enter around 16:10 to 16:20. Once you are inside the temple grounds, tap “I’m here”.",
         "meta": "Sunset today is at about 17:44. The temple is expected to close at 18:00.",
         "expect": "About 2 hours, through sunset.",
@@ -2491,6 +2442,7 @@
       {
         "id": "back-to-gion",
         "name": "Back to Gion",
+        "notBefore": "18:00",
         "unlock": "When you are ready for dinner, wander back downhill after dark toward Yasaka Shrine and Gion. Once you are in Gion, tap “I’m here”.",
         "expect": "Whenever you are ready for dinner.",
         "blurb": "Take whichever old streets feel most atmospheric on the way down. Sannenzaka feels completely different after dark. No booking, no fixed plan: choose somewhere inviting."
@@ -2504,32 +2456,7 @@
       "lo": 17,
       "hi": 25,
       "cond": "Mild, mostly clear",
-      "hourly": [
-        [
-          "09:00",
-          "19°"
-        ],
-        [
-          "12:00",
-          "23°"
-        ],
-        [
-          "15:00",
-          "25°"
-        ],
-        [
-          "18:00",
-          "22°"
-        ],
-        [
-          "21:00",
-          "19°"
-        ],
-        [
-          "23:00",
-          "18°"
-        ]
-      ]
+      "hourly": [["08:00","18°"],["10:00","21°"],["12:00","23°"],["14:00","25°"],["16:00","24°"],["18:00","21°"],["20:00","20°"],["22:00","18°"]]
     },
     "energy": "Medium",
     "walking": "Medium to high",
@@ -2546,6 +2473,7 @@
       {
         "id": "osaka",
         "name": "Osaka - let’s go",
+        "notBefore": "05:00",
         "unlock": "Leave Kabin Gion around 09:15 and travel directly to Osaka-Namba. Once you are at Wagyu Idaten, tap “I’m here”.",
         "meta": "There is no reservation. Lunch places are allocated before opening and walk-in slots are limited, so being on time matters.",
         "timing": {
@@ -2599,6 +2527,7 @@
       {
         "id": "namba",
         "name": "Namba, while you wait",
+        "notBefore": "05:00",
         "unlock": "Once you have your lunch slot, wander nearby. Tap “I’m here” when you are in the lanes around Namba.",
         "timing": {
           "title": "Timing",
@@ -2673,6 +2602,7 @@
       {
         "id": "kuromon",
         "name": "Kuromon and Namba",
+        "notBefore": "12:00",
         "unlock": "After lunch, walk to Kuromon Market. Once you are there, tap “I’m here”.",
         "meta": "Around 14:30 the day moves on to coffee at Nakanoshima, so that is roughly how long you have after lunch.",
         "expect": "However long feels right.",
@@ -2712,6 +2642,7 @@
       {
         "id": "nakanoshima",
         "name": "Nakanoshima pause",
+        "notBefore": "12:00",
         "unlock": "Around 14:30, or whenever you need a break, go for coffee at Brooklyn Roasting Company and then to Nakanoshima Park. Once you are in the park, tap “I’m here”.",
         "meta": "Nothing is fixed here. This is a pause, so take it when the day allows.",
         "expect": "60 to 90 minutes.",
@@ -2747,6 +2678,7 @@
       {
         "id": "dotonbori",
         "name": "Dotonbori after dark",
+        "notBefore": "12:00",
         "unlock": "Head to Dotonbori around 16:30 to 17:00, when the signs and the canal come alive. Once you are there, tap “I’m here”.",
         "meta": "Arriving earlier or later is fine. Nothing here runs on a deadline.",
         "expect": "As long as dinner and wandering take.",
@@ -2828,32 +2760,7 @@
       "lo": 16,
       "hi": 24,
       "cond": "Mild, mostly clear",
-      "hourly": [
-        [
-          "07:00",
-          "17°"
-        ],
-        [
-          "10:00",
-          "21°"
-        ],
-        [
-          "13:00",
-          "24°"
-        ],
-        [
-          "16:00",
-          "24°"
-        ],
-        [
-          "18:00",
-          "21°"
-        ],
-        [
-          "21:00",
-          "19°"
-        ]
-      ]
+      "hourly": [["08:00","17°"],["10:00","20°"],["12:00","22°"],["14:00","24°"],["16:00","23°"],["18:00","20°"],["20:00","19°"],["22:00","17°"]]
     },
     "energy": "Medium to high",
     "walking": "Medium",
@@ -2870,6 +2777,7 @@
       {
         "id": "bamboo",
         "name": "To the Bamboo Grove",
+        "notBefore": "05:00",
         "unlock": "Leave Kabin Gion between 06:30 and 08:00 and make your way to Arashiyama. Once you are at the Bamboo Grove, tap “I’m here”.",
         "meta": "Leaving up to 08:00 still keeps the rest of the morning comfortable. There is a booked train this afternoon.",
         "timing": {
@@ -2965,6 +2873,7 @@
       {
         "id": "otagi",
         "name": "Otagi Nenbutsu-ji",
+        "notBefore": "05:00",
         "unlock": "From Saga-Arashiyama, take a taxi to Otagi Nenbutsu-ji, shortly before 09:00. Once you are at the temple, tap “I’m here”.",
         "meta": "The temple is expected to open at 09:00 and close at 16:00. The schedule will be confirmed closer to the day.",
         "expect": "About 1 hour. Aim to be done by 10:30 to 11:00.",
@@ -3000,6 +2909,7 @@
       {
         "id": "saga-toriimoto",
         "name": "Down through Saga-Toriimoto",
+        "notBefore": "05:00",
         "unlock": "When you are done at Otagi, walk downhill through the old village. Once you are in Saga-Toriimoto, tap “I’m here”.",
         "timing": {
           "title": "Timing",
@@ -3046,6 +2956,7 @@
       {
         "id": "back-to-kyoto",
         "name": "Back to Kyoto Station",
+        "notBefore": "05:00",
         "unlock": "Leave Arashiyama between 11:30 and 12:00, have lunch, collect your luggage from Kabin Gion and be at Kyoto Station by 15:15. Once you are at the station, tap “I’m here”.",
         "booking": {
           "title": "Your train",
@@ -3073,6 +2984,7 @@
       {
         "id": "to-aria",
         "name": "To ARIA Takanawa",
+        "notBefore": "18:00",
         "unlock": "When you arrive in Shinagawa at 18:08, continue to ARIA Takanawa. Once you arrive, tap “I’m here”.",
         "meta": "Your stay has its own card in the Stays tab, with the address and a short guide to the area.",
         "mapsUrl": 'https://maps.app.goo.gl/fqdxqihf1QPTjcqa7',
@@ -3088,32 +3000,7 @@
       "lo": 19,
       "hi": 25,
       "cond": "Mild, partly cloudy",
-      "hourly": [
-        [
-          "07:00",
-          "20°"
-        ],
-        [
-          "10:00",
-          "22°"
-        ],
-        [
-          "13:00",
-          "25°"
-        ],
-        [
-          "16:00",
-          "24°"
-        ],
-        [
-          "18:00",
-          "22°"
-        ],
-        [
-          "21:00",
-          "20°"
-        ]
-      ]
+      "hourly": [["08:00","20°"],["10:00","22°"],["12:00","24°"],["14:00","25°"],["16:00","24°"],["18:00","22°"],["20:00","21°"],["22:00","20°"]]
     },
     "energy": "Medium",
     "walking": "Medium to high",
@@ -3130,6 +3017,7 @@
       {
         "id": "tsukiji",
         "name": "Tsukiji Outer Market",
+        "notBefore": "05:00",
         "unlock": "Leave ARIA Takanawa early and head to Tsukiji Outer Market, aiming to be there by about 07:30. Once you are at the market, tap “I’m here”.",
         "meta": "Many stalls start to close in the late morning, so this is a morning stop. Bring cash, many small stalls do not take cards.",
         "timing": {
@@ -3178,6 +3066,7 @@
       {
         "id": "kiyosumi",
         "name": "Kiyosumi Gardens",
+        "notBefore": "05:00",
         "unlock": "Around 09:30, travel from Tsukiji to Kiyosumi Gardens. Once you are in the gardens, tap “I’m here”.",
         "meta": "Open 09:00 to 17:00. Admission is about 150 yen.",
         "expect": "About 30 minutes, more of a pause than a visit.",
@@ -3217,6 +3106,7 @@
       {
         "id": "fukagawa",
         "name": "Fukagawa Edo Museum",
+        "notBefore": "05:00",
         "unlock": "Around 10:45 to 11:00, walk to the Fukagawa Edo Museum, a few minutes from the gardens. Once you are at the museum, tap “I’m here”.",
         "meta": "Open 09:30 to 17:00. Admission is about 400 yen.",
         "expect": "60 to 90 minutes.",
@@ -3252,6 +3142,7 @@
       {
         "id": "kappabashi",
         "name": "Kappabashi",
+        "notBefore": "12:00",
         "unlock": "Around 14:00, travel to Kappabashi, Tokyo’s kitchenware street. Once you are on the street, tap “I’m here”.",
         "meta": "Most shops close by 17:00.",
         "expect": "About 1 hour.",
@@ -3287,6 +3178,7 @@
       {
         "id": "asakusa",
         "name": "Asakusa and Sensō-ji",
+        "notBefore": "12:00",
         "unlock": "Around 16:00 to 16:30, walk on to Asakusa. Once you are at Sensō-ji, tap “I’m here”.",
         "meta": "The main hall closes at 17:00, but the grounds stay open and are lit after dark.",
         "expect": "Until dusk, and as long as you like after.",
@@ -3332,32 +3224,7 @@
       "lo": 19,
       "hi": 25,
       "cond": "Mild, partly cloudy",
-      "hourly": [
-        [
-          "08:00",
-          "20°"
-        ],
-        [
-          "11:00",
-          "23°"
-        ],
-        [
-          "14:00",
-          "25°"
-        ],
-        [
-          "17:00",
-          "23°"
-        ],
-        [
-          "19:00",
-          "21°"
-        ],
-        [
-          "21:00",
-          "20°"
-        ]
-      ]
+      "hourly": [["08:00","20°"],["10:00","22°"],["12:00","24°"],["14:00","25°"],["16:00","24°"],["18:00","22°"],["20:00","21°"],["22:00","20°"]]
     },
     "energy": "Low to medium",
     "walking": "Low to medium",
@@ -3374,6 +3241,7 @@
       {
         "id": "aria-checkout",
         "name": "ARIA Takanawa",
+        "notBefore": "05:00",
         "unlock": "Pack, check out of ARIA Takanawa and leave all your luggage with them for the day. Once you are ready to head out, tap “I’m here”.",
         "checklist": {
           "title": "Before you leave",
@@ -3389,6 +3257,7 @@
       {
         "id": "ginza",
         "name": "Ginza",
+        "notBefore": "05:00",
         "unlock": "Head to Ginza for around 11:00. Once you are in Ginza, tap “I’m here”.",
         "meta": "Finish by about 14:30, so there is margin before the airport. Today is a Sunday, so from 12:00 the main avenue is closed to cars.",
         "expect": "Around 11:00 to 14:30.",
@@ -3462,6 +3331,7 @@
       {
         "id": "haneda",
         "name": "Back to ARIA and Haneda",
+        "notBefore": "12:00",
         "unlock": "Be back at ARIA Takanawa around 15:00 to 15:30 to collect your luggage, then leave for Haneda around 16:00 to 16:30. Once you are at the airport, tap “I’m here”.",
         "meta": "This is the one real deadline of the day. Aim to reach the airport by about 17:00, and confirm your terminal first.",
         "booking": {
@@ -4089,8 +3959,38 @@
     leaf:'<path d="M13 3C7.5 3 3 7.5 3 13c6 0 10-4.5 10-10Z"/><path d="M3.6 13 9 7.6"/>',
     shirt:'<path d="M5.6 2 8 3.2 10.4 2 13 4.1 11 6V14H5V6L3 4.1Z"/>',
     bag:'<rect x="3" y="5.6" width="10" height="8.4" rx="1.3"/><path d="M6.1 5.6V4.4a1.9 1.9 0 0 1 3.8 0v1.2"/>',
-    flag:'<path d="M4 14.2V2"/><path d="M4 2.8 12.2 4.6 4 7Z"/>'
+    flag:'<path d="M4 14.2V2"/><path d="M4 2.8 12.2 4.6 4 7Z"/>',
+    'wx-sun':'<circle cx="8" cy="8" r="3"/><path d="M8 1.6v1.6M8 12.8v1.6M1.6 8h1.6M12.8 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/>',
+    'wx-cloudsun':'<circle cx="5.6" cy="5.2" r="1.8"/><path d="M6.4 12.6h5.4a2.2 2.2 0 0 0 .2-4.3A3.6 3.6 0 0 0 5 9a2.1 2.1 0 0 0 1.4 3.6Z"/>',
+    'wx-cloud':'<path d="M4.8 11.6h6.4a2.4 2.4 0 0 0 .3-4.8A3.9 3.9 0 0 0 3.9 8a2.2 2.2 0 0 0 .9 3.6Z"/>',
+    'wx-rain':'<path d="M4.8 8.6h6.1a2.3 2.3 0 0 0 .3-4.6A3.7 3.7 0 0 0 3.6 5a2.1 2.1 0 0 0 1.2 3.6Z"/><path d="M5.6 11v1.6M8 11v1.6M10.4 11v1.6"/>',
+    'wx-snow':'<path d="M4.8 8.6h6.1a2.3 2.3 0 0 0 .3-4.6A3.7 3.7 0 0 0 3.6 5a2.1 2.1 0 0 0 1.2 3.6Z"/><circle cx="5.6" cy="11.6" r=".5"/><circle cx="8" cy="12.6" r=".5"/><circle cx="10.4" cy="11.6" r=".5"/>',
+    'wx-storm':'<path d="M4.8 7.6h6.1a2.3 2.3 0 0 0 .3-4.6A3.7 3.7 0 0 0 3.6 4a2.1 2.1 0 0 0 1.2 3.6Z"/><path d="M8.6 8.6 6.4 12.4h1.8L7.2 15l3-3.6H8.4Z"/>',
+    'wx-fog':'<path d="M2.4 5.8h11.2M2.4 8h11.2M2.4 10.2h8"/>'
   };
+  /* live: an Open-Meteo WMO weather code. fallback (no per-hour forecast yet): the
+     day's own plain-English condition string. Both land on the same small icon set. */
+  function wmoIcon(c){
+    if(c===0 || c===1) return 'wx-sun';
+    if(c===2) return 'wx-cloudsun';
+    if(c===3) return 'wx-cloud';
+    if(c===45 || c===48) return 'wx-fog';
+    if((c>=51 && c<=67) || (c>=80 && c<=82)) return 'wx-rain';
+    if((c>=71 && c<=77) || c===85 || c===86) return 'wx-snow';
+    if(c>=95) return 'wx-storm';
+    return 'wx-cloud';
+  }
+  function condIcon(cond){
+    var t = (cond||'').toLowerCase();
+    if(t.indexOf('storm')>=0) return 'wx-storm';
+    if(t.indexOf('snow')>=0) return 'wx-snow';
+    if(t.indexOf('rain')>=0 || t.indexOf('drizzle')>=0 || t.indexOf('shower')>=0) return 'wx-rain';
+    if(t.indexOf('fog')>=0 || t.indexOf('mist')>=0) return 'wx-fog';
+    if(t.indexOf('overcast')>=0) return 'wx-cloud';
+    if(t.indexOf('partly')>=0 || t.indexOf('partial')>=0) return 'wx-cloudsun';
+    if(t.indexOf('clear')>=0 || t.indexOf('mild')>=0 || t.indexOf('sun')>=0) return 'wx-sun';
+    return 'wx-cloudsun';
+  }
   var DC_LABEL_ICON = {
     'Why it matters':'target', 'A little context':'clock', 'A little history':'clock', 'Look for':'eye',
     'How to experience it':'compass', 'Etiquette':'shield', 'One memorable detail':'star', 'Good to know':'bulb',
@@ -4149,7 +4049,9 @@
       if(hh < prevH) dateKey = new Date(Date.UTC(2026, 8, 24 + dayN + 1)).toISOString().slice(0,10);
       prevH = hh;
       var hi2 = loc.hourly.time.indexOf(dateKey+'T'+h[0]);
-      return [h[0], hi2>=0 ? Math.round(loc.hourly.temperature_2m[hi2])+'°' : h[1]];
+      var temp = hi2>=0 ? Math.round(loc.hourly.temperature_2m[hi2])+'°' : h[1];
+      var icon = (hi2>=0 && loc.hourly.weather_code) ? wmoIcon(loc.hourly.weather_code[hi2]) : condIcon(cond);
+      return [h[0], temp, icon];
     });
     return { lo:lo, hi:hi, cond:cond, hourly:hourly };
   }
@@ -4162,7 +4064,7 @@
     Promise.all(names.map(function(nm){
       var L = WEATHER_LOCS[nm];
       var url = 'https://api.open-meteo.com/v1/forecast?latitude='+L.lat+'&longitude='+L.lon +
-        '&hourly=temperature_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max' +
+        '&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max' +
         '&timezone=Asia%2FTokyo&forecast_days=16';
       return fetch(url).then(function(r){ if(!r.ok) throw new Error('weather '+r.status); return r.json(); })
         .then(function(j){ return { daily:j.daily, hourly:j.hourly }; });
@@ -4179,9 +4081,10 @@
   function essentialSheetBody(d, dayN){
     var live = liveWeatherFor(dayN, d.weather);
     var w = live || d.weather;
+    var hourly = live ? w.hourly : w.hourly.map(function(h){ return [h[0], h[1], condIcon(w.cond)]; });
     var html = dcRowHTML(['Weather', w.lo+'–'+w.hi+'°, '+w.cond]);
-    html += '<div class="dc-hourly">' + w.hourly.map(function(h){
-      return '<div><span class="t">'+escH(h[0])+'</span><span class="g">'+escH(h[1])+'</span></div>';
+    html += '<div class="dc-hourly">' + hourly.map(function(h){
+      return '<div><span class="ic">'+dcIconSvg(h[2])+'</span><span class="t">'+escH(h[0])+'</span><span class="g">'+escH(h[1])+'</span></div>';
     }).join('') + '</div>';
     [['Energy',d.energy],['Walking',d.walking],['Outside',d.outside],['Dress',d.dress],['Bring',d.bring],['First move',d.first]].forEach(function(r){
       html += dcRowHTML(r);
@@ -4399,35 +4302,49 @@
     return { day:day, data:data, p:p, ch:data.chapters[p.done], isLast:(p.done===data.chapters.length-1) };
   }
   /* "I'm here" is checked against the phone's location, but only roughly: it works when the
-     phone is in Japan (a coarse map box, main islands plus the south-west islands). If the
-     phone will not say where it is (permission off, no signal, timeout) the tap is simply
-     allowed, so missing GPS can never strand anyone. Guide Mode skips the check. */
+     phone is in Japan (a coarse map box, main islands plus the south-west islands). Guide Mode
+     skips the check entirely.
+     If the phone will not say where it is (permission off, no signal, timeout), the tap falls
+     back to a plain clock check instead of simply being allowed: each chapter carries a
+     `notBefore` ('HH:MM', Japan time, the earliest this chapter's own timing makes plausible --
+     see each chapter's own unlock copy), and without GPS the tap is allowed once Japan's clock
+     has reached that time. A chapter with no `notBefore` falls back to allowed, same as before.
+     This is what stops someone tapping "I'm here" hours early just because their phone has no
+     signal or location is off, while still never permanently stranding anyone once the day has
+     plausibly moved on. Comparing "HH:MM" strings works directly since both sides are always
+     zero-padded 24-hour time. */
   function inJapan(lat, lon){
     if(lat>=30.9 && lat<=45.6 && lon>=129.5 && lon<=146) return true; /* Kyushu to Hokkaido */
     if(lat>=24 && lat<31 && lon>=122.9 && lon<=131.5) return true;    /* Nansei / Okinawa */
     return false;
   }
-  function checkInJapan(done){
-    if(state.guide || !navigator.geolocation){ done(true); return; }
+  function notBeforeOk(notBefore){
+    if(!notBefore) return true;
+    return jstNow().time >= notBefore;
+  }
+  function checkInJapan(ch, done){
+    if(state.guide){ done(true); return; }
+    var fallback = notBeforeOk(ch && ch.notBefore);
+    if(!navigator.geolocation){ done(fallback); return; }
     var finished = false, timer = null;
     function fin(ok){ if(finished) return; finished = true; clearTimeout(timer); done(ok); }
-    timer = setTimeout(function(){ fin(true); }, 20000); /* long enough to read the permission prompt */
+    timer = setTimeout(function(){ fin(fallback); }, 20000); /* long enough to read the permission prompt */
     try{
       navigator.geolocation.getCurrentPosition(
         function(pos){ fin(inJapan(pos.coords.latitude, pos.coords.longitude)); },
-        function(){ fin(true); },
+        function(){ fin(fallback); },
         { timeout:15000, maximumAge:600000, enableHighAccuracy:false });
-    }catch(e){ fin(true); }
+    }catch(e){ fin(fallback); }
   }
   var locBusy = false;
   function dcArrive(){
     var a = dcActive(); if(!a || locBusy) return;
-    var dayN = a.day.n, chId = a.ch.id;
+    var dayN = a.day.n, chId = a.ch.id, ch = a.ch;
     locBusy = true;
     state.confirming = null;
     state.locNote = state.guide ? null : 'Checking where you are…';
     render();
-    checkInJapan(function(ok){
+    checkInJapan(ch, function(ok){
       locBusy = false;
       var b = dcActive();
       if(!b || b.day.n!==dayN || b.ch.id!==chId){ state.locNote = null; return; }

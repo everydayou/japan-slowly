@@ -4,6 +4,23 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 55 — 2026-09-24 (Haneda's fallback moved to 9pm; hourly weather widened to 08:00-22:00 with per-slot icons)
+
+- Marco's correction: "Touchdown at Haneda" is really about when the family (Fernando and Tomas, landing 22:20) arrives, not Marco's own earlier solo touchdown at 13:50, so its fallback time (used only when GPS can't confirm a location) is now 21:00, not the "afternoon" bucket from Round 54.
+- The `notBefore` fallback moved from three buckets (morning/afternoon/night) to a plain Japan-time "HH:MM" per chapter, compared directly against the clock (`notBeforeOk()`). Every chapter's tag was converted to its bucket's representative time (05:00/12:00/18:00) except Haneda, now 21:00.
+- Every day's hourly forecast widened to a consistent 08:00 to 22:00 (was a mix of ranges per day, some starting as late as 12:00 or 13:00 and running past midnight). Night hours are dropped rather than detailed, per Marco ("at night doesn't matter so much").
+- Each hourly slot now shows a small weather icon above the time (sun, part-cloud, cloud, rain, snow, storm, fog): from the live forecast's own per-hour Open-Meteo code when available (`wmoIcon()`, added `weather_code` to the hourly fetch alongside temperature), or from the day's plain-English condition text as a fallback icon when the live forecast hasn't loaded yet (`condIcon()`).
+
+---
+
+## ROUND 54 — 2026-09-24 (part-of-day fallback for "I'm here", instead of always allowing)
+
+- Marco tested "I'm here" on Touchdown at Haneda from Berlin this morning and it let him through: location for the site had already been denied from earlier testing, so no permission prompt appeared and the old fallback ("if location is denied or unavailable, allow the tap") let it through unconditionally, even though it was still morning in Berlin.
+- Hybrid fix: every real chapter now carries a `notBefore` tag ('morning', 'afternoon' or 'night', roughly Japan-time 05:00/12:00/18:00), taken from its own unlock copy (Touchdown at Haneda, arriving 13:50, is 'afternoon'). When GPS can't confirm a location (denied, unavailable, or the 20 s timeout), the tap now only goes through once Japan's clock has plausibly reached that chapter's part of day; a real, confirmed Japan location still always works immediately, any time. Guide Mode still bypasses the whole check, as before. A missing `notBefore` (there shouldn't be any) falls back to always-allowed, the old behaviour.
+- `checkInJapan(ch, done)` now takes the chapter so it can look up `notBefore`; `dcArrive()` passes it through.
+
+---
+
 ## ROUND 53 — 2026-09-24 (Day 1 unlocked for real, ahead of schedule)
 
 - At Marco's request on departure-day morning (Berlin), Day 1 is now always reached (`dayReached(1)` returns true unconditionally), open from right now rather than waiting for 00:00 Japan time on the 25th. Every other day still follows its own real calendar date, unchanged.
