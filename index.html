@@ -1292,7 +1292,10 @@
     return { date:t.slice(0,10), time:t.slice(11,16) };
   }
   function dayDateKey(n){ return new Date(Date.UTC(2026, 8, 24 + n)).toISOString().slice(0,10); }
-  function dayReached(n){ return jstNow().date >= dayDateKey(n); }
+  /* Day 1 is opened for real, ahead of its own 00:00 Japan-time date, at Marco's
+     request on 24 Sep (still departure-day morning in Berlin) -- everything else
+     still follows the real calendar date. */
+  function dayReached(n){ return n===1 || jstNow().date >= dayDateKey(n); }
   function gateOpen(dayN, ch){
     if(!ch || !ch.gate) return true;
     if(state.guide) return false; /* guide mode: use the skip button */

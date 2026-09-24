@@ -4,6 +4,12 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 53 — 2026-09-24 (Day 1 unlocked for real, ahead of schedule)
+
+- At Marco's request on departure-day morning (Berlin), Day 1 is now always reached (`dayReached(1)` returns true unconditionally), open from right now rather than waiting for 00:00 Japan time on the 25th. Every other day still follows its own real calendar date, unchanged.
+
+---
+
 ## ROUND 52 — 2026-09-24 (card shadows halved)
 
 - Every card shadow's size is halved: the home deck cards (`.stack-card`, was 0 22px 40px -18px / 0 0 36px 2px, now 0 11px 20px -9px / 0 0 18px 1px), the day/stay chapter cards (`.dc-card`, was 0 2px 12px / 0 12px 16px, now 0 1px 6px / 0 6px 8px), and the Stays list cards (`.stay-card`, was 0 16px 28px -12px / 0 5px 10px -4px, now 0 8px 14px -6px / 0 3px 5px -2px). Opacity unchanged, just the blur/spread. The matching inline shadow JS sets during the home-deck open/close animation were updated to match.
