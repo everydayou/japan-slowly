@@ -4,6 +4,12 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 52 — 2026-09-24 (card shadows halved)
+
+- Every card shadow's size is halved: the home deck cards (`.stack-card`, was 0 22px 40px -18px / 0 0 36px 2px, now 0 11px 20px -9px / 0 0 18px 1px), the day/stay chapter cards (`.dc-card`, was 0 2px 12px / 0 12px 16px, now 0 1px 6px / 0 6px 8px), and the Stays list cards (`.stay-card`, was 0 16px 28px -12px / 0 5px 10px -4px, now 0 8px 14px -6px / 0 3px 5px -2px). Opacity unchanged, just the blur/spread. The matching inline shadow JS sets during the home-deck open/close animation were updated to match.
+
+---
+
 ## ROUND 51 — 2026-09-24 ("Touchdown at Haneda" now needs the Japan location check)
 
 - "Touchdown at Haneda" no longer starts pre-arrived. It now needs an explicit "I'm here" tap, same as any other chapter, which puts it through the existing Japan location check (Round 45): allowed only once the phone is actually in Japan, or if location is denied/unavailable/times out. Day 1's essential-info card is unaffected and still opens from anywhere, no location involved, so the day is still readable before landing.

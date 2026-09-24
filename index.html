@@ -327,7 +327,7 @@
        instead of a robotic stop. */
     transition:transform .6s cubic-bezier(.34,1.56,.64,1), opacity .5s ease, box-shadow .3s ease;
     /* second layer (0 offset, wide blur) lets each card cast a shadow sideways and up onto the cards behind it, not only down onto the page */
-    box-shadow:0 22px 40px -18px rgba(0,0,0,.55), 0 0 36px 2px rgba(0,0,0,.38);
+    box-shadow:0 11px 20px -9px rgba(0,0,0,.55), 0 0 18px 1px rgba(0,0,0,.38); /* halved from 0 22px 40px -18px, 0 0 36px 2px, per Marco's ask */
     perspective:1600px;
     -webkit-tap-highlight-color:transparent;
   }
@@ -600,7 +600,7 @@
     flex:0 0 calc(100% - 48px); scroll-snap-align:start; scroll-snap-stop:always;
     display:flex; flex-direction:column; min-height:0; padding:16px;
     background:var(--bg-elevated); border-radius:24px;
-    box-shadow:0 2px 12px rgba(0,0,0,.05), 0 12px 16px rgba(0,0,0,.05);
+    box-shadow:0 1px 6px rgba(0,0,0,.05), 0 6px 8px rgba(0,0,0,.05); /* halved from 0 2px 12px, 0 12px 16px, per Marco's ask */
   }
   .dc-card:first-child{ margin-left:24px; }
   .dc-card:last-child{ margin-right:24px; }
@@ -879,7 +879,7 @@
        blur). Two layers now: a soft, wide-spread ambient shadow plus a tighter,
        darker contact shadow close under the card, the same recipe modern card UIs
        use for a shadow that reads clearly without looking heavy. */
-    box-shadow:0 16px 28px -12px rgba(0,0,0,.32), 0 5px 10px -4px rgba(0,0,0,.22);
+    box-shadow:0 8px 14px -6px rgba(0,0,0,.32), 0 3px 5px -2px rgba(0,0,0,.22); /* halved from 0 16px 28px -12px, 0 5px 10px -4px, per Marco's ask */
     /* round 26: simplified from a 3D flip to a plain box expand/collapse -- see
        openStayFlip()/closeStayFlip(). .opening's transition covers the box-morph
        (top/left/width/height/border-radius); the plain `transition` here just
@@ -5082,7 +5082,7 @@
         var i = parseInt(el.getAttribute('data-idx'),10);
         el.style.transition = 'transform .48s cubic-bezier(.22,.9,.32,1), box-shadow .3s ease';
         el.style.transform = stackTransform(stackStyle(i - state.stackIndex, i));
-        el.style.boxShadow = '0 22px 40px -18px rgba(0,0,0,.55)';
+        el.style.boxShadow = '0 11px 20px -9px rgba(0,0,0,.55)';
       });
 
       /* the final DOM swap used to be pinned to a flat setTimeout(820) that assumed this
@@ -5110,7 +5110,7 @@
        it in earlier, while the card was still visibly mid-motion, read as premature */
     setTimeout(function(){
       wrapper.style.transition = 'box-shadow .12s ease';
-      wrapper.style.boxShadow = '0 22px 40px -18px rgba(0,0,0,.55)';
+      wrapper.style.boxShadow = '0 11px 20px -9px rgba(0,0,0,.55)';
     }, 560);
 
     var closeFinished = false;
@@ -5158,7 +5158,7 @@
       wrapper.style.zIndex = String(s.z);
       wrapper.style.opacity = String(s.op);
       wrapper.style.pointerEvents = s.pe;
-      wrapper.style.boxShadow = '0 22px 40px -18px rgba(0,0,0,.55)';
+      wrapper.style.boxShadow = '0 11px 20px -9px rgba(0,0,0,.55)';
       wrapper.style.transform = stackTransform(s);
 
       var stackwrapEl = bgEl.querySelector('#stackwrap');
