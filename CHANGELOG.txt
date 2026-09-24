@@ -4,6 +4,12 @@ Full round-by-round history. PROJECT-CONTEXT.txt is the current-state snapshot m
 
 ---
 
+## ROUND 56 — 2026-09-24 (weather now ends at 8pm)
+
+- Every day's hourly forecast now runs 08:00 to 20:00 (was 08:00 to 22:00, Round 55). Same 2-hour steps, same per-slot icons, just one slot shorter at the end.
+
+---
+
 ## ROUND 55 — 2026-09-24 (Haneda's fallback moved to 9pm; hourly weather widened to 08:00-22:00 with per-slot icons)
 
 - Marco's correction: "Touchdown at Haneda" is really about when the family (Fernando and Tomas, landing 22:20) arrives, not Marco's own earlier solo touchdown at 13:50, so its fallback time (used only when GPS can't confirm a location) is now 21:00, not the "afternoon" bucket from Round 54.
